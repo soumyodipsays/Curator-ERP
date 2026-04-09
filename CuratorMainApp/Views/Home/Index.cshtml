@@ -1,21 +1,21 @@
 ﻿@using System.Configuration
 @{
     ViewBag.Title = "Home Page";
-    var authUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/Login/Verify";
+    var loginUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Login";
     var registerUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Register";
     var emailUrl = ConfigurationManager.AppSettings["EmailServiceBaseUrl"] + "/Email/Test";
 }
 
 <h2>Login from Main App</h2>
 
-<form action="@authUrl" method="post">
+<form action="@loginUrl" method="post">
     <div>
-        <label>Organization Name:</label>
-        <input type="text" name="orgName" />
+        <label>User Name:</label>
+        <input type="text" name="userName" />
     </div>
     <div>
-        <label>User Email:</label>
-        <input type="email" name="userEmail" />
+        <label>Password :</label>
+        <input type="text" name="password" />
     </div>
     <button type="submit">Login to Auth System</button>
 </form>
