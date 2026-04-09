@@ -1,20 +1,60 @@
 ﻿@using System.Configuration
 @{
     ViewBag.Title = "Home Page";
-    var authUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/Login/Verify";
+    var loginUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Login";
+    var registerUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Register";
     var emailUrl = ConfigurationManager.AppSettings["EmailServiceBaseUrl"] + "/Email/Test";
 }
 
 <h2>Login from Main App</h2>
 
-<form action="@emailUrl" method="post">
+<form action="@loginUrl" method="post">
     <div>
-        <label>Organization Name:</label>
-        <input type="text" name="orgName" />
+        <label>User Name:</label>
+        <input type="text" name="userName" />
     </div>
     <div>
-        <label>User Email:</label>
-        <input type="email" name="userEmail" />
+        <label>Password :</label>
+        <input type="text" name="password" />
     </div>
     <button type="submit">Login to Auth System</button>
+</form>
+
+<form action="@registerUrl" method="post">
+    <div>
+        <label>Admin Username:</label>
+        <input type="text" name="AdminUserName" />
+    </div>
+
+    <div>
+        <label>Customer ID:</label>
+        <input type="number" name="CustomerID" />
+    </div>
+
+    <div>
+        <label>User ID (0 for new):</label>
+        <input type="number" name="UserID" value="0" />
+    </div>
+
+    <div>
+        <label>Username:</label>
+        <input type="text" name="UserName" />
+    </div>
+
+    <div>
+        <label>Password:</label>
+        <input type="password" name="Password" />
+    </div>
+
+    <div>
+        <label>First Name:</label>
+        <input type="text" name="FirstName" />
+    </div>
+
+    <div>
+        <label>Last Name:</label>
+        <input type="text" name="LastName" />
+    </div>
+
+    <button type="submit">Register User</button>
 </form>

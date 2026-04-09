@@ -9,6 +9,15 @@ namespace DataAccessLayer.Dapper
 {
     public class DapperConn
     {
+        // RETURN NO VALUE.
+        public void ExecuteWithoutReturn(string procName, DynamicParameters param = null)
+        {
+            using (var conn = DbConnectionFactory.Create())
+            {
+                conn.Execute(procName, param, commandType: CommandType.StoredProcedure);
+            }
+        }
+
         public T ExecuteWithOutput<T>(string procName, DynamicParameters param, string outputParamName)
         {
             using (var conn = DbConnectionFactory.Create())

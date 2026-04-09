@@ -136,10 +136,9 @@
   <ItemGroup>
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="Controllers\LoginController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="DAL\AuthDAL.cs" />
-    <Compile Include="Dapper\DapperConn.cs" />
-    <Compile Include="Dapper\DbConnectionFactory.cs" />
+    <Compile Include="DTOs\UserLoginDTO.cs" />
     <Compile Include="DTOs\UserRegistrationDTO.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
