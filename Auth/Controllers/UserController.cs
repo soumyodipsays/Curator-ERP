@@ -1,6 +1,7 @@
 ﻿using Auth.DAL;
 using Auth.DTOs;
 using System;
+using System.Data.SqlClient;
 using System.Web.Mvc;
 
 namespace Auth.Controllers
@@ -34,6 +35,56 @@ namespace Auth.Controllers
                                 ? "User registered successfully"
                                 : "User updated successfully",
                     userId = newUserId
+                });
+            }
+            catch (SqlException sqlex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = sqlex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult Login(UserLoginDTO model)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    return Json(new { success = false, message = "Invalid request" });
+                }
+
+                if (string.IsNullOrWhiteSpace(model.UserName) ||
+                    string.IsNullOrWhiteSpace(model.Password))
+                {
+                    return Json(new { success = false, message = "Username & Password required" });
+                }
+
+                _authDal.ValidateUser(model);
+
+                return Json(new
+                {
+                    success = true,
+                    message =  "User logged in successfully", 
+                });
+            }
+            catch (SqlException sqlex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = sqlex.Message
                 });
             }
             catch (Exception ex)

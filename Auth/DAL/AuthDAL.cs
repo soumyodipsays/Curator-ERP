@@ -15,21 +15,31 @@ namespace Auth.DAL
 
         public long InsertUpdateUser(UserRegistrationDto userDto)
         {
-            var p = new DynamicParameters();
-
+            var parameters = new DynamicParameters();
+            var proc = "spUser_InsertUpdate";
             // Map DTO to SP Parameters
-            p.Add("@AdminUserName", userDto.AdminUserName);
-            p.Add("@CustomerID", userDto.CustomerID);
-            p.Add("@UserID", userDto.UserID ?? 0); // Handle 0 for new signup
-            p.Add("@UserName", userDto.UserName);
-            p.Add("@Password", userDto.Password);
-            p.Add("@FirstName", userDto.FirstName);
-            p.Add("@LastName", userDto.LastName);
-
-            p.Add("@NewUserID", dbType: DbType.Int64, direction: ParameterDirection.Output);
+            parameters.Add("@AdminUserName", userDto.AdminUserName);
+            parameters.Add("@CustomerID", userDto.CustomerID);
+            parameters.Add("@UserID", userDto.UserID ?? 0); // Handle 0 for new signup
+            parameters.Add("@UserName", userDto.UserName);
+            parameters.Add("@Password", userDto.Password);
+            parameters.Add("@FirstName", userDto.FirstName);
+            parameters.Add("@LastName", userDto.LastName);
+            parameters.Add("@NewUserID", dbType: DbType.Int64, direction: ParameterDirection.Output);
 
             // Execute and return the new ID
-            return _db.ExecuteWithOutput<long>("spUser_InsertUpdate", p, "@NewUserID");
+            return _db.ExecuteWithOutput<long>(proc, parameters, "@NewUserID");
+        }
+
+        public void ValidateUser(UserLoginDTO userDto)
+        {
+            var parameters = new DynamicParameters();
+            var proc = "spValidate_User";
+            // Map DTO to SP Parameters
+            parameters.Add("@UserName", userDto.UserName);
+            parameters.Add("@Password", userDto.Password);
+
+            _db.ExecuteWithoutReturn(proc, parameters);
         }
     }
 }
