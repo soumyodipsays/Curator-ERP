@@ -1,0 +1,39 @@
+@*<%-- Views/Shared/_Newsletter.cshtml --%>*@
+
+<section class="apple-section" style="background:var(--black)">
+    <div class="container-xl px-4">
+        <div class="row justify-content-center text-center">
+            <div class="col-12 col-md-6 fade-up">
+                <span class="section-eyebrow"
+                      style="color:rgba(255,255,255,0.4)">Stay in the loop</span>
+                <h2 class="section-title section-title-white mb-3">Join the Curation</h2>
+                <p class="section-sub section-sub-white mb-5">
+                    Early access to seasonal collections, exclusive editorials, no spam — ever.
+                </p>
+
+                @using (Html.BeginForm("Subscribe", "Newsletter", FormMethod.Post,
+                        new { @class = "d-flex gap-3 flex-column flex-sm-row" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="email"
+                           name="email"
+                           placeholder="your@email.com"
+                           class="apple-input flex-grow-1"
+                           style="background:rgba(255,255,255,0.08);
+                                  border-color:rgba(255,255,255,0.12);
+                                  color:#fff"
+                           required />
+                    <button type="submit"
+                            class="btn-apple-blue px-4 py-3 flex-shrink-0">
+                        Subscribe
+                    </button>
+                }
+
+                <p class="mt-3"
+                   style="font-size:0.72rem; color:rgba(255,255,255,0.3)">
+                    By subscribing you agree to our Privacy Policy. Unsubscribe anytime.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>

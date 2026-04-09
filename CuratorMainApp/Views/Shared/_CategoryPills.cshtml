@@ -1,0 +1,21 @@
+@*<%-- Views/Shared/_CategoryPills.cshtml --%>
+<%-- Model: Curator.Models.CategoryPillsViewModel --%>*@
+@model Curator.Models.CategoryPillsViewModel
+
+<div class="bg-white py-4 border-bottom" style="border-color:var(--gray-2)!important">
+    <div class="container-xl px-4">
+        <div class="category-scroll">
+            @foreach (var cat in Model.Categories)
+            {
+                <div class="cat-pill @(cat.IsActive ? "active" : "")"
+                     data-category="@cat.Slug">
+                    @if (!string.IsNullOrEmpty(cat.Icon))
+                    {
+                        <i class="bi @cat.Icon"></i>
+                    }
+                    @cat.Name
+                </div>
+            }
+        </div>
+    </div>
+</div>

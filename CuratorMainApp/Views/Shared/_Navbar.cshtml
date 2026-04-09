@@ -1,0 +1,60 @@
+@*<%-- Views/Shared/_Navbar.cshtml --%>*@
+<nav class="apple-nav">
+    <div class="container-xl px-4 d-flex align-items-center justify-content-between w-100">
+
+        @*<%-- Brand --%>*@
+        <a href="@Url.Action("Index", "Home")" class="nav-brand">Curator.</a>
+
+        @*<%-- Desktop nav links --%>*@
+        <div class="d-none d-md-flex align-items-center gap-1">
+            <a href="@Url.Action("Index", "Home")"       class="nav-link-item @(ViewContext.RouteData.Values["action"].ToString() == "Index"       ? "active" : "")">Home</a>
+            <a href="@Url.Action("Index", "Products")"   class="nav-link-item @(ViewContext.RouteData.Values["controller"].ToString() == "Products" ? "active" : "")">Shop</a>
+            <a href="@Url.Action("Index", "Collections")" class="nav-link-item">Collections</a>
+            <a href="@Url.Action("Sale",  "Products")"   class="nav-link-item">Sale</a>
+            <a href="@Url.Action("About", "Home")"       class="nav-link-item">Journal</a>
+        </div>
+
+        @*<%-- Icon group --%>*@
+        <div class="d-flex align-items-center gap-1">
+            <button class="nav-icon-btn d-none d-md-flex" title="Search">
+                <i class="bi bi-search"></i>
+            </button>
+            <a href="@Url.Action("Index", "Wishlist")" class="nav-icon-btn" title="Wishlist">
+                <i class="bi bi-heart"></i>
+            </a>
+            <a href="@Url.Action("Index", "Cart")" class="nav-icon-btn position-relative" title="Cart">
+                <i class="bi bi-bag"></i>
+                @if (ViewBag.CartCount != null && (int)ViewBag.CartCount > 0)
+                {
+                    <span class="cart-badge">@ViewBag.CartCount</span>
+                }
+            </a>
+            <a href="@Url.Action("Index", "Account")" class="nav-icon-btn d-none d-md-flex" title="Account">
+                <i class="bi bi-person"></i>
+            </a>
+            @*<%-- Mobile hamburger --%>*@
+            <button class="nav-icon-btn d-md-none"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#mobileMenu"
+                    aria-controls="mobileMenu">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+@*<%-- ===== Mobile Offcanvas Menu ===== --%>*@
+<div class="offcanvas offcanvas-end apple-offcanvas" tabindex="-1" id="mobileMenu">
+    <div class="offcanvas-header">
+        <span class="nav-brand">Curator.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <a href="@Url.Action("Index", "Home")"        class="offcanvas-nav-link">Home</a>
+        <a href="@Url.Action("Index", "Products")"    class="offcanvas-nav-link">Shop</a>
+        <a href="@Url.Action("Index", "Collections")" class="offcanvas-nav-link">Collections</a>
+        <a href="@Url.Action("Sale",  "Products")"    class="offcanvas-nav-link">Sale</a>
+        <a href="@Url.Action("About", "Home")"        class="offcanvas-nav-link">Journal</a>
+        <a href="@Url.Action("Index", "Account")"     class="offcanvas-nav-link">Account</a>
+    </div>
+</div>

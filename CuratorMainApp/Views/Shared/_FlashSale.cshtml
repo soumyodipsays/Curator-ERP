@@ -1,0 +1,73 @@
+@*<%-- Views/Shared/_FlashSale.cshtml --%>
+<%-- Model: Curator.Models.FlashSaleViewModel --%>*@
+@model Curator.Models.FlashSaleViewModel
+
+<section class="apple-section apple-section-dark">
+    <div class="container-xl px-4">
+
+        @*<%-- Header + Countdown --%>*@
+        <div class="row align-items-center gy-4 mb-5 fade-up">
+            <div class="col-12 col-md-6">
+                <span class="section-eyebrow" style="color:rgba(255,255,255,0.4)">Limited Time</span>
+                <h2 class="section-title section-title-white">Flash Sale</h2>
+                <p class="section-sub section-sub-white mt-2">Archival pieces. Once gone, gone forever.</p>
+            </div>
+            <div class="col-12 col-md-6 d-flex justify-content-md-end">
+                <div class="countdown-pill"
+                     data-end-time="@Model.SaleEndTime.ToString("o")">
+                    <div class="cd-block">
+                        <div class="cd-num" id="cd-hours">00</div>
+                        <div class="cd-label">hr</div>
+                    </div>
+                    <span class="cd-sep">:</span>
+                    <div class="cd-block">
+                        <div class="cd-num" id="cd-mins">00</div>
+                        <div class="cd-label">min</div>
+                    </div>
+                    <span class="cd-sep">:</span>
+                    <div class="cd-block">
+                        <div class="cd-num" id="cd-secs">00</div>
+                        <div class="cd-label">sec</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @*<%-- Sale Product Grid --%>*@
+        <div class="row g-4">
+            @foreach (var p in Model.Products)
+            {
+                <div class="col-6 col-md-3 fade-up">
+                    <div class="apple-card-dark">
+                        <div class="card-img-wrap position-relative"
+                             style="height:300px; background:#2c2c2e">
+                            <img src="@p.ImageUrl" alt="@p.Name" />
+                            <span class="discount-pill">−@p.DiscountPercent%</span>
+                            <button class="card-wish-btn"
+                                    data-product-id="@p.Id"
+                                    title="Add to wishlist">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="card-body-apple">
+                            <h6 class="card-name card-name-white mb-1">@p.Name</h6>
+                            <p class="mb-0">
+                                <span style="color:#fff; font-weight:600">
+                                    @p.SalePrice.ToString("C0")
+                                </span>
+                                <del class="ms-2"
+                                     style="color:rgba(255,255,255,0.3); font-size:0.82rem">
+                                    @p.OriginalPrice.ToString("C0")
+                                </del>
+                            </p>
+                        </div>
+                        <div class="quick-add">
+                            <button class="quick-add-btn" data-product-id="@p.Id">Add to Bag</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div>
+</section>

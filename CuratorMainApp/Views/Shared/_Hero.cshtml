@@ -1,0 +1,36 @@
+@*<%-- Views/Shared/_Hero.cshtml --%>
+<%-- Model: Curator.Models.HeroViewModel --%>*@
+@model Curator.Models.HeroViewModel
+
+<section class="apple-hero">
+    <img class="hero-bg"
+         src="@Model.ImageUrl"
+         alt="@Model.ImageAlt" />
+    <div class="hero-vignette"></div>
+    <div class="hero-gradient-bottom"></div>
+
+    <div class="hero-text-block">
+        <span class="hero-eyebrow">@Model.EyebrowLabel</span>
+        <h1 class="hero-title">@Html.Raw(Model.Heading)</h1>
+        <p class="hero-subtitle">@Model.Subtitle</p>
+
+        <div class="hero-actions">
+            <a href="@Model.PrimaryCtaUrl" class="btn-apple-blue px-4 py-3">
+                @Model.PrimaryCtaText <i class="bi bi-arrow-right"></i>
+            </a>
+            @if (!string.IsNullOrEmpty(Model.SecondaryCtaUrl))
+            {
+                <a href="@Model.SecondaryCtaUrl" class="btn-apple-ghost px-4 py-3">
+                    @Model.SecondaryCtaText
+                </a>
+            }
+        </div>
+    </div>
+
+    @*<%-- Scroll cue --%>*@
+    <div class="position-absolute bottom-0 mb-4 text-white d-flex flex-column align-items-center"
+         style="opacity:0.45; animation:bounce 2s ease infinite; z-index:2">
+        <small style="font-size:0.68rem; letter-spacing:0.1em">SCROLL</small>
+        <i class="bi bi-chevron-down mt-1" style="font-size:0.8rem"></i>
+    </div>
+</section>
