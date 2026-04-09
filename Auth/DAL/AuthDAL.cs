@@ -1,11 +1,11 @@
-﻿using Auth.Dapper;
-using Auth.DTOs;
+﻿using Auth.DTOs;
 using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Web;
+using DataAccessLayer.Dapper;
 
 namespace Auth.DAL
 {
