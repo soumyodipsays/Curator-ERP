@@ -38,5 +38,6 @@ namespace Auth.Models
 
         public string ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
+        public string Email { get; set; }
     }
 }
