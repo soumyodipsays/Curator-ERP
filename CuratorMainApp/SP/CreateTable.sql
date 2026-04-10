@@ -63,3 +63,12 @@ CREATE TABLE tblUserVerification (
 );
 
 
+ALTER TABLE tblUserVerification
+ADD IsVerified BIT NOT NULL DEFAULT 0;
+
+ALTER TABLE tblUserVerification
+ADD Attempts INT NOT NULL DEFAULT 0;
+
+ALTER TABLE tblUserVerification
+ADD ExpiresOn DATETIME;
+
