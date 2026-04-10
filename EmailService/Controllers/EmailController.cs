@@ -145,12 +145,12 @@ namespace EmailService.Controllers
             EmailModel model = new EmailModel
             {
                 EmailFrom = "subhradeepbasu2305@gmail.com",
-                EmailTo = "subhradeepbasu2002@gmail.com",
+                //EmailTo = "subhradeepbasu2002@gmail.com",
                 //OTP = "123456",
                 //EmailBody = "Here is your OTP: 123456",
                 EmailSubject = "Don't Reply. Just a Test mail.",
                 NameFrom = "Curator",
-                NameTo = "Client"
+                //NameTo = "Client"
             };
 
             dynamic response = await SendEmail(model);

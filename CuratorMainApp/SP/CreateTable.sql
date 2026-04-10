@@ -53,5 +53,13 @@ CREATE TABLE tblFlashSaleProducts (
     FOREIGN KEY (ProductID) REFERENCES tblProduct(ProductID)
 );
 
+CREATE TABLE tblUserVerification (
+    VerificationID INT IDENTITY PRIMARY KEY,
+    UserID BIGINT,
+    OTP NVARCHAR(100),
+    CreatedOn DATETIME,
+
+    FOREIGN KEY (UserID) REFERENCES tblUser(UserID)
+);
 
 
