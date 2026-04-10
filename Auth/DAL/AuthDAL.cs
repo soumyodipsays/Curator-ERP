@@ -37,7 +37,7 @@ namespace Auth.DAL
             var parameters = new DynamicParameters();
             var proc = "spValidate_User";
             // Map DTO to SP Parameters
-            parameters.Add("@UserName", userDto.UserName);
+            parameters.Add("@Email", userDto.Email);
             parameters.Add("@Password", userDto.Password);
 
             _db.ExecuteWithoutReturn(proc, parameters);

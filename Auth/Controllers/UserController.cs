@@ -65,10 +65,10 @@ namespace Auth.Controllers
                     return Json(new { success = false, message = "Invalid request" });
                 }
 
-                if (string.IsNullOrWhiteSpace(model.UserName) ||
+                if (string.IsNullOrWhiteSpace(model.Email) ||
                     string.IsNullOrWhiteSpace(model.Password))
                 {
-                    return Json(new { success = false, message = "Username & Password required" });
+                    return Json(new { success = false, message = "Email & Password required" });
                 }
 
                 _authDal.ValidateUser(model);

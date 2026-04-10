@@ -9,9 +9,14 @@ namespace Auth.DTOs
 {
     public class UserLoginDTO
     {
-        [Required]
         [DisplayName("UserName")]
         public string UserName { get; set; }
+
+        [DisplayName("Email")]
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+
         [Required]
         [DisplayName("Password")]
         public string Password { get; set; }
