@@ -1,6 +1,9 @@
-﻿@{
+﻿@using System.Configuration
+@{
     ViewBag.Title = "Create Account";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var loginUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Login";
+    var registerUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Register";
 }
 
 <div class="container py-5">
@@ -29,9 +32,7 @@
                     <hr class="flex-grow-1 m-0">
                 </div>
 
-                @using (Html.BeginForm("Register", "Account", FormMethod.Post))
-                {
-                    @Html.AntiForgeryToken()
+                <form id="registerForm">
                     <div class="row g-3 mb-3">
                         <div class="col-6">
                             <label class="form-label small fw-medium text-dark">First name</label>
@@ -134,41 +135,79 @@
                     <div class="d-grid">
                         <button type="submit" class="btn btn-dark rounded-pill py-2 fw-medium">Create Account</button>
                     </div>
-                }
-
-                <p class="text-center text-muted small mt-4 mb-0">
-                    Already have an account?
-                    <a href="@Url.Action("Login","User")"
-                       class="text-decoration-none fw-medium" style="color:#0071e3">Sign in</a>
-                </p>
+                    <p class="text-center text-muted small mt-4 mb-0">
+                        Already have an account?
+                        <a href="@Url.Action("Login","User")"
+                           class="text-decoration-none fw-medium" style="color:#0071e3">Sign in</a>
+                    </p>
+                </form>
             </div>
         </div>
     </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+    $('#registerForm').on('submit', function (e) {
+    e.preventDefault(); 
+        var data = {
+        // hardcoded
+        AdminUserName: "Admin", 
+        CustomerID: 1,
+        UserID: 0,
+
+        FirstName: $('input[name=FirstName]').val(),
+        LastName: $('input[name=LastName]').val(),
+        UserName: $('input[name=UserName]').val(),
+        Email: $('input[name=Email]').val(),
+        Password: $('input[name=Password]').val()
+    };
+
+    $.ajax({
+        url: '@registerUrl',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+
+        success: function (res) {
+            if (res.success) {
+                alert(res.message);
+                //window.location.href = '/User/Login';
+            } else {
+                alert(res.message);
+            }
+        },
+        error: function (err) {
+            console.log(err);
+            alert("Something went wrong");
+        }
+    });
+});
+</script>
 
 @section scripts {
     <script>
-  function togglePw(id, btn) {
-    var inp = document.getElementById(id);
-    var icon = btn.querySelector('i');
-    inp.type = inp.type === 'password' ? 'text' : 'password';
-    icon.className = inp.type === 'text' ? 'bi bi-eye-slash' : 'bi bi-eye';
-  }
+        function togglePw(id, btn) {
+            var inp = document.getElementById(id);
+            var icon = btn.querySelector('i');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+            icon.className = inp.type === 'text' ? 'bi bi-eye-slash' : 'bi bi-eye';
+        }
 
-  function checkStrength(val) {
-    var score = 0;
-    if (val.length >= 8)           score++;
-    if (/[A-Z]/.test(val))         score++;
-    if (/[0-9]/.test(val))         score++;
-    if (/[^A-Za-z0-9]/.test(val))  score++;
+        function checkStrength(val) {
+            var score = 0;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
 
-    var colors = ['#dee2e6','#dee2e6','#dee2e6','#dee2e6'];
-    var label  = val.length === 0 ? '\u00a0' : ['','Weak','Fair','Good','Strong'][score];
-    var accent = ['','#dc3545','#fd7e14','#ffc107','#198754'][score] || '#dee2e6';
+            var colors = ['#dee2e6', '#dee2e6', '#dee2e6', '#dee2e6'];
+            var label = val.length === 0 ? '\u00a0' : ['', 'Weak', 'Fair', 'Good', 'Strong'][score];
+            var accent = ['', '#dc3545', '#fd7e14', '#ffc107', '#198754'][score] || '#dee2e6';
 
-    for (var i = 0; i < score; i++) colors[i] = accent;
-    for (var j = 1; j <= 4; j++) document.getElementById('s'+j).style.background = colors[j-1];
-    document.getElementById('strength-label').textContent = label;
-  }
+            for (var i = 0; i < score; i++) colors[i] = accent;
+            for (var j = 1; j <= 4; j++) document.getElementById('s' + j).style.background = colors[j - 1];
+            document.getElementById('strength-label').textContent = label;
+        }
     </script>
 }
