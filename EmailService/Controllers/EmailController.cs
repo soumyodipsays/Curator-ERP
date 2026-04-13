@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Helpers;
 using System.Web.Mvc;
 using System.Web.Services.Description;
 using static System.Net.WebRequestMethods;
@@ -126,6 +127,10 @@ namespace EmailService.Controllers
                 {
                     success = true,
                     message = "Mail sent successfully",
+                    data = new
+                    {
+                        otp = emailModel.OTP
+                    },
                     error = ""
                 };
             }
@@ -135,17 +140,18 @@ namespace EmailService.Controllers
                 {
                     success = false,
                     message = "Mail sent failed",
+                    data = new { },
                     error = ex.Message
                 };
             }
         }
 
-        public async Task<ActionResult> Test()
+        public async Task<object> EmailHandler(string email)
         {
             EmailModel model = new EmailModel
             {
                 EmailFrom = "subhradeepbasu2305@gmail.com",
-                //EmailTo = "subhradeepbasu2002@gmail.com",
+                EmailTo = email,
                 //OTP = "123456",
                 //EmailBody = "Here is your OTP: 123456",
                 EmailSubject = "Don't Reply. Just a Test mail.",
@@ -155,9 +161,7 @@ namespace EmailService.Controllers
 
             dynamic response = await SendEmail(model);
 
-            return Content($"Success: {response.success} <br/> " +
-                           $"Message: {response.message} <br/> " +
-                           $"Error: {response.error}");
+            return response;
         }
     }
 }

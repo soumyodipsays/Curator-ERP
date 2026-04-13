@@ -1,7 +1,9 @@
 ﻿using Auth.DAL;
 using Auth.DTOs;
+using EmailService.Controllers;
 using System;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 
 namespace Auth.Controllers
@@ -9,6 +11,7 @@ namespace Auth.Controllers
     public class UserController : Controller
     {
         private readonly AuthDAL _authDal = new AuthDAL();
+        private readonly EmailController _emailSVC = new EmailController();
 
         [HttpPost]
         public ActionResult Register(UserRegistrationDto model)
@@ -96,5 +99,13 @@ namespace Auth.Controllers
                 });
             }
         }
+
+        public async Task<JsonResult> SendOTP(string email)
+        {
+            dynamic  response = await _emailSVC.EmailHandler(email);
+            _authDal.InsertUpdateOTP(response.data.otp);
+            return Json(response);
+        }
+
     }
 }
