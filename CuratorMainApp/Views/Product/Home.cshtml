@@ -1,6 +1,9 @@
-﻿@{
+﻿@using System.Configuration
+@{
     ViewBag.Title = "Product page";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var productURL = ConfigurationManager.AppSettings["ProductServiceBaseUrl"];
+    var categoryURL = productURL + "/Products/GetCategoryList";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -656,3 +659,64 @@
     </script>
 </body>
 </html>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+
+    function renderCategoryPills(categoryList)
+    {
+        categoryList.forEach(item => {
+            const html = `
+                    <div class="cat-pill" data-cat="${item.Category}" data-id=${item.CategoryID}>
+                        
+                        ${item.Category}
+                    </div>
+                `
+            $("#categoryPills").append(html);
+        })
+    }
+
+    function getAllCategories()
+    {
+        $.ajax({
+            url: `@categoryURL`,
+            data: {
+                //hardcoded
+                CustomerID: 1
+            },
+            type: 'GET',
+            success: function (response) {
+                console.log("S-Response: ", response)
+                renderCategoryPills(response)
+            },
+            error: function (response) {
+                console.log("E-Response: ", response)
+            }
+        })
+    }
+
+    function setActiveCategory(categoryName) {
+        $('.cat-pill').removeClass('active');
+
+        $(`.cat-pill[data-cat="${categoryName}"]`).addClass('active');
+    }
+
+    $(document).ready(function () {
+
+        // Fetch all categories by CustomerID and render them
+        getAllCategories()
+
+        // Set the active category on click
+        $(document).on('click', '.cat-pill', function () {
+            
+            const category = $(this).data('cat');
+            const categoryId = $(this).data('id');
+
+            //console.log("Selected:", category, categoryId);
+            setActiveCategory(category)
+        })
+
+
+    })
+</script>
