@@ -1,0 +1,84 @@
+﻿﻿@*<%-- Views/Shared/_SearchOverlay.cshtml --%>*@
+
+<div id="search-overlay" style="display:none; position:fixed; top:56px; left:0; right:0; z-index:999;
+     background:#fff; border-bottom:1px solid #e8e8ed; padding:20px 0 28px; box-shadow:0 8px 32px rgba(0,0,0,0.08)">
+    <div class="container-xl px-4">
+
+        @*<%-- Input row --%>*@
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="d-flex align-items-center flex-grow-1 gap-2 px-3 py-2 rounded-pill"
+                 style="background:#f5f5f7; border:1.5px solid transparent" id="search-box">
+                <i class="bi bi-search text-secondary" style="font-size:14px; flex-shrink:0"></i>
+                <input type="text" id="search-input"
+                       placeholder="Search for styles, brands, items…"
+                       class="border-0 bg-transparent w-100"
+                       style="outline:none; font-size:0.9rem; color:#1d1d1f"
+                       autocomplete="off" />
+                <button id="clear-btn" class="border-0 bg-transparent p-0 text-secondary"
+                        style="display:none; line-height:1; cursor:pointer">
+                    <i class="bi bi-x-circle-fill" style="font-size:14px"></i>
+                </button>
+            </div>
+            <button id="search-cancel-btn"
+                    class="border-0 bg-transparent p-0"
+                    style="color:#0071e3; font-size:0.9rem; font-weight:500; cursor:pointer; white-space:nowrap">
+                Cancel
+            </button>
+        </div>
+
+        @*<%-- DEFAULT STATE --%>*@
+        <div id="search-default">
+            <div class="row g-4">
+
+                @*<%-- Recent Searches --%>*@
+                <div class="col-12 col-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-uppercase fw-semibold text-secondary"
+                              style="font-size:0.7rem; letter-spacing:0.08em">Recent</span>
+                        <button id="clear-recent-btn" class="border-0 bg-transparent p-0"
+                                style="color:#0071e3; font-size:0.75rem; cursor:pointer">
+                            Clear
+                        </button>
+                    </div>
+                    <ul id="recent-list" class="list-unstyled mb-0"></ul>
+                </div>
+
+                @*<%-- Trending --%>*@
+                <div class="col-12 col-md-4">
+                    <p class="text-uppercase fw-semibold text-secondary mb-3"
+                       style="font-size:0.7rem; letter-spacing:0.08em">Trending Now</p>
+                    <div id="trending-pills" class="d-flex flex-wrap gap-2"></div>
+                </div>
+
+                @*<%-- Popular Categories --%>*@
+                <div class="col-12 col-md-4">
+                    <p class="text-uppercase fw-semibold text-secondary mb-3"
+                       style="font-size:0.7rem; letter-spacing:0.08em">Popular Categories</p>
+                    <ul id="category-list" class="list-unstyled mb-0"></ul>
+                </div>
+            </div>
+        </div>
+
+        @*<%-- RESULTS STATE --%>*@
+        <div id="search-results" style="display:none">
+            <div class="row g-4">
+                <div class="col-12 col-md-5">
+                    <p class="text-uppercase fw-semibold text-secondary mb-3"
+                       style="font-size:0.7rem; letter-spacing:0.08em">Suggestions</p>
+                    <ul id="suggestions-list" class="list-unstyled mb-0"></ul>
+                </div>
+                <div class="col-12 col-md-7">
+                    <p class="text-uppercase fw-semibold text-secondary mb-3"
+                       style="font-size:0.7rem; letter-spacing:0.08em">Quick Results</p>
+                    <div id="quick-results"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@*<%-- Backdrop --%>*@
+<div id="search-backdrop"
+     style="display:none; position:fixed; inset:0; top:56px; background:rgba(0,0,0,0.35); z-index:998">
+</div>
