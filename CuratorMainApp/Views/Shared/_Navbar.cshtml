@@ -8,7 +8,7 @@
         @*<%-- Desktop nav links --%>*@
         <div class="d-none d-md-flex align-items-center gap-1">
             <a href="@Url.Action("Index", "Home")"       class="nav-link-item @(ViewContext.RouteData.Values["action"].ToString() == "Index"       ? "active" : "")">Home</a>
-            <a href="@Url.Action("Index", "Products")"   class="nav-link-item @(ViewContext.RouteData.Values["controller"].ToString() == "Products" ? "active" : "")">Shop</a>
+            <a href="@Url.Action("Home", "Product")"   class="nav-link-item @(ViewContext.RouteData.Values["controller"].ToString() == "Products" ? "active" : "")">Shop</a>
             <a href="@Url.Action("Index", "Collections")" class="nav-link-item">Collections</a>
             <a href="@Url.Action("Sale",  "Products")"   class="nav-link-item">Sale</a>
             <a href="@Url.Action("About", "Home")"       class="nav-link-item">Journal</a>
