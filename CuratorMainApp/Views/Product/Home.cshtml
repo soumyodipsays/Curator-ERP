@@ -4,6 +4,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var productURL = ConfigurationManager.AppSettings["ProductServiceBaseUrl"];
     var categoryURL = productURL + "/Products/GetCategoryList";
+    var allProductURL = productURL + "/Products/GetProductList";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -654,7 +655,7 @@
         /* ---- INIT — load products on page ready ---- */
         /* In MVC: replaced by $.ajax({ url:'/Product/GetProducts', success: renderProducts }) */
         document.addEventListener('DOMContentLoaded', () => {
-            renderProducts(PRODUCTS);
+            //renderProducts(PRODUCTS);
         });
     </script>
 </body>
@@ -669,7 +670,7 @@
         categoryList.forEach(item => {
             const html = `
                     <div class="cat-pill" data-cat="${item.Category}" data-id=${item.CategoryID}>
-                        
+
                         ${item.Category}
                     </div>
                 `
@@ -702,6 +703,25 @@
         $(`.cat-pill[data-cat="${categoryName}"]`).addClass('active');
     }
 
+    function getAllProducts()
+    {
+        $.ajax({
+            url: `@allProductURL`,
+            data: {
+                //hardcoded
+                CustomerID: 1
+            },
+            type: 'GET',
+            success: function (response) {
+                console.log("Products S-Response: ", response)
+                renderProducts(response)
+            },
+            error: function (response) {
+                console.log("E-Response: ", response)
+            }
+        })
+    }
+
     $(document).ready(function () {
 
         // Fetch all categories by CustomerID and render them
@@ -709,13 +729,15 @@
 
         // Set the active category on click
         $(document).on('click', '.cat-pill', function () {
-            
+
             const category = $(this).data('cat');
             const categoryId = $(this).data('id');
 
             //console.log("Selected:", category, categoryId);
             setActiveCategory(category)
         })
+
+        getAllProducts()
 
     })
 </script>
