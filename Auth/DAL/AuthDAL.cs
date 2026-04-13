@@ -66,5 +66,16 @@ namespace Auth.DAL
 
             _db.ExecuteWithoutReturn(proc, parameters);
         }
+
+        public void ResetPassword(UserLoginDTO resetDto)
+        {
+            var parameters = new DynamicParameters();
+            var proc = "spUser_ResetPassword";
+
+            parameters.Add("@Email", resetDto.Email);
+            parameters.Add("@OTP", resetDto.Password);
+
+            _db.ExecuteWithoutReturn(proc, parameters);
+        }
     }
 }

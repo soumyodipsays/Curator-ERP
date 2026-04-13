@@ -14,7 +14,7 @@ namespace Auth.Controllers
         private readonly EmailController _emailSVC = new EmailController();
 
         [HttpPost]
-        public ActionResult Register(UserRegistrationDto model)
+        public JsonResult Register(UserRegistrationDto model)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace Auth.Controllers
         }
 
         [HttpPost]
-        public ActionResult Login(UserLoginDTO model)
+        public JsonResult Login(UserLoginDTO model)
         {
             try
             {
@@ -144,6 +144,45 @@ namespace Auth.Controllers
                 });
             }
 
+        }
+
+        [HttpPost]
+        public JsonResult ResetPassword(UserLoginDTO model)
+        { 
+            try
+            {
+                if (model == null)
+                {
+                    return Json(new { success = false, message = "Invalid request" });
+                }
+                if (string.IsNullOrWhiteSpace(model.Email) ||
+                    string.IsNullOrWhiteSpace(model.Password))
+                {
+                    return Json(new { success = false, message = "Email & Password required" });
+                }
+                _authDal.ResetPassword(model);
+                return Json(new
+                {
+                    success = true,
+                    message = "Password reset successfully",
+                });
+            }
+            catch (SqlException sqlex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = sqlex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
         }
     }
 }
