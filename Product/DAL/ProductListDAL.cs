@@ -14,12 +14,19 @@ namespace Product.DAL
     {
         private readonly DapperConn _db = new DapperConn();
 
-        public List<ProductListModel> GetProductList(int CustomerID)
+        public List<ProductListModel> GetProductList(long CustomerID)
         {
             DynamicParameters param = new DynamicParameters();
             param.Add("@CustomerID", CustomerID);
             return _db.ExecuteMultipleRow<ProductListModel>("spProduct_GetList",param);
         }
 
+        public List<CategoryListModel> GetCategoryList(long CustomerID)
+        {
+            DynamicParameters param = new DynamicParameters();
+            var proc = "spProductCategory_DDL";
+            param.Add("@CustomerID", CustomerID);
+            return _db.ExecuteMultipleRow<CategoryListModel>(proc, param);
+        }
     }
 }

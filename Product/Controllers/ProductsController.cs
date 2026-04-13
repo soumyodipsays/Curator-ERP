@@ -31,10 +31,16 @@ namespace Product.Controllers
         //    return Json(products, JsonRequestBehavior.AllowGet);
         //}
 
-        public JsonResult GetProductList(int CustomerID)
+        public JsonResult GetProductList(long CustomerID)
         {
-            var Result = product_list_dal.GetProductList(CustomerID);
-            return Json(Result, JsonRequestBehavior.AllowGet);
+            var result = product_list_dal.GetProductList(CustomerID);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetCategoryList(long CustomerID)
+        {
+            var result = product_list_dal.GetCategoryList(CustomerID);
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
     }
 }

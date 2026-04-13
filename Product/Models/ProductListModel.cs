@@ -47,4 +47,10 @@ namespace Product.Models
     
         public double Rating { get; set; }
     }
+
+    public class CategoryListModel
+    {
+        public long CategoryID { get; set; }
+        public string Category { get; set; }
+    }
 }

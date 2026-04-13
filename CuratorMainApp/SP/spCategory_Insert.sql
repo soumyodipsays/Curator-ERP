@@ -1,8 +1,16 @@
-CREATE PROCEDURE spCategory_Insert
+USE [Ecommerce]
+GO
+/****** Object:  StoredProcedure [dbo].[spCategory_Insert]    Script Date: 4/13/2026 3:54:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[spCategory_Insert]
 (
     @Category        udt_Name,
     @DisplayOrder    udt_ID2 = 0,
-    @CreatedBy       udt_Name = 'system'
+    @CreatedBy       udt_Name = 'system',
+	@CustomerID		 bigint
 )
 AS
 BEGIN
@@ -15,7 +23,8 @@ BEGIN
         ActivationDate,
         DisplayOrder,
         CreatedBy,
-        CreatedOn
+        CreatedOn,
+		CustomerID
     )
     VALUES
     (
@@ -24,7 +33,8 @@ BEGIN
         [dbo].UTC2Indian(GETDATE()),
         @DisplayOrder,
         @CreatedBy,
-        [dbo].UTC2Indian(GETDATE())
+        [dbo].UTC2Indian(GETDATE()),
+		@CustomerID
     )
 END
 
