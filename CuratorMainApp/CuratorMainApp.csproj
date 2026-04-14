@@ -194,6 +194,10 @@
     <Content Include="SP\spColor_Insert.sql" />
     <Content Include="SP\spCoupon_Insert.sql" />
     <Content Include="SP\spDiscount_Insert.sql" />
+    <Content Include="SP\spFeaturedProduct_Insert.sql" />
+    <Content Include="SP\spFlashSaleProduct_Insert.sql" />
+    <Content Include="SP\spFlashSale_Insert.sql" />
+    <Content Include="SP\spHomePage_Get.sql" />
     <Content Include="SP\spOTP_InsertUpdate.sql" />
     <Content Include="SP\spOTP_Verify.sql" />
     <Content Include="SP\spProductCategory_DDL.sql" />
