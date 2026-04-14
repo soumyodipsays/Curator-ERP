@@ -345,74 +345,158 @@
         }
 
         function buildGridCard(p) {
-            const savedPct = p.DiscountID ? p.DiscountID : 0;
-            const priceOrig = p.OriginalPrice ? `<span class="price-original">$${p.OriginalPrice}</span>` : '';
-            const priceSave = savedPct ? `<span class="price-save">−${savedPct}%</span>` : '';
-            const ratingHtml = p.Reviews > 0
+            const isPercentage = p.IsInrOrPercentage == 'P';
+
+            let originalPrice = p.Price;
+            let discountAmount = 0;
+            let finalPrice = p.Price;
+
+            if (p.DiscountID) {
+
+                if (isPercentage) {
+                    discountAmount = (p.Price * p.Percentage) / 100;
+                } else {
+                    discountAmount = p.INR;
+                }
+
+                // ✅ Round properly (important for money UI)
+                discountAmount = Math.round(discountAmount);
+                finalPrice = Math.round(p.Price - discountAmount);
+            }
+
+            const hasDiscount = discountAmount > 0;
+
+            const priceHtml = hasDiscount
+                ? `
+        <span class="price-current">₹${finalPrice}</span>
+        <span class="price-original text-decoration-line-through ms-2">₹${originalPrice}</span>
+        <span class="price-save ms-2 text-success">Save ₹${discountAmount}</span>
+        `
+                : `<span class="price-current">₹${originalPrice}</span>`;
+
+            const ratingHtml = p.Rating > 0
                 ? `<div class="d-flex align-items-center gap-1 mt-1">
-                 <span class="stars-pc">${renderStars(p.Rating)}</span>
-                 <span class="review-count">${p.Rating} · ${p.Reviews}</span>
-               </div>` : '';
+             <span class="stars-pc">${renderStars(p.Rating)}</span>
+             <span class="review-count">${p.Rating} · ${p.Reviews}</span>
+           </div>`
+                : '';
 
             return `
-            <div class="col-6 col-md-4 fade-up">
-              <div class="product-card h-100" onclick="openDetail(${p.ProductID})">
-                <div class="card-img-wrap position-relative" style="height:240px">
-                  <img src="${p.ImageURL}" alt="${p.ProductName}" loading="lazy">
-                  ${getCardBadge(p)}
-                  <button class="wish-btn" onclick="event.stopPropagation();toggleWish(this)" title="Save">
-                    <i class="bi bi-heart"></i>
-                  </button>
-                </div>
-                <div class="card-body-pc">
-                  <span class="card-label-pc">${p.BrandID}</span>
-                  <h6 class="card-name-pc">${p.ProductName}</h6>
-                  <p class="card-caption">${p.ProductCaption}</p>
-                  ${ratingHtml}
-                  <div class="price-row mt-2">
-                    <span class="price-current">$${p.Price}</span>
-                    ${priceOrig}
-                    ${priceSave}
-                  </div>
-                </div>
-                <div class="card-actions">
-                  <button class="quick-add-btn" onclick="event.stopPropagation();addToCartQuick('${p.ProductName}')">
-                    Add to Bag
-                  </button>
-                  <button class="view-detail-btn" onclick="event.stopPropagation();openDetail(${p.ProductID})" title="View details">
-                    <i class="bi bi-eye"></i>
-                  </button>
-                </div>
-              </div>
-            </div>`;
+    <div class="col-6 col-md-4 fade-up">
+      <div class="product-card h-100" onclick="openDetail(${p.ProductID})">
+        
+        <div class="card-img-wrap position-relative" style="height:240px">
+          <img src="${p.ImageURL}" alt="${p.ProductName}" loading="lazy">
+          ${getCardBadge(p)}
+          <button class="wish-btn" onclick="event.stopPropagation();toggleWish(this)">
+            <i class="bi bi-heart"></i>
+          </button>
+        </div>
+
+        <div class="card-body-pc">
+          <span class="card-label-pc">${p.BrandID}</span>
+          <h6 class="card-name-pc">${p.ProductName}</h6>
+          <p class="card-caption">${p.ProductCaption}</p>
+
+          ${ratingHtml}
+
+          <div class="price-row mt-2 d-flex align-items-center flex-wrap">
+            ${priceHtml}
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="quick-add-btn" onclick="event.stopPropagation();addToCartQuick('${p.ProductName}')">
+            Add to Bag
+          </button>
+          <button class="view-detail-btn" onclick="event.stopPropagation();openDetail(${p.ProductID})">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>`;
         }
 
         function buildListCard(p) {
+
+            const isPercentage = p.IsInrOrPercentage == 'P';
+
+            let originalPrice = p.Price;
+            let discountAmount = 0;
+            let finalPrice = p.Price;
+
+            if (p.DiscountID) {
+                if (isPercentage) {
+                    discountAmount = (p.Price * p.Percentage) / 100;
+                } else {
+                    discountAmount = p.INR;
+                }
+
+                discountAmount = Math.round(discountAmount);
+                finalPrice = Math.round(p.Price - discountAmount);
+            }
+
+            const hasDiscount = discountAmount > 0;
+
+            const priceHtml = hasDiscount
+                ? `
+        <div>
+            <div class="price-current" style="font-size:1.2rem">₹${finalPrice}</div>
+            <div class="price-original text-decoration-line-through" style="font-size:.85rem;color:#888">
+                ₹${originalPrice}
+            </div>
+            <div class="price-save text-success" style="font-size:.8rem">
+                Save ₹${discountAmount}
+            </div>
+        </div>
+        `
+                : `
+        <div class="price-current" style="font-size:1.2rem">
+            ₹${originalPrice}
+        </div>
+        `;
+
             return `
-            <div class="list-card fade-up" onclick="openDetail(${p.ProductID})">
-              <div class="list-img" style="height:130px">
-                <img src="${p.ImageURL}" alt="${p.ProductName}" loading="lazy">
-              </div>
-              <div class="list-body d-flex justify-content-between align-items-center">
-                <div>
-                  <span class="card-label-pc">${p.BrandID} · ${p.CategoryID}</span>
-                  <h6 class="card-name-pc mb-1">${p.ProductName}</h6>
-                  <p style="font-size:.78rem;color:var(--gray-4);margin:0;max-width:400px">${p.ProductCaption}</p>
-                  <div class="d-flex align-items-center gap-1 mt-1">
-                    <span class="stars-pc">${renderStars(p.Rating)}</span>
-                    <span class="review-count">${p.Reviews > 0 ? p.Rating + ' · ' + p.Reviews + ' reviews' : 'No reviews yet'}</span>
-                  </div>
-                </div>
-                <div class="text-end flex-shrink-0 ms-3">
-                  <div class="price-current" style="font-size:1.2rem">$${p.Price}</div>
-                  ${p.OriginalPrice ? `<div class="price-original">$${p.OriginalPrice}</div>` : ''}
-                  ${getCardBadge(p)}
-                  <button class="quick-add-btn mt-2" style="white-space:nowrap" onclick="event.stopPropagation();addToCartQuick('${p.ProductName}')">
-                    Add to Bag
-                  </button>
-                </div>
-              </div>
-            </div>`;
+    <div class="list-card fade-up" onclick="openDetail(${p.ProductID})">
+      
+      <div class="list-img" style="height:130px">
+        <img src="${p.ImageURL}" alt="${p.ProductName}" loading="lazy">
+      </div>
+
+      <div class="list-body d-flex justify-content-between align-items-center">
+
+        <div>
+          <span class="card-label-pc">${p.BrandID} · ${p.CategoryID}</span>
+          <h6 class="card-name-pc mb-1">${p.ProductName}</h6>
+
+          <p style="font-size:.78rem;color:var(--gray-4);margin:0;max-width:400px">
+            ${p.ProductCaption}
+          </p>
+
+          <div class="d-flex align-items-center gap-1 mt-1">
+            <span class="stars-pc">${renderStars(p.Rating)}</span>
+            <span class="review-count">
+              ${p.Reviews > 0 ? p.Rating + ' · ' + p.Reviews + ' reviews' : 'No reviews yet'}
+            </span>
+          </div>
+        </div>
+
+        <div class="text-end flex-shrink-0 ms-3">
+
+          ${priceHtml}
+
+          ${getCardBadge(p)}
+
+          <button class="quick-add-btn mt-2"
+                  style="white-space:nowrap"
+                  onclick="event.stopPropagation();addToCartQuick('${p.ProductName}')">
+            Add to Bag
+          </button>
+
+        </div>
+      </div>
+    </div>`;
         }
 
         function renderProducts(products) {
