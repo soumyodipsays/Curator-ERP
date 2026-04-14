@@ -189,11 +189,16 @@
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\search.js" />
     <Content Include="SP\CreateTable.sql" />
+    <Content Include="SP\Ecommerce.sql" />
     <Content Include="SP\spBrand_Insert.sql" />
     <Content Include="SP\spCategory_Insert.sql" />
     <Content Include="SP\spColor_Insert.sql" />
     <Content Include="SP\spCoupon_Insert.sql" />
     <Content Include="SP\spDiscount_Insert.sql" />
+    <Content Include="SP\spFeaturedProduct_Insert.sql" />
+    <Content Include="SP\spFlashSaleProduct_Insert.sql" />
+    <Content Include="SP\spFlashSale_Insert.sql" />
+    <Content Include="SP\spHomePage_Get.sql" />
     <Content Include="SP\spOTP_InsertUpdate.sql" />
     <Content Include="SP\spOTP_Verify.sql" />
     <Content Include="SP\spProductCategory_DDL.sql" />
