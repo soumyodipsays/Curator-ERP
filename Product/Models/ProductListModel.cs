@@ -15,6 +15,7 @@ namespace Product.Models
 
         public long CategoryID { get; set; }
         public long BrandID { get; set; }
+        public string Brand { get; set; }
         public long ColorID { get; set; }
         public long SizeID { get; set; }
 
