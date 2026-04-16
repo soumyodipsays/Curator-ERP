@@ -1,11 +1,33 @@
 @*<%-- Views/Shared/_FeaturedProducts.cshtml --%>
-<%-- Model: IList<Curator.Models.ProductCardViewModel>  (expects at least 3 items) --%>*@
-@model IList<Curator.Models.ProductCardViewModel>
+    <%-- Model: IList<Curator.Models.ProductCardViewModel>  (expects at least 3 items) --%>*@
+
+<style>
+    /* 1. Keeps the items invisible right as they are injected */
+    .ready-to-fade {
+        opacity: 0;
+    }
+
+    /* 2. The class that triggers the movement */
+    .fade-up-featured_product {
+        opacity: 0;
+        transform: translateY(24px);
+        /* FIX 1: Use 'animation' to trigger the keyframes, NOT 'transition' */
+        animation: fadeUpAction 0.6s ease forwards;
+    }
+
+    /* 3. The Keyframes */
+    @@keyframes fadeUpAction {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
 
 <section class="apple-section">
     <div class="container-xl px-4">
 
-        <div class="d-flex justify-content-between align-items-end mb-5 fade-up">
+        <div class="d-flex justify-content-between align-items-end mb-5 ready-to-fade">
             <div>
                 <span class="section-eyebrow">Curation 01</span>
                 <h2 class="section-title">Featured Items</h2>
@@ -16,70 +38,112 @@
             </a>
         </div>
 
-        <div class="row g-4">
-
-            @*<%-- Large hero card — first product --%>*@
-            @if (Model.Count > 0)
-            {
-                var p = Model[0];
-                <div class="col-10 col-md-8 fade-up">
-                    <div class="apple-card h-100">
-                        <div class="card-img-wrap position-relative" style="height:620px">
-                            <img src="@p.ImageUrl" alt="@p.Name" />
-                            <button class="card-wish-btn"
-                                    data-product-id="@p.Id"
-                                    title="Add to wishlist">
-                                <i class="bi bi-heart"></i>
-                            </button>
-                        </div>
-                        <div class="card-body-apple">
-                            <span class="card-label">@p.Label</span>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="card-name mb-0">@p.Name</h5>
-                                <span class="card-price-highlight">@p.Price.ToString("C0")</span>
-                            </div>
-                        </div>
-                        <div class="quick-add">
-                            <button class="quick-add-btn" data-product-id="@p.Id">Add to Bag</button>
-                            <button class="quick-bag-btn" data-product-id="@p.Id" title="Save">
-                                <i class="bi bi-bag-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            }
-
-            @*<%-- Two stacked small cards --%>*@
-            <div class="col-12 col-md-4 d-flex flex-column gap-4">
-                @for (int i = 1; i <= 2 && i < Model.Count; i++)
-                {
-                    var p = Model[i];
-                    <div class="apple-card flex-fill fade-up" style="animation-delay:@(i * 0.1)s">
-                        <div class="card-img-wrap position-relative" style="height:248px">
-                            <img src="@p.ImageUrl" alt="@p.Name" />
-                            <button class="card-wish-btn"
-                                    data-product-id="@p.Id"
-                                    title="Add to wishlist">
-                                <i class="bi bi-heart"></i>
-                            </button>
-                        </div>
-                        <div class="card-body-apple">
-                            <span class="card-label">@p.Label</span>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h6 class="card-name mb-0">@p.Name</h6>
-                                <span class="card-price-highlight">@p.Price.ToString("C0")</span>
-                            </div>
-                        </div>
-                        <div class="quick-add">
-                            <button class="quick-add-btn" data-product-id="@p.Id">Add to Bag</button>
-                            <button class="quick-bag-btn" data-product-id="@p.Id">
-                                <i class="bi bi-bag-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                }
-            </div>
-
+        <div class="row g-4" id="featuredProductsContainer">
         </div>
+
     </div>
 </section>
+
+<script>
+    function renderFeaturedProducts(products) {
+        console.log("Rendering products:", products);
+        if (!products || products.length === 0) return;
+
+        let html = '';
+
+        // ===== HERO PRODUCT =====
+        let p = products[0];
+
+        html += `
+            <div class="col-10 col-md-8 ready-to-fade">
+                <div class="apple-card h-100">
+                    <div class="card-img-wrap position-relative" style="height:620px">
+                        <img src="${p.ImageURL}" alt="${p.ProductName}" />
+                        <button class="card-wish-btn" data-product-id="${p.ProductID}" title="Add to wishlist">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                    </div>
+                    <div class="card-body-apple">
+                        <span class="card-label">${p.Label || ''}</span>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-name mb-0">${p.ProductName}</h5>
+                            <span class="card-price-highlight">${formatPrice(p.Price)}</span>
+                        </div>
+                    </div>
+                    <div class="quick-add">
+                        <button class="quick-add-btn" data-product-id="${p.ProductID}">Add to Bag</button>
+                        <button class="quick-bag-btn" data-product-id="${p.ProductID}" title="Save">
+                            <i class="bi bi-bag-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // ===== RIGHT SIDE PRODUCTS =====
+        html += `<div class="col-12 col-md-4 d-flex flex-column gap-4">`;
+
+        for (let i = 1; i <= 2 && i < products.length; i++) {
+            let item = products[i];
+
+            html += `
+                <div class="apple-card flex-fill ready-to-fade" style="animation-delay:${i * 0.1}s">
+                    <div class="card-img-wrap position-relative" style="height:248px">
+                        <img src="${item.ImageURL}" alt="${item.ProductName}" />
+                        <button class="card-wish-btn" data-product-id="${item.ProductID}" title="Add to wishlist">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                    </div>
+                    <div class="card-body-apple">
+                        <span class="card-label">${item.Label || ''}</span>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="card-name mb-0">${item.ProductName}</h6>
+                            <span class="card-price-highlight">${formatPrice(item.Price)}</span>
+                        </div>
+                    </div>
+                    <div class="quick-add">
+                        <button class="quick-add-btn" data-product-id="${item.ProductID}">Add to Bag</button>
+                        <button class="quick-bag-btn" data-product-id="${item.ProductID}" title="Save">
+                            <i class="bi bi-bag-plus"></i>
+                        </button>
+                    </div>
+
+                </div>
+            `;
+        }
+
+        html += `</div>`;
+
+        // 1. Inject the HTML into the page
+        $("#featuredProductsContainer").html(html);
+
+        // 2. Wait 50 milliseconds, then add the animation class
+        setTimeout(function () {
+            $(".ready-to-fade").addClass("fade-up-featured_product").removeClass("ready-to-fade");
+        }, 50);
+    }
+
+    // Price formatter (Indian format)
+    function formatPrice(price) {
+        return new Intl.NumberFormat('en-IN').format(price);
+    }
+
+    $(document).on("click", ".quick-add-btn", function () {
+        let id = $(this).data("product-id");
+        console.log("Add to Bag:", id);
+    });
+
+    $(document).on("click", ".card-wish-btn", function () {
+        let id = $(this).data("product-id");
+        console.log("Wishlist:", id);
+    });
+
+    $(document).ready(function () {
+        console.log("Featured Products Script Loaded");
+
+        // FIX 2: Matched the class name here to 'fade-up-featured_product'
+        setTimeout(function () {
+            $(".ready-to-fade").addClass("fade-up-featured_product").removeClass("ready-to-fade");
+        }, 50);
+    });
+</script>

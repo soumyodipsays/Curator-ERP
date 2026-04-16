@@ -1,20 +1,17 @@
-@*<%-- Views/Shared/_FlashSale.cshtml --%>
-<%-- Model: Curator.Models.FlashSaleViewModel --%>*@
-@model Curator.Models.FlashSaleViewModel
+﻿@*<%-- Views/Shared/_FlashSale.cshtml --%>*@
 
-<section class="apple-section apple-section-dark">
+<section class="apple-section apple-section-dark" id="flashSaleSection" style="display: none;">
     <div class="container-xl px-4">
 
         @*<%-- Header + Countdown --%>*@
-        <div class="row align-items-center gy-4 mb-5 fade-up">
+        <div class="row align-items-center gy-4 mb-5 ready-to-fade">
             <div class="col-12 col-md-6">
                 <span class="section-eyebrow" style="color:rgba(255,255,255,0.4)">Limited Time</span>
                 <h2 class="section-title section-title-white">Flash Sale</h2>
                 <p class="section-sub section-sub-white mt-2">Archival pieces. Once gone, gone forever.</p>
             </div>
             <div class="col-12 col-md-6 d-flex justify-content-md-end">
-                <div class="countdown-pill"
-                     data-end-time="@Model.SaleEndTime.ToString("o")">
+                <div class="countdown-pill" id="flashSaleCountdown">
                     <div class="cd-block">
                         <div class="cd-num" id="cd-hours">00</div>
                         <div class="cd-label">hr</div>
@@ -33,41 +30,109 @@
             </div>
         </div>
 
-        @*<%-- Sale Product Grid --%>*@
-        <div class="row g-4">
-            @foreach (var p in Model.Products)
-            {
-                <div class="col-6 col-md-3 fade-up">
-                    <div class="apple-card-dark">
-                        <div class="card-img-wrap position-relative"
-                             style="height:300px; background:#2c2c2e">
-                            <img src="@p.ImageUrl" alt="@p.Name" />
-                            <span class="discount-pill">−@p.DiscountPercent%</span>
-                            <button class="card-wish-btn"
-                                    data-product-id="@p.Id"
-                                    title="Add to wishlist">
-                                <i class="bi bi-heart"></i>
-                            </button>
-                        </div>
-                        <div class="card-body-apple">
-                            <h6 class="card-name card-name-white mb-1">@p.Name</h6>
-                            <p class="mb-0">
-                                <span style="color:#fff; font-weight:600">
-                                    @p.SalePrice.ToString("C0")
-                                </span>
-                                <del class="ms-2"
-                                     style="color:rgba(255,255,255,0.3); font-size:0.82rem">
-                                    @p.OriginalPrice.ToString("C0")
-                                </del>
-                            </p>
-                        </div>
-                        <div class="quick-add">
-                            <button class="quick-add-btn" data-product-id="@p.Id">Add to Bag</button>
-                        </div>
-                    </div>
-                </div>
-            }
+        @*<%-- Dynamic Sale Product Grid --%>*@
+        <div class="row g-4" id="flashSaleContainer">
         </div>
 
     </div>
 </section>
+
+<script>
+    let flashSaleTimer;
+
+    function renderFlashSaleProducts(products) {
+        console.log("Rendering flash sale products:", products);
+
+        // If there are no flash sale products, keep the section hidden and exit
+        if (!products || products.length === 0) return;
+
+        // Show the main section since we have data
+        $("#flashSaleSection").show();
+
+        let html = '';
+
+        // Grab the end time from the first product to start the countdown
+        let endTime = new Date(parseInt(products[0].SaleEndTime.match(/\d+/)[0])).getTime();
+        startCountdown(endTime);
+
+        products.forEach((p, i) => {
+            // Calculate the discount percentage dynamically
+            let discountPct = 0;
+            if (p.ActualPrice > 0) {
+                discountPct = Math.round(((p.ActualPrice - p.SalePrice) / p.ActualPrice) * 100);
+            }
+
+            html += `
+                <div class="col-6 col-md-3 ready-to-fade" style="animation-delay:${i * 0.1}s">
+                    <div class="apple-card-dark">
+                        <div class="card-img-wrap position-relative" style="height:300px; background:#2c2c2e">
+                            <img src="${p.ImageURL}" alt="${p.ProductName}" />
+                            <span class="discount-pill">−${discountPct}%</span>
+                            <button class="card-wish-btn" data-product-id="${p.ProductID}" title="Add to wishlist">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <div class="card-body-apple">
+                            <h6 class="card-name card-name-white mb-1">${p.ProductName}</h6>
+                            <p class="mb-0">
+                                <span style="color:#fff; font-weight:600">
+                                    ${formatPrice(p.SalePrice)}
+                                </span>
+                                <del class="ms-2" style="color:rgba(255,255,255,0.3); font-size:0.82rem">
+                                    ${formatPrice(p.ActualPrice)}
+                                </del>
+                            </p>
+                        </div>
+                        <div class="quick-add">
+                            <button class="quick-add-btn" data-product-id="${p.ProductID}">Add to Bag</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // 1. Inject the HTML into the page
+        $("#flashSaleContainer").html(html);
+
+        // 2. Wait 50 milliseconds, then add the animation class
+        setTimeout(function () {
+            $(".ready-to-fade").addClass("fade-up-featured_product").removeClass("ready-to-fade");
+        }, 50);
+    }
+
+    // Dynamic Countdown Function
+    function startCountdown(endTime) {
+        clearInterval(flashSaleTimer); // Clear any existing timer just in case
+
+        flashSaleTimer = setInterval(function () {
+            let now = new Date().getTime();
+            let distance = endTime - now;
+
+            // If the countdown is over, stop the timer and show zeros
+            if (distance < 0) {
+                clearInterval(flashSaleTimer);
+                $("#cd-hours").text("00");
+                $("#cd-mins").text("00");
+                $("#cd-secs").text("00");
+                return;
+            }
+
+            // Calculate hours, minutes, and seconds
+            let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)) + Math.floor(distance / (1000 * 60 * 60 * 24)) * 24;
+            let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Update HTML and pad single digits with a "0" (e.g., 9 becomes 09)
+            $("#cd-hours").text(hours < 10 ? "0" + hours : hours);
+            $("#cd-mins").text(minutes < 10 ? "0" + minutes : minutes);
+            $("#cd-secs").text(seconds < 10 ? "0" + seconds : seconds);
+        }, 1000);
+    }
+
+    // Fallback formatPrice function (just in case it wasn't loaded globally)
+    if (typeof formatPrice !== 'function') {
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-IN').format(price);
+        }
+    }
+</script>

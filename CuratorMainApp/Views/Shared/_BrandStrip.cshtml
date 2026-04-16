@@ -1,16 +1,50 @@
 @*<%-- Views/Shared/_BrandStrip.cshtml --%>
 <%-- Model: IEnumerable<string> — list of brand names --%>*@
-@model IEnumerable<string>
-
 <div class="brand-strip">
-    <div class="marquee-track">
-        <%-- Render twice for seamless infinite loop --%>
-        @for (int pass = 0; pass < 2; pass++)
-        {
-            foreach (var brand in Model)
-            {
-                <span class="brand-item">@brand</span>
-            }
-        }
+    <div class="marquee-track" id="brandContainer">
+        <!-- Brands will be injected here -->
     </div>
 </div>
+
+<script>
+    function renderBrands(brands) {
+        if (!brands || brands.length === 0) return;
+
+        brands.sort((a, b) => a.DisplayOrder - b.DisplayOrder);
+
+        let container = document.getElementById("brandContainer");
+
+        // Step 1: Create original content
+        let html = '';
+        brands.forEach(b => {
+            html += `<span class="brand-item">${b.BrandName}</span>`;
+        });
+
+        container.innerHTML = html;
+
+        // Step 2: Clone content for seamless loop
+        container.innerHTML += container.innerHTML;
+
+        // Step 3: Start animation
+        startInfiniteScroll(container);
+    }
+
+    function startInfiniteScroll(container) {
+        let scrollSpeed = 0.5; // adjust speed
+        let pos = 0;
+
+        function animate() {
+            pos += scrollSpeed;
+
+            // Reset BEFORE it reaches end of first set
+            if (pos >= container.scrollWidth / 2) {
+                pos = 0;
+            }
+
+            container.style.transform = `translateX(-${pos}px)`;
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    }
+</script>

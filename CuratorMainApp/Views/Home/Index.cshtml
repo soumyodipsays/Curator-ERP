@@ -4,9 +4,8 @@
     var productURL = ConfigurationManager.AppSettings["ProductServiceBaseUrl"];
     var homePageProductURL = productURL + "/HomePageApi/GetHomePageDetails";
     ViewBag.Title = "Home Page";
-    ViewBag.Title = "Home";
+    ViewBag.Title = "Home"; // Note: You have ViewBag.Title twice here, you can remove one!
     Layout = "~/Views/Shared/_Layout.cshtml";
-
 }
 
 @* ===== HERO ===== *@
@@ -16,10 +15,11 @@
 @Html.Partial("_BrandStrip", Model.Brands)
 
 @*===== CATEGORY PILLS =====
-    @Html.Partial("_CategoryPills", Model.CategoryPills)*@
+    @Html.Partial("_CategoryPills", Model.CategoryPills)
+*@
 
 @* ===== FEATURED PRODUCTS ===== *@
-@Html.Partial("_FeaturedProducts", Model.FeaturedProducts)
+@Html.Partial("_FeaturedProducts")
 
 @* ===== FLASH SALE ===== *@
 @Html.Partial("_FlashSale", Model.FlashSale)
@@ -38,6 +38,7 @@
     <script src="~/Scripts/search.js"></script>
 
     <script>
+        
         function getAllDetails() {
             $.ajax({
                 url: '@homePageProductURL',
@@ -47,6 +48,14 @@
                 type: 'GET',
                 success: function (response) {
                     console.log(response);
+
+                    @* ===== For _BrandStrip ===== *@
+                    const brands = response.Brands;
+                    const featuredProducts = response.FeaturedProducts;
+                    const flashSaleProducts = response.FlashSaleProducts;
+                    renderBrands(brands)
+                    renderFeaturedProducts(featuredProducts)
+                    renderFlashSaleProducts(flashSaleProducts)
                 },
                 error: function (response) {
                     console.log("E-Response: ", response);

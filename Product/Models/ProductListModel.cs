@@ -72,6 +72,7 @@ namespace Product.Models
         public long ProductID { get; set; }
         public string ProductName { get; set; }
         public string ImageURL { get; set; }
+        public double ActualPrice { get; set; }
         public double SalePrice { get; set; }
         public DateTime SaleEndTime { get; set; }
     }
