@@ -165,8 +165,13 @@
         let isGridView = true;
         let PRODUCTS;
 
+        let CURRENT_PRODUCT = null;
+        let SELECTED_SIZE = null;
+        let SELECTED_COLOR = null;
+
         function calculatePrice(p) {
             const isPercentage = p.IsInrOrPercentage == 'P';
+
 
             let originalPrice = p.Price;
             let discountAmount = 0;
@@ -206,156 +211,107 @@
             return '';
         }
 
-        function buildGridCard(p) {
+        function getBestVariant(variants) {
+            if (!variants || variants.length === 0) return null;
+
+            return variants.reduce((best, v) => {
+                const bestPrice = calculatePrice(best).finalPrice;
+                const currPrice = calculatePrice(v).finalPrice;
+
+                return currPrice < bestPrice ? v : best;
+            });
+        }
+
+        function buildGridCard(product) {
+
+            if (!product.VariantList || product.VariantList.length === 0) return '';
+
+            const p = getBestVariant(product.VariantList);
 
             const { originalPrice, discountAmount, finalPrice } = calculatePrice(p);
 
             const hasDiscount = discountAmount > 0;
 
             const priceHtml = hasDiscount
-                ?
-                `
-                            <span class="price-current">₹${finalPrice}</span>
-                            <span class="price-original text-decoration-line-through ms-2">₹${originalPrice}</span>
-                            <span class="price-save ms-2 text-success">Save ₹${discountAmount}</span>
-                        `
-                :
-                `
-                            <span class="price-current">₹${originalPrice}</span>
-                        `;
-
-            const ratingHtml = p.Rating > 0
-                ?
-                `
-                        <div class="d-flex align-items-center gap-1 mt-1">
-                            <span class="stars-pc">${renderStars(p.Rating)}</span>
-                            <span class="review-count">${p.Rating} · ${p.Reviews}</span>
-                        </div>
+                ? `
+                    <span class="price-current">₹${finalPrice}</span>
+                    <span class="price-original text-decoration-line-through ms-2">₹${originalPrice}</span>
+                    <span class="price-save ms-2 text-success">Save ₹${discountAmount}</span>
                     `
-                : '';
+                            : `<span class="price-current">₹${originalPrice}</span>`;
 
-            return `
-                    <div class="col-6 col-md-4 fade-up">
-                        <div class="product-card h-100" onclick="openDetail(${p.ProductID})">
-
-                            <div class="card-img-wrap position-relative" style="height:240px">
-                                <img src="${p.ImageURL}" alt="${p.ProductName}" loading="lazy">
-                                ${getCardBadge(p)}
-
-                                <button class="wish-btn"
-                                    onclick="event.stopPropagation();toggleWish(this)">
-                                    <i class="bi bi-heart"></i>
-                                </button>
-                            </div>
-
-                            <div class="card-body-pc">
-                                <span class="card-label-pc">${p.Brand}</span>
-                                <h6 class="card-name-pc">${p.ProductName}</h6>
-                                <p class="card-caption">${p.ProductCaption}</p>
-
-                                ${ratingHtml}
-
-                                <div class="price-row mt-2 d-flex align-items-center flex-wrap">
-                                    ${priceHtml}
-                                </div>
-                            </div>
-
-                            <div class="card-actions">
-                                <button class="quick-add-btn"
-                                    onclick="event.stopPropagation();addToCartQuick('${p.ProductName}')">
-                                    Add to Bag
-                                </button>
-
-                                <button class="view-detail-btn"
-                                    onclick="event.stopPropagation();openDetail(${p.ProductID})">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                            </div>
-
-                        </div>
+                        const ratingHtml = product.Rating > 0
+                            ? `
+                    <div class="d-flex align-items-center gap-1 mt-1">
+                        <span class="stars-pc">${renderStars(product.Rating)}</span>
+                        <span class="review-count">${product.Rating}</span>
                     </div>
-                `;
+                    `
+                            : '';
+
+                        return `
+                            <div class="col-6 col-md-4 fade-up">
+                                <div class="product-card h-100" onclick="openDetail(${product.ProductID})">
+
+                                    <div class="card-img-wrap position-relative" style="height:240px">
+                                        <img src="${p.ImageURL}" alt="${product.ProductName}" loading="lazy">
+                                        ${getCardBadge(p)}
+                                    </div>
+
+                                    <div class="card-body-pc">
+                                        <span class="card-label-pc">${product.Brand}</span>
+                                        <h6 class="card-name-pc">${product.ProductName}</h6>
+                                        <p class="card-caption">${product.ProductCaption}</p>
+
+                                        ${ratingHtml}
+
+                                        <div class="price-row mt-2">
+                                            ${priceHtml}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
         }
 
-        function buildListCard(p) {
+        function buildListCard(product) {
 
-            const isPercentage = p.IsInrOrPercentage == 'P';
+            if (!product.VariantList || product.VariantList.length === 0) return '';
 
-            let originalPrice = p.Price;
-            let discountAmount = 0;
-            let finalPrice = p.Price;
-
-            if (p.DiscountID) {
-                if (isPercentage) {
-                    discountAmount = (p.Price * p.Percentage) / 100;
-                } else {
-                    discountAmount = p.INR;
-                }
-
-                discountAmount = Math.round(discountAmount);
-                finalPrice = Math.round(p.Price - discountAmount);
-            }
+            const p = getBestVariant(product.VariantList);
+            const { originalPrice, discountAmount, finalPrice } = calculatePrice(p);
 
             const hasDiscount = discountAmount > 0;
 
             const priceHtml = hasDiscount
                 ? `
-                            <div>
-                                <div class="price-current" style="font-size:1.2rem">₹${finalPrice}</div>
-                                <div class="price-original text-decoration-line-through" style="font-size:.85rem;color:#888">
-                                    ₹${originalPrice}
-                                </div>
-                                <div class="price-save text-success" style="font-size:.8rem">
-                                    Save ₹${discountAmount}
-                                </div>
-                            </div>
-                            `
-                : `
-                            <div class="price-current" style="font-size:1.2rem">
-                                ₹${originalPrice}
-                            </div>
-                            `;
+                    <div>
+                        <div class="price-current">₹${finalPrice}</div>
+                        <div class="price-original text-decoration-line-through">₹${originalPrice}</div>
+                        <div class="price-save text-success">Save ₹${discountAmount}</div>
+                    </div>`
+                            : `<div class="price-current">₹${originalPrice}</div>`;
 
             return `
-                        <div class="list-card fade-up" onclick="openDetail(${p.ProductID})">
+                <div class="list-card fade-up" onclick="openDetail(${product.ProductID})">
 
-                          <div class="list-img" style="height:130px">
-                            <img src="${p.ImageURL}" alt="${p.ProductName}" loading="lazy">
-                          </div>
+                    <div class="list-img">
+                        <img src="${p.ImageURL}" alt="${product.ProductName}">
+                    </div>
 
-                          <div class="list-body d-flex justify-content-between align-items-center">
+                    <div class="list-body d-flex justify-content-between align-items-center">
 
-                            <div>
-                              <span class="card-label-pc">${p.Brand}</span>
-                              <h6 class="card-name-pc mb-1">${p.ProductName}</h6>
+                        <div>
+                            <span class="card-label-pc">${product.Brand}</span>
+                            <h6>${product.ProductName}</h6>
+                            <p>${product.ProductCaption}</p>
+                        </div>
 
-                              <p style="font-size:.78rem;color:var(--gray-4);margin:0;max-width:400px">
-                                ${p.ProductCaption}
-                              </p>
+                        <div class="text-end">
+                            ${priceHtml}
+                        </div>
 
-                              <div class="d-flex align-items-center gap-1 mt-1">
-                                <span class="stars-pc">${renderStars(p.Rating)}</span>
-                                <span class="review-count">
-                                  ${p.Reviews > 0 ? p.Rating + ' · ' + p.Reviews + ' reviews' : 'No reviews yet'}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div class="text-end flex-shrink-0 ms-3">
-
-                              ${priceHtml}
-
-                              ${getCardBadge(p)}
-
-                              <button class="quick-add-btn mt-2"
-                                      style="white-space:nowrap"
-                                      onclick="event.stopPropagation();addToCartQuick('${p.ProductName}')">
-                                Add to Bag
-                              </button>
-
-                            </div>
-                          </div>
-                        </div>`;
+                    </div>
+                </div>`;
         }
 
         function renderProducts(products) {
@@ -387,37 +343,54 @@
             }, 50);
         }
 
-        /* -----------------------------------------------
-           OPEN DETAIL MODAL — _ProductDetailModal.cshtml
-           In MVC: $.get('/Product/Detail/'+id).done(data => renderModal(data))
-           ----------------------------------------------- */
+        function showColorOptions(variantList) {
+
+            //const uniqueColors = [];
+            //const seen = new Set();
+
+            //variantList.forEach(v => {
+            //    if (!seen.has(v.ColorCode)) {
+            //        seen.add(v.ColorCode);
+            //        uniqueColors.push(v);
+            //    }
+            //});
+
+            //SELECTED_COLOR = uniqueColors[0]?.ColorCode;
+
+            SELECTED_COLOR = variantList[0]?.ColorCode;
+
+            document.getElementById('modalColors').innerHTML = variantList.map((v, i) =>
+                `<div class="color-chip ${i === 0 ? 'active' : ''}" 
+                  style="background:${v.ColorCode}"
+                  onclick="selectColor(this, '${v.ColorCode}')">
+                </div>`
+            ).join('');
+
+            // Update UI for first color
+            updateVariantUI();
+        }
+
         function openDetail(id) {
-            const p = PRODUCTS.find(x => Number(x.ProductID) === Number(id));
-            if (!p) return;
 
-            const price = calculatePrice(p);
-            // price = {  }
-            const finalPrice = price.finalPrice;
+            const product = PRODUCTS.find(x => Number(x.ProductID) === Number(id));
+            if (!product) return;
 
-            currentQty = 1;
-            document.getElementById('qtyDisplay').textContent = '1';
+            CURRENT_PRODUCT = product;
 
-            // Populate fields — maps to tblProduct columns
+            const p = getBestVariant(product.VariantList);
+
+            const { finalPrice } = calculatePrice(p);
+
             document.getElementById('modalImg').src = p.ImageURL;
-            document.getElementById('modalImg').alt = p.ProductName;
-            document.getElementById('modalBrand').textContent =
-                (p.Brand || p.BrandName || '').toUpperCase();
-            document.getElementById('modalName').textContent = p.ProductName;
-            document.getElementById('modalCaption').textContent = p.ProductCaption;
-            document.getElementById('modalDescription').textContent = p.ProductDescription;
+            document.getElementById('modalName').textContent = product.ProductName;
             document.getElementById('modalPrice').textContent = '₹' + finalPrice;
-            document.getElementById('modalCategory').textContent = p.CategoryID;
-            document.getElementById('modalSubCategory').textContent = p.SubCategoryID;
-            document.getElementById('modalBrandMeta').textContent = p.BrandID;
-            document.getElementById('modalProductId').textContent = '#' + String(p.ProductID).padStart(4, '0');
-            document.getElementById('modalCreatedBy').textContent = p.CreatedBy;
-            document.getElementById('modalCreatedOn').textContent = formatDate(p.CreatedOn);
-            document.getElementById('modalModifiedOn').textContent = formatDate(p.ModifiedOn);
+            document.getElementById('modalCaption').textContent = product.ProductCaption;
+
+            document.getElementById('modalCategory').textContent = product.Category;
+            document.getElementById('modalSubCategory').textContent = product.SubCategory;
+            document.getElementById('modalBrandMeta').textContent = product.Brand;
+
+            document.getElementById('modalDescription').textContent = product.ProductDescription;
 
             // Status with dot
             const statusEl = document.getElementById('modalStatus');
@@ -427,86 +400,19 @@
             // Drop date
             document.getElementById('modalDropDate').textContent = p.DropDate ? formatDate(p.DropDate) : 'Available';
 
-            // Badge
-            const badge = document.getElementById('modalBadge');
-            if (p.IsSale) { badge.textContent = `−${p.DiscountID}%`; badge.className = 'detail-img-badge badge-sale'; }
-            else if (p.IsNew) { badge.textContent = 'NEW'; badge.className = 'detail-img-badge badge-new'; }
-            else if (!p.IsActive) { badge.textContent = 'COMING SOON'; badge.className = 'detail-img-badge badge-soon'; }
-            else { badge.textContent = ''; badge.className = ''; }
+            // Sizes
+            const sizes = [...new Set(product.VariantList.map(v => v.SizeName))];
 
-            // Original price
-            const origEl = document.getElementById('modalOrigPrice');
-            const saveEl = document.getElementById('modalSaveTag');
-            if (p.OriginalPrice) {
-                origEl.textContent = '$' + p.OriginalPrice;
-                origEl.classList.remove('d-none');
-                saveEl.textContent = `Save $${p.OriginalPrice - p.Price}`;
-                saveEl.classList.remove('d-none');
-            } else {
-                origEl.classList.add('d-none');
-                saveEl.classList.add('d-none');
-            }
+            SELECTED_SIZE = sizes[0]; // default
 
-            // Stars
-            document.getElementById('modalStars').innerHTML = renderStars(p.Rating);
-            document.getElementById('modalReviews').textContent = p.Reviews > 0
-                ? `${p.Rating} · ${p.Reviews} reviews` : 'Be the first to review';
-
-            // Coupon
-            const couponWrap = document.getElementById('modalCouponWrap');
-            if (p.CouponID) {
-                document.getElementById('modalCoupon').textContent = p.CouponID;
-                couponWrap.classList.remove('d-none');
-            } else {
-                couponWrap.classList.add('d-none');
-            }
-
-            // Delivery
-            const delivery = p.IsActive
-                ? 'Free delivery · Arrives in 3–5 days'
-                : (p.DropDate ? `Available from ${formatDate(p.DropDate)}` : 'Check availability');
-            document.getElementById('modalDelivery').textContent = delivery;
-
-            // Size chips
-            const sizesEl = document.getElementById('modalSizes');
-
-            let sizes = [];
-
-            if (Array.isArray(p.SizeID)) {
-                sizes = p.SizeID;
-            }
-            else if (typeof p.SizeID === 'string' && p.SizeID.trim() !== '') {
-                sizes = p.SizeID.split(',');
-            }
-            else if (p.SizeID != null) {
-                sizes = [p.SizeID];
-            }
-
-            sizesEl.innerHTML = sizes.map((s, i) =>
-                `<div class="size-chip${i === 0 ? ' active' : ''}" onclick="selectSize(this)">${String(s).trim()}</div>`
+            document.getElementById('modalSizes').innerHTML = sizes.map((s, i) =>
+                `<div class="size-chip ${i === 0 ? 'active' : ''}" 
+              onclick="selectSize(this, '${s}')">${s}</div>`
             ).join('');
 
-            // Color chips
-            const colorsEl = document.getElementById('modalColors');
-
-            let colors = [];
-
-            if (Array.isArray(p.ColorID)) {
-                colors = p.ColorID;
-            }
-            else if (typeof p.ColorID === 'string' && p.ColorID.trim() !== '') {
-                colors = p.ColorID.split(',');
-            }
-            else if (p.ColorID != null) {
-                colors = [p.ColorID];
-            }
-
-            colorsEl.innerHTML = colors.map((c, i) =>
-                `<div class="color-chip${i === 0 ? ' active' : ''}"
-                                         style="background:${String(c).trim()}"
-                                         onclick="selectColor(this)">
-                                     </div>`
-            ).join('');
+            // Show colors for default size
+            const variantsBySize = product.VariantList.filter(v => v.SizeName === SELECTED_SIZE);
+            showColorOptions(variantsBySize);
 
             new bootstrap.Modal(document.getElementById('productDetailModal')).show();
         }
@@ -521,8 +427,57 @@
             currentQty = Math.max(1, Math.min(10, currentQty + delta));
             document.getElementById('qtyDisplay').textContent = currentQty;
         }
-        function selectSize(el) { el.closest('.size-chips').querySelectorAll('.size-chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); }
-        function selectColor(el) { el.closest('.color-chips').querySelectorAll('.color-chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); }
+        function selectSize(el, size) {
+
+            el
+                .closest('.size-chips')
+                .querySelectorAll('.size-chip')
+                .forEach(c => c.classList.remove('active'));
+
+            el.classList.add('active');
+
+            SELECTED_SIZE = size;
+
+            // filter variants for this size
+            const variantsBySize = CURRENT_PRODUCT.VariantList
+                .filter(v => v.SizeName === size);
+
+            // update colors
+            showColorOptions(variantsBySize);
+        }
+
+        function selectColor(el, colorCode) {
+
+            el
+                .closest('.color-chips')
+                .querySelectorAll('.color-chip')
+                .forEach(c => c.classList.remove('active'));
+
+            el.classList.add('active');
+
+            SELECTED_COLOR = colorCode;
+
+            // update UI based on selection
+            updateVariantUI();
+        }
+
+        function updateVariantUI() {
+
+            if (!CURRENT_PRODUCT) return;
+
+            const variant = CURRENT_PRODUCT.VariantList.find(v =>
+                v.SizeName === SELECTED_SIZE &&
+                v.ColorCode === SELECTED_COLOR
+            );
+
+            if (!variant) return;
+
+            const { finalPrice } = calculatePrice(variant);
+
+            // Update UI
+            document.getElementById('modalImg').src = variant.ImageURL;
+            document.getElementById('modalPrice').textContent = '₹' + finalPrice;
+        }
 
         function toggleWish(btn) {
             const icon = btn.querySelector('i');

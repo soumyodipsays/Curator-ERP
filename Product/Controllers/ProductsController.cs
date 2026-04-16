@@ -1,4 +1,5 @@
 ﻿using Product.DAL;
+using Product.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,12 @@ namespace Product.Controllers
         public JsonResult GetProductList(long CustomerID)
         {
             var result = product_list_dal.GetProductList(CustomerID);
+            foreach (var item in result)
+            {
+                item.VariantList = string.IsNullOrEmpty(item.Variants)
+                    ? new List<ProductVariantModel>()
+                    : Newtonsoft.Json.JsonConvert.DeserializeObject<List<ProductVariantModel>>(item.Variants);
+            }
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
