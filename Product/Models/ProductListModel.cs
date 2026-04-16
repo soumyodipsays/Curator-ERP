@@ -16,10 +16,14 @@ namespace Product.Models
         public long CategoryID { get; set; }
         public long BrandID { get; set; }
         public string Brand { get; set; }
-        public long ColorID { get; set; }
-        public long SizeID { get; set; }
 
-        
+        public long ColorID { get; set; }
+        public string ColorName { get; set; }
+        public string ColorCode { get; set; }
+
+        public long SizeID { get; set; }
+        public string Size { get; set; }
+
         public string ImageURL { get; set; }
 
      
