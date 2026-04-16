@@ -183,6 +183,7 @@
     <Compile Include="DTOs\OTP_UpsertDTO.cs" />
     <Compile Include="DTOs\UserLoginDTO.cs" />
     <Compile Include="DTOs\UserRegistrationDTO.cs" />
+    <Compile Include="Filters\JwtGuardAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

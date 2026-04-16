@@ -5,6 +5,7 @@ using System;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using Auth.Filters;
 
 namespace Auth.Controllers
 {
@@ -162,6 +163,24 @@ namespace Auth.Controllers
                 });
             }
 
+        }
+
+        [JwtGuard]
+        [HttpPost]
+        public JsonResult GetProfile()
+        {
+            long userId =
+                Convert.ToInt64(HttpContext.Items["UserID"]);
+
+            string email =
+                HttpContext.Items["Email"].ToString();
+
+            return Json(new
+            {
+                success = true,
+                userId = userId,
+                email = email
+            }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]

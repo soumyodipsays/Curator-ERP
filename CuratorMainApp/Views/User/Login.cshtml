@@ -4,6 +4,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var loginUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Login";
     var registerUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Register";
+    var profileUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/GetProfile";
 }
 
 <div class="container py-5">
@@ -98,47 +99,67 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
-    $('#loginForm').on('submit', function (e) {
-        e.preventDefault();
+$('#loginForm').on('submit', function (e) {
+    e.preventDefault();
 
-        var data = {
-            Email: $('input[name=Email]').val(),
-            Password: $('input[name=Password]').val()
-        };
+    var data = {
+        Email: $('input[name=Email]').val(),
+        Password: $('input[name=Password]').val()
+    };
 
-        $.ajax({
-            url: '@loginUrl',
-            type: 'POST',
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            data: JSON.stringify(data),
+    $.ajax({
+        url: '@loginUrl',
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        data: JSON.stringify(data),
 
-            success: function (res) {
-                console.log(res);
+        success: function (res) {
 
-                if (res.success) {
+            if (res.success) {
 
-                    alert(res.message);
+                localStorage.setItem("token", res.accessToken);
+                localStorage.setItem("user", JSON.stringify(res.user));
 
-                    // Save JWT token
-                    localStorage.setItem("token", res.accessToken);
-                    
-                    // Save user if needed
-                    localStorage.setItem("user", JSON.stringify(res.user));
-                }
-                else {
-                    alert(res.message || "Login failed");
-                }
-            },
+                alert("Login success");
 
-            error: function (xhr) {
-                console.log(xhr);
-
-                alert(
-                    xhr.responseJSON?.message ||
-                    "Something went wrong"
-                );
+                // Test protected route
+                testProfileApi();
             }
-        });
+            else {
+                alert(res.message);
+            }
+        },
+
+        error: function (xhr) {
+            console.log(xhr);
+            alert("Login failed");
+        }
     });
+});
+
+
+function testProfileApi() {
+
+    const token = localStorage.getItem("token");
+
+    $.ajax({
+        url: '@profileUrl',
+        type: 'POST',
+
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+
+        success: function (res) {
+            console.log("Protected Route Success:", res);
+            alert("JWT Guard Working");
+        },
+
+        error: function (error) {
+            console.log(error);
+            alert("JWT Guard Failed");
+        }
+    });
+}
 </script>
