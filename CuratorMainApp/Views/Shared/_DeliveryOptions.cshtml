@@ -1,0 +1,33 @@
+﻿@* Views/Shared/_DeliveryOptions.cshtml *@
+@model List<Curator.Web.Models.ViewModels.OrderTypeViewModel>
+@* Maps: tblOrderType — OrderTypeID, OrderTypeCode, OrderType, IsActive *@
+@* Called from: Views/Checkout/Address.cshtml *@
+
+<div class="order-type-chips">
+
+    @* Loop: foreach tblOrderType row where IsActive = true *@
+    @foreach (var type in Model.Where(t => t.IsActive))
+    {
+        <div class="order-type-chip @(type.IsDefault ? "active" : "")"
+             onclick="selectOrderType(this)"
+             data-type-id="@type.OrderTypeID"
+             data-type-code="@type.OrderTypeCode">
+
+            <div class="chip-icon">@type.Icon</div>
+
+            <div class="chip-label">@type.OrderType</div>
+
+            <div class="chip-sub">@type.Description</div>
+
+            <div class="chip-sub"
+                 style="@(type.DeliveryFee == 0 ? "color:var(--green)" : "color:var(--black)"); font-weight:600; margin-top:4px;">
+
+                @(type.DeliveryFee == 0
+                    ? "FREE"
+                    : "+" + type.DeliveryFee.ToString("N0"))
+            </div>
+
+        </div>
+    }
+
+</div>

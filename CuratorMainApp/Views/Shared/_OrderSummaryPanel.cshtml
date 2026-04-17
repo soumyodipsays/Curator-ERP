@@ -1,0 +1,175 @@
+﻿@model Curator.Web.Models.ViewModels.OrderSummaryPanelViewModel
+
+@* Views/Shared/_OrderSummaryPanel.cshtml *@
+@* Reused on: Cart, Address, Review pages (sticky sidebar) *@
+@* Maps: tblOrder — Amount, DiscountAmount, CouponAmount, PaymentAmount *@
+
+<div class="summary-card">
+
+    <h6 style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-4);margin-bottom:16px">
+        Order Summary
+    </h6>
+
+    @* Coupon input (Cart page only) *@
+    @if (Model.ShowCouponInput)
+    {
+        <div class="coupon-wrap">
+            <input class="coupon-input"
+                   type="text"
+                   placeholder="Coupon code"
+                   id="couponInput"
+                   value="@Model.AppliedCouponCode" />
+
+            <button class="btn-coupon" onclick="applyCoupon()">Apply</button>
+        </div>
+
+        <div id="couponMsg"
+             style="font-size:.75rem;margin-bottom:12px;display:none">
+        </div>
+    }
+
+    <div class="summary-row">
+        <span class="summary-label">
+            Subtotal (@Model.ItemCount items)
+        </span>
+
+        <span class="summary-value">
+            $@Model.Amount.ToString("N0")
+        </span>
+    </div>
+
+    @if (Model.DiscountAmount > 0)
+    {
+        <div class="summary-row">
+            <span class="summary-label">Product Discount</span>
+
+            <span class="summary-value green" id="discountAmt">
+                -$@Model.DiscountAmount.ToString("N0")
+            </span>
+        </div>
+    }
+
+    <div class="summary-row"
+         id="couponRow"
+         @(Model.CouponAmount > 0 ? "" : "style='display:none'")>
+
+        <span class="summary-label">Coupon Savings</span>
+
+        <span class="summary-value green" id="couponAmt">
+            @(Model.CouponAmount > 0
+                ? "-$" + Model.CouponAmount.ToString("N0")
+                : "-$0")
+        </span>
+    </div>
+
+    <div class="summary-row">
+        <span class="summary-label">Delivery</span>
+
+        <span class="summary-value green" id="deliveryFee2">
+            @(Model.DeliveryFee == 0
+                ? "FREE"
+                : "$" + Model.DeliveryFee.ToString("N0"))
+        </span>
+    </div>
+
+    <div class="apple-divider"></div>
+
+    <div class="summary-row total">
+        <span>Total</span>
+
+        <span id="totalAmt">
+            $@Model.PaymentAmount.ToString("N0")
+        </span>
+    </div>
+
+    <div style="height:16px"></div>
+
+    @if (Model.CurrentStep == 1)
+    {
+        <a href="/CuratorMainApp/Checkout/Address" class="btn-apple-blue">
+            Proceed to Delivery <i class="bi bi-arrow-right"></i>
+        </a>
+
+        <a href="/Product"
+           class="btn-apple-ghost mt-2"
+           style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;border-radius:980px;padding:12px;font-size:.85rem;font-weight:500;color:var(--black)">
+            <i class="bi bi-arrow-left"></i> Continue Shopping
+        </a>
+    }
+    else if (Model.CurrentStep == 2)
+    {
+        <div style="margin-bottom:16px">
+
+            <div style="font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-4);margin-bottom:10px">
+                @Model.ItemCount Items in Bag
+            </div>
+
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+
+                @foreach (var img in Model.ItemImageUrls)
+                {
+                    <img src="@img"
+                         style="width:48px;height:48px;border-radius:10px;object-fit:cover" />
+                }
+
+            </div>
+        </div>
+
+        <a href="/CuratorMainApp/Checkout/Review" class="btn-apple-blue">
+            Review Order <i class="bi bi-arrow-right"></i>
+        </a>
+    }
+    else if (Model.CurrentStep == 3)
+    {
+        <a href="/CuratorMainApp/Checkout/Payment"
+           class="btn-apple-blue"
+           style="font-size:1rem;padding:16px">
+            <i class="bi bi-lock-fill"></i> Proceed to Payment
+        </a>
+
+        <p style="font-size:.7rem;color:var(--gray-4);text-align:center;margin-top:10px">
+            By placing your order you agree to our
+            <a href="/terms" style="color:var(--blue)">Terms</a>
+            &
+            <a href="/privacy" style="color:var(--blue)">Privacy Policy</a>
+        </p>
+
+        <div style="text-align:center;margin-top:4px">
+
+            <span style="font-size:.65rem;color:var(--gray-4);display:block;margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase">
+                We accept
+            </span>
+
+            <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
+
+                <span style="background:var(--gray-1);border-radius:6px;padding:4px 10px;font-size:.7rem;font-weight:700;color:var(--gray-5)">VISA</span>
+
+                <span style="background:var(--gray-1);border-radius:6px;padding:4px 10px;font-size:.7rem;font-weight:700;color:var(--gray-5)">MC</span>
+
+                <span style="background:var(--gray-1);border-radius:6px;padding:4px 10px;font-size:.7rem;font-weight:700;color:var(--gray-5)">UPI</span>
+
+                <span style="background:var(--gray-1);border-radius:6px;padding:4px 10px;font-size:.7rem;font-weight:700;color:var(--gray-5)">COD</span>
+
+                <span style="background:var(--gray-1);border-radius:6px;padding:4px 10px;font-size:.7rem;font-weight:700;color:var(--gray-5)">NetBanking</span>
+
+            </div>
+        </div>
+    }
+
+    <div class="trust-strip">
+
+        <span class="trust-badge">
+            <i class="bi bi-shield-check"></i> Secure
+        </span>
+
+        <span class="trust-badge">
+            <i class="bi bi-arrow-return-left"></i> Returns
+        </span>
+
+        <span class="trust-badge">
+            <i class="bi bi-truck"></i> Free delivery
+        </span>
+
+    </div>
+
+</div>

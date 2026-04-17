@@ -1,0 +1,175 @@
+﻿@* Views/Checkout/Review.cshtml *@
+@model Curator.Web.Models.ViewModels.OrderReviewViewModel
+@* Controller: CheckoutController.Review() *@
+@{
+    ViewData["Title"] = "Review Order";
+    ViewData["NavData"] = Model.Nav;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/curator-checkout.css" asp-append-version="true" />
+}
+
+@* ── Stepper: step 3 active ── *@
+@Html.Partial("_CheckoutStepper", 3)
+
+<div class="container-xl px-4 py-4">
+    <div class="row g-4">
+
+        @*{{!-- ── Left: items + address + price breakdown ── --}}*@
+        <div class="col-12 col-lg-8">
+
+            <a href="/CuratorMainApp/Checkout/Address" class="back-link">
+                <i class="bi bi-arrow-left"></i> Back to Address
+            </a>
+
+            @*{{!-- Order items — tblOrderDetail rows --}}*@
+            <div class="apple-card mb-4 fade-up">
+                <div class="apple-card-inner">
+                    <span class="section-eyebrow">Review your order</span>
+                    <h2 class="section-title-sm mb-4">Order Items</h2>
+
+                    @* ── PARTIAL: _OrderReviewItems.cshtml ── *@
+                    @* Maps: tblOrderDetail — OrderDetailID, ProductID, Quantity, Discount, TotalPrice *@
+                    @Html.Partial("_OrderReviewItems", Model.OrderDetails)
+                </div>
+            </div>
+
+            @*{{!-- Delivery address preview — tblOrder.DeliveryLocationID → tblAddress --}}*@
+            <div class="apple-card mb-4 fade-up" style="animation-delay:.05s">
+                <div class="apple-card-inner">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="section-eyebrow">Delivering to</span>
+                            <h5 style="font-size:1rem;font-weight:700;margin-bottom:12px">Delivery Address</h5>
+                        </div>
+                        <a href="CuratorMainApp/Checkout/Address"
+                           class="btn-apple-ghost" style="width:auto;font-size:.78rem;padding:8px 14px">
+                            Change
+                        </a>
+                    </div>
+                    <div class="delivery-preview">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <div>
+                            <div style="font-size:.88rem;font-weight:600;margin-bottom:3px">
+                                @Model.DeliveryAddress.PersonName — @Model.DeliveryAddress.Location  @* tblAddress.Location *@
+                            </div>
+                            <div style="font-size:.82rem;color:var(--gray-4);line-height:1.5">
+                                @Model.DeliveryAddress.Address1<br>@* tblAddress.Address1 *@
+                                @if (!string.IsNullOrEmpty(Model.DeliveryAddress.Address2))
+                                {
+                                    @Model.DeliveryAddress.Address2<text>, </text> @* tblAddress.Address2 *@
+                                }
+                                @Model.DeliveryAddress.City, @Model.DeliveryAddress.StateName @Model.DeliveryAddress.PinCode
+                                @* tblAddress.City, StateID→Name, PinCode *@
+                            </div>
+                            <div style="font-size:.75rem;color:var(--blue);font-weight:600;margin-top:6px">
+                                <i class="bi bi-truck me-1"></i>
+                                @Model.SelectedOrderType.OrderType · @* tblOrderType.OrderType *@
+                                @(Model.SelectedOrderType.DeliveryFee == 0 ? "FREE" : $"${Model.SelectedOrderType.DeliveryFee:N0}")
+                                · @Model.EstimatedDelivery
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @*{{!-- Price breakdown — all tblOrder columns --}}*@
+            <div class="apple-card fade-up" style="animation-delay:.1s">
+                <div class="apple-card-inner">
+                    <span class="section-eyebrow">Order Details</span>
+                    <h5 style="font-size:1rem;font-weight:700;margin-bottom:16px">Price Breakdown</h5>
+
+                    @*{{!-- Order meta grid --}}*@
+                    <div class="order-meta-grid mb-4">
+                        <div class="order-meta-item">
+                            <span class="order-meta-label">Order Type</span>
+                            <span class="order-meta-value" id="reviewOrderType">
+                                @Model.SelectedOrderType.OrderType  @* tblOrderType.OrderType *@
+                            </span>
+                        </div>
+                        <div class="order-meta-item">
+                            <span class="order-meta-label">Total Items</span>
+                            <span class="order-meta-value">@Model.OrderDetails.Count items</span>
+                        </div>
+                        <div class="order-meta-item">
+                            <span class="order-meta-label">Est. Delivery</span>
+                            <span class="order-meta-value">@Model.EstimatedDelivery</span>
+                        </div>
+                        <div class="order-meta-item">
+                            <span class="order-meta-label">Ship To</span>
+                            <span class="order-meta-value">
+                                @Model.DeliveryAddress.City, @Model.DeliveryAddress.PinCode  @* tblAddress *@
+                            </span>
+                        </div>
+                    </div>
+
+                    @*{{!-- Price rows — tblOrder columns --}}*@
+                    <div class="price-breakdown-row">
+                        <span style="color:var(--gray-5)">MRP Total</span>
+                        <span style="font-weight:600">$@Model.Order.Amount.ToString("N0")</span>        @* tblOrder.Amount *@
+                    </div>
+
+                    @if (Model.Order.DiscountAmount > 0)
+                    {
+                        <div class="price-breakdown-row saving">
+                            <span>Product Discount</span>
+                            <span style="font-weight:600">−$@Model.Order.DiscountAmount.ToString("N0")</span>  @* tblOrder.DiscountAmount *@
+                        </div>
+                    }
+
+                    @if (Model.Order.CouponAmount > 0)
+                    {
+                        <div class="price-breakdown-row saving">
+                            <span>Coupon Discount</span>
+                            <span style="font-weight:600">−$@Model.Order.CouponAmount.ToString("N0")</span>    @* tblOrder.CouponAmount *@
+                        </div>
+                    }
+
+                    <div class="price-breakdown-row">
+                        <span style="color:var(--gray-5)">Delivery Fee</span>
+                        <span style="font-weight:600;color:var(--green)">
+                            @(Model.SelectedOrderType.DeliveryFee == 0 ? "FREE" : $"${Model.SelectedOrderType.DeliveryFee:N0}")
+                        </span>
+                    </div>
+
+                    <div class="price-breakdown-row total-row">
+                        <span>You Pay</span>
+                        <span style="color:var(--blue)">$@Model.Order.PaymentAmount.ToString("N0")</span>   @* tblOrder.PaymentAmount *@
+                    </div>
+
+                    @{
+                        var saved = Model.Order.Amount - Model.Order.PaymentAmount;
+                    }
+                    @if (saved > 0)
+                    {
+                        <div style="font-size:.75rem;color:var(--green);font-weight:600;text-align:right;margin-top:6px">
+                            🎉 You save $@saved.ToString("N0") on this order!
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+
+        @*{{!-- ── Right: final summary ── --}}*@
+        <div class="col-12 col-lg-4 fade-up" style="animation-delay:.15s">
+            @* ── PARTIAL: _OrderSummaryPanel.cshtml ── *@
+            @Html.Partial("_OrderSummaryPanel", Model.SummaryPanel)
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/curator-checkout.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.fade-up').forEach((el, i) => {
+                setTimeout(() => el.classList.add('visible'), i * 80);
+            });
+        });
+    </script>
+}

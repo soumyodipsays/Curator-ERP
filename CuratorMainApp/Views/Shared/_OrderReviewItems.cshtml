@@ -1,0 +1,50 @@
+﻿@* Views/Shared/_OrderReviewItems.cshtml *@
+@model List<Curator.Web.Models.ViewModels.OrderDetailViewModel>
+@* Maps: tblOrderDetail — OrderDetailID, OrderID, ProductID, Quantity, Discount, TotalPrice *@
+@* Called from: Views/Checkout/Review.cshtml *@
+
+@foreach (var item in Model)
+{
+    <div class="order-item-row" data-order-detail-id="@item.OrderDetailID">
+
+        @*{{!-- Product image --}}*@
+        <div class="order-item-img">
+            <img src="@item.ImageURL" alt="@item.ProductName" loading="lazy" />
+        </div>
+
+        @*{{!-- Item info --}}*@
+        <div style="flex:1">
+            <div style="font-size:.68rem;color:var(--gray-4);font-weight:600;text-transform:uppercase;letter-spacing:.06em">
+                @item.BrandName
+            </div>
+            <div style="font-size:.92rem;font-weight:600;letter-spacing:-.02em;margin:3px 0">
+                @item.ProductName
+            </div>
+            <div style="font-size:.75rem;color:var(--gray-4)">
+                @if (!string.IsNullOrEmpty(item.Size))
+                {<text>Size: @item.Size &nbsp;·&nbsp;</text>}
+                Qty: @item.Quantity   @* tblOrderDetail.Quantity *@
+            </div>
+        </div>
+
+        @*{{!-- Price col — tblOrderDetail.TotalPrice + Discount --}}*@
+        <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:1rem;font-weight:700">
+                $@item.TotalPrice.ToString("N0")   @* tblOrderDetail.TotalPrice *@
+            </div>
+            @if (item.OriginalPrice.HasValue)
+            {
+                <div style="font-size:.78rem;color:var(--gray-4);text-decoration:line-through">
+                    $@item.OriginalPrice.Value.ToString("N0")
+                </div>
+            }
+            @if (item.Discount > 0)
+            {
+                <div style="font-size:.72rem;color:var(--green);font-weight:600">
+                    Save $@item.Discount.ToString("N0")   @* tblOrderDetail.Discount *@
+                </div>
+            }
+        </div>
+
+    </div>
+}

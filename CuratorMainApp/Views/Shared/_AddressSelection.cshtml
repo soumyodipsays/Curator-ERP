@@ -1,0 +1,128 @@
+﻿@* Views/Shared/_AddressSelection.cshtml *@
+@model Curator.Web.Models.ViewModels.AddressSelectionViewModel
+@* Maps: tblAddress — AddressID, PersonID, Address1, Address2, City, StateID, PinCode, Location *@
+@* Called from: Views/Checkout/Address.cshtml *@
+
+@*{{!-- Saved addresses loop --}}*@
+@if (Model.SavedAddresses.Any())
+{
+    foreach (var addr in Model.SavedAddresses)
+    {
+        <div class="address-card @(addr.AddressID == Model.SelectedAddressID ? "selected" : "")"
+             onclick="selectAddress(this)"
+             data-address-id="@addr.AddressID">
+
+            <div class="check-icon"><i class="bi bi-check"></i></div>
+
+            <div class="addr-label">@addr.Location</div>             @* tblAddress.Location *@
+            <div class="addr-name">@addr.PersonName</div>            @* PersonID → PersonName *@
+            <div class="addr-line">@addr.Address1</div>              @* tblAddress.Address1 *@
+            @if (!string.IsNullOrEmpty(addr.Address2))
+            {
+                <div class="addr-line">@addr.Address2</div> @* tblAddress.Address2 *@
+            }
+            <div class="addr-pin">
+                @addr.City, @addr.StateName — @addr.PinCode           @* City, StateID→Name, PinCode *@
+            </div>
+
+            @if (addr.IsDefault)
+            {
+                <span class="addr-tag">Default</span>
+            }
+
+        </div>
+    }
+}
+else
+{
+    <div class="text-center py-4" style="color:var(--gray-4)">
+        <i class="bi bi-geo-alt" style="font-size:2rem"></i>
+        <p class="mt-2 mb-0">No saved addresses. Add one below.</p>
+    </div>
+}
+
+@*{{!-- Add new address toggle button --}}*@
+<button class="add-address-btn mt-2" id="addAddrBtn" onclick="toggleNewAddressForm()">
+    <i class="bi bi-plus-circle" style="font-size:1.1rem"></i>
+    Add a new address
+</button>
+
+@*{{!-- New address form — hidden until toggled --}}*@
+<div id="newAddressForm" style="display:none; margin-top:20px">
+    <div class="apple-divider"></div>
+    <div class="form-section-title">New Delivery Address</div>
+
+    <div class="row g-3">
+
+        <div class="col-12 col-md-6">
+            <label class="apple-label">Full Name</label>
+            <input class="apple-input" type="text" id="newName" placeholder="e.g. Arjun Mehta" />
+        </div>
+        <div class="col-12 col-md-6">
+            <label class="apple-label">Phone Number</label>
+            <input class="apple-input" type="tel" id="newPhone" placeholder="+91 98765 43210" />
+        </div>
+
+        @*{{!-- tblAddress.Address1 *}}*@
+        <div class="col-12">
+            <label class="apple-label">Address Line 1 <span style="color:var(--red)">*</span></label>
+            <input class="apple-input" type="text" id="newAddr1"
+                   placeholder="House / Flat no., Building, Street" />
+            <span class="form-error" id="err-addr1">Please enter your address</span>
+        </div>
+
+        @*{{!-- tblAddress.Address2 --}}*@
+        <div class="col-12">
+            <label class="apple-label">Address Line 2</label>
+            <input class="apple-input" type="text" id="newAddr2"
+                   placeholder="Area, Colony, Landmark (optional)" />
+        </div>
+
+        @*{{!-- tblAddress.City --}}*@
+        <div class="col-12 col-md-6">
+            <label class="apple-label">City <span style="color:var(--red)">*</span></label>
+            <input class="apple-input" type="text" id="newCity" placeholder="e.g. Kolkata" />
+            <span class="form-error" id="err-city">Please enter your city</span>
+        </div>
+
+        @*{{!-- tblAddress.PinCode --}}*@
+        <div class="col-12 col-md-6">
+            <label class="apple-label">PIN Code <span style="color:var(--red)">*</span></label>
+            <input class="apple-input" type="text" id="newPin"
+                   placeholder="6-digit PIN" maxlength="10"
+                   oninput="this.value=this.value.replace(/\D/g,'')" />
+            <span class="form-error" id="err-pin">Enter a valid PIN code</span>
+        </div>
+
+        @*{{!-- tblAddress.StateID — from state lookup table --}}*@
+        <div class="col-12 col-md-6">
+            <label class="apple-label">State <span style="color:var(--red)">*</span></label>
+            <select class="apple-select" id="newState">
+                <option value="">Select State</option>
+                @foreach (var state in Model.States)
+                {
+                    <option value="@state.StateID">@state.StateName</option>
+                }
+            </select>
+            <span class="form-error" id="err-state">Please select a state</span>
+        </div>
+
+        @*{{!-- tblAddress.Location — address type label --}}*@
+        <div class="col-12 col-md-6">
+            <label class="apple-label">Address Type</label>
+            <select class="apple-select" id="newLocType">
+                <option value="Home">Home</option>
+                <option value="Office">Office</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="col-12">
+            <button class="btn-apple-blue" onclick="saveNewAddress()"
+                    style="max-width:220px; width:auto; padding:12px 24px">
+                <i class="bi bi-plus-circle"></i> Save Address
+            </button>
+        </div>
+
+    </div>
+</div>

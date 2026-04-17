@@ -1,0 +1,65 @@
+﻿@* Views/Shared/_CheckoutStepper.cshtml *@
+@*@model int  (currentStep: 1=Cart, 2=Address, 3=Review, 4=Payment) *@
+@* Called from: Cart/Index, Checkout/Address, Checkout/Review, Checkout/Payment *@
+
+@{
+    int current = Model; // 1..4
+
+    string StepClass(int s) =>
+        s < current ? "step completed" :
+        s == current ? "step active" : "step pending";
+
+    string StepIcon(int s) => s < current
+        ? "<i class=\"bi bi-check\"></i>"
+        : s.ToString();
+}
+
+<div class="stepper-wrap">
+    <div class="stepper">
+
+        @*{{!-- Step 1: Cart --}}*@
+        <div class="@StepClass(1)" id="step1">
+            <div class="step-circle">
+                @if (1 < current)
+                {<i class="bi bi-check"></i> }
+                else
+                { <i class="bi bi-bag"></i>}
+            </div>
+            <span class="step-label">Cart</span>
+        </div>
+
+        @*{{!-- Step 2: Address --}}*@
+        <div class="@StepClass(2)" id="step2">
+            <div class="step-circle">
+                @if (2 < current)
+                {<i class="bi bi-check"></i> }
+                else
+                { <text>2</text>}
+            </div>
+            <span class="step-label">Address</span>
+        </div>
+
+        @*{{!-- Step 3: Review --}}*@
+        <div class="@StepClass(3)" id="step3">
+            <div class="step-circle">
+                @if (3 < current)
+                {<i class="bi bi-check"></i> }
+                else
+                { <text>3</text>}
+            </div>
+            <span class="step-label">Review</span>
+        </div>
+
+        @*{{!-- Step 4: Payment --}}*@
+        <div class="@StepClass(4)" id="step4">
+            <div class="step-circle">
+                @if (4 < current)
+                {<i class="bi bi-check"></i> }
+                else
+                { <i class="bi bi-lock"></i>}
+            </div>
+            <span class="step-label">Payment</span>
+        </div>
+
+    </div>
+</div>

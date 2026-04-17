@@ -1,0 +1,134 @@
+﻿@model Curator.Web.Models.ViewModels.CartViewModel
+@using System.Linq
+
+@* Views/Cart/Index.cshtml *@
+@* Controller: CartController.Index() *@
+
+@{
+    ViewBag.Title = "Your Bag";
+    ViewBag.NavData = Model.Nav;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/curator-checkout.css" />
+}
+
+@* Stepper: step 1 active *@
+@Html.Partial("_CheckoutStepper", 1)
+
+<div class="container-xl px-5 py-5">
+
+    <div class="row g-4">
+
+        @* Left: cart items + upsell *@
+        <div class="col-12 col-lg-8">
+
+            @* Cart items card *@
+            <div class="apple-card mb-4 fade-up">
+
+                <div class="apple-card-inner">
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+                        <h2 class="section-title-sm mb-0">
+                            Your Bag
+                        </h2>
+
+                        <span class="section-sub-sm">
+                            @Model.Items.Count item@(Model.Items.Count != 1 ? "s" : "")
+                        </span>
+
+                    </div>
+
+                    <div class="apple-divider mt-2" style="margin-bottom:0!important"></div>
+
+                    @* Partial: _CartItems.cshtml *@
+                    @Html.Partial("_CartItems", Model)
+
+                </div>
+
+            </div>
+
+            @* You may also like *@
+            @if (Model.RecommendedProducts != null && Model.RecommendedProducts.Count > 0)
+            {
+                <div class="apple-card fade-up" style="animation-delay:.1s">
+
+                    <div class="apple-card-inner">
+
+                        <span class="section-eyebrow">
+                            You may also like
+                        </span>
+
+                        <div class="row g-3 mt-1">
+
+                            @foreach (var p in Model.RecommendedProducts)
+                            {
+                                <div class="col-6 col-md-3">
+
+                                    <a href="/Product/@p.ProductID"
+                                       style="display:block;text-decoration:none;">
+
+                                        <div style="height:120px;border-radius:var(--radius-md);overflow:hidden;background:var(--gray-1)">
+
+                                            <img src="@p.ImageURL"
+                                                 alt="@p.ProductName"
+                                                 style="width:100%;height:100%;object-fit:cover"
+                                                 loading="lazy" />
+
+                                        </div>
+
+                                        <div style="font-size:.78rem;font-weight:600;margin-top:8px;color:var(--black)">
+                                            @p.ProductName
+                                        </div>
+
+                                        <div style="font-size:.75rem;color:var(--gray-4)">
+                                            $@p.Price.ToString("N0")
+                                        </div>
+
+                                    </a>
+
+                                </div>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+        @* Right: order summary *@
+        <div class="col-12 col-lg-4 fade-up" style="animation-delay:.15s">
+
+            @Html.Partial("_OrderSummaryPanel", Model.SummaryPanel)
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script src="~/Scripts/curator-checkout.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            var items = document.querySelectorAll('.fade-up');
+
+            for (var i = 0; i < items.length; i++) {
+                (function (el, delay) {
+                    setTimeout(function () {
+                        el.classList.add('visible');
+                    }, delay);
+                })(items[i], i * 80);
+            }
+
+        });
+    </script>
+}

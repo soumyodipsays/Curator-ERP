@@ -1,0 +1,105 @@
+﻿@model Curator.Web.Models.ViewModels.AddressViewModel
+
+@* Views/Checkout/Address.cshtml *@
+@* Controller: CheckoutController.Address() *@
+
+@{
+    ViewBag.Title = "Delivery Address";
+    ViewBag.NavData = Model.Nav;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/curator-checkout.css" />
+}
+
+@* Stepper: step 2 active *@
+@Html.Partial("_CheckoutStepper", 2)
+
+<div class="container-xl px-4 py-4">
+
+    <div class="row g-4">
+
+        @* Left: address + delivery options *@
+        <div class="col-12 col-lg-8">
+
+            <a href="/CuratorMainApp/Cart" class="back-link">
+                <i class="bi bi-arrow-left"></i> Back to Bag
+            </a>
+
+            @* Saved / new address *@
+            <div class="apple-card mb-4 fade-up">
+
+                <div class="apple-card-inner">
+
+                    <span class="section-eyebrow">
+                        Step 2 of 4
+                    </span>
+
+                    <h2 class="section-title-sm">
+                        Delivery Address
+                    </h2>
+
+                    <p class="section-sub-sm mb-4">
+                        Choose where you'd like your order delivered.
+                    </p>
+
+                    @Html.Partial("_AddressSelection", Model.AddressSelection)
+
+                </div>
+
+            </div>
+
+            @* Delivery type selection *@
+            <div class="apple-card fade-up" style="animation-delay:.1s">
+
+                <div class="apple-card-inner">
+
+                    <span class="section-eyebrow">
+                        Delivery Option
+                    </span>
+
+                    <h5 style="font-size:1rem;font-weight:700;margin-bottom:16px">
+                        How would you like it delivered?
+                    </h5>
+
+                    @Html.Partial("_DeliveryOptions", Model.OrderTypes)
+
+                </div>
+
+            </div>
+
+        </div>
+
+        @* Right: summary sidebar *@
+        <div class="col-12 col-lg-4 fade-up" style="animation-delay:.15s">
+
+            @Html.Partial("_OrderSummaryPanel", Model.SummaryPanel)
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script src="~/Scripts/curator-checkout.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            var items = document.querySelectorAll('.fade-up');
+
+            for (var i = 0; i < items.length; i++) {
+                (function (el, delay) {
+                    setTimeout(function () {
+                        el.classList.add('visible');
+                    }, delay);
+                })(items[i], i * 80);
+            }
+
+        });
+    </script>
+
+}
