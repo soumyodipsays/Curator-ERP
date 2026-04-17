@@ -24,9 +24,9 @@ namespace CuratorMainApp.Controllers
             return View();
         }
 
+        [HttpGet]
         public ActionResult VerifyOTP()
         {
-
             return View();
         }
     }

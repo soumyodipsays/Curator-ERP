@@ -34,7 +34,8 @@
     $(document).ready(function () {
         const email = sessionStorage.getItem('pendingEmail');
         if (!email) {
-            window.location.href = '/User/Register';
+            alert("Session expired or invalid access.");
+            window.location.href = '@Url.Action("Login","User")';
             return;
         }
         $('#displayEmail').text(email);

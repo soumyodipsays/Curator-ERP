@@ -3,8 +3,8 @@
     ViewBag.Title = "Sign In";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var loginUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Login";
-    var registerUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Register";
     var profileUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/GetProfile";
+    var sendOTPUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/SendOTP";
 }
 
 <div class="container py-5">
@@ -110,29 +110,46 @@ $('#loginForm').on('submit', function (e) {
     $.ajax({
         url: '@loginUrl',
         type: 'POST',
-        contentType: 'application/json; charset=utf-8',
+        contentType: 'application/json',
         dataType: 'json',
         data: JSON.stringify(data),
 
         success: function (res) {
-
             if (res.success) {
-
                 localStorage.setItem("token", res.accessToken);
                 localStorage.setItem("user", JSON.stringify(res.user));
-
                 alert("Login success");
-
-                // Test protected route
                 testProfileApi();
             }
             else {
-                alert(res.message);
+                // Check if the error message from spValidate_User indicates non-verification
+                if (res.message.includes("not verified")) {
+                    alert(res.message);
+
+                    var emailAddress = $('input[name=Email]').val();
+                    sessionStorage.setItem('pendingEmail', emailAddress);
+
+                    // Trigger a new OTP so the user actually has a code to enter
+                    $.ajax({
+                        url: '@sendOTPUrl',
+                        type: 'POST',
+                        data: { email: emailAddress },
+                        success: function (otpRes) {
+                            // Redirect to the Verify page, passing email in the URL
+                            window.location.href = '@Url.Action("VerifyOTP", "User")';
+                        },
+                        error: function () {
+                            alert("Account exists but failed to send verification email. Please try again.");
+                        }
+                    });
+                } else {
+                    alert(res.message);
+                }
             }
         },
 
-        error: function (xhr) {
-            console.log(xhr);
+        error: function (err) {
+            console.log(err);
             alert("Login failed");
         }
     });

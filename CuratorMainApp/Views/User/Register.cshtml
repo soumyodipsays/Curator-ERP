@@ -176,7 +176,6 @@
                 console.log(res);
                 alert("Account created! Redirecting to verify your email...");
                 window.location.href = '@Url.Action("VerifyOTP","User")';
-                //window.location.href = '/User/Login';
             } else {
                 alert(res.message);
                 console.log(res);

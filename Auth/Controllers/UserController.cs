@@ -127,22 +127,16 @@ namespace Auth.Controllers
             }
         }
 
+        [HttpPost]
         public async Task<JsonResult> SendOTP(string email)
         {
-            dynamic response = await _emailSVC.EmailHandler(email);
-            //string otpValue = response?.data?.ToString() ?? string.Empty;
+            // Calling the Email Service project
+            var response = await _emailSVC.EmailHandler(email);
 
-            string otpValue = response.GetType()
-                          .GetProperty("data")
-                          ?.GetValue(response, null)
-                          ?.ToString() ?? "";
+            string otpValue = response.GetType().GetProperty("data")?.GetValue(response, null)?.ToString() ?? "";
+            bool isSent = (bool?)response.GetType().GetProperty("success")?.GetValue(response, null) ?? false;
 
-            bool isSent = (bool?)response.GetType()
-                             .GetProperty("success")
-                             ?.GetValue(response, null) ?? false;
-
-            //bool isSent = response.success ?? false;
-            if(isSent)
+            if (isSent)
             {
                 var otpDto = new OTP_DTO
                 {
@@ -150,10 +144,40 @@ namespace Auth.Controllers
                     OTP = otpValue
                 };
                 _authDal.InsertUpdateOTP(otpDto);
+
+                return Json(new { success = true, message = "OTP Sent" });
             }
 
-            return Json(response, JsonRequestBehavior.AllowGet);
+            return Json(new { success = false, message = "Failed to send email" });
         }
+
+        //public async Task<JsonResult> SendOTP(string email)
+        //{
+        //    dynamic response = await _emailSVC.EmailHandler(email);
+        //    //string otpValue = response?.data?.ToString() ?? string.Empty;
+
+        //    string otpValue = response.GetType()
+        //                  .GetProperty("data")
+        //                  ?.GetValue(response, null)
+        //                  ?.ToString() ?? "";
+
+        //    bool isSent = (bool?)response.GetType()
+        //                     .GetProperty("success")
+        //                     ?.GetValue(response, null) ?? false;
+
+        //    //bool isSent = response.success ?? false;
+        //    if(isSent)
+        //    {
+        //        var otpDto = new OTP_DTO
+        //        {
+        //            Email = email,
+        //            OTP = otpValue
+        //        };
+        //        _authDal.InsertUpdateOTP(otpDto);
+        //    }
+
+        //    return Json(response, JsonRequestBehavior.AllowGet);
+        //}
 
         public JsonResult ValidateOTP(OTP_DTO model)
         {
