@@ -1,12 +1,13 @@
 ﻿using Auth.DTOs;
+using Auth.Models;
 using Dapper;
+using DataAccessLayer.Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
-using DataAccessLayer.Dapper;
-using Auth.Models;
 
 namespace Auth.DAL
 {
@@ -78,6 +79,16 @@ namespace Auth.DAL
             parameters.Add("@OTP", resetDto.Password);
 
             _db.ExecuteWithoutReturn(proc, parameters);
+        }
+
+        public UserDTO GetUserById(long userId)
+        {
+            var parameters = new DynamicParameters();
+            var proc = "spUser_GetById";
+
+            parameters.Add("@UserID", userId);
+
+            return _db.ExecuteSingleRow<UserDTO>(proc, parameters);
         }
     }
 }
