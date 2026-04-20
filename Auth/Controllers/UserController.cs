@@ -175,34 +175,6 @@ namespace Auth.Controllers
             return Json(new { success = false, message = "Failed to send email" });
         }
 
-        //public async Task<JsonResult> SendOTP(string email)
-        //{
-        //    dynamic response = await _emailSVC.EmailHandler(email);
-        //    //string otpValue = response?.data?.ToString() ?? string.Empty;
-
-        //    string otpValue = response.GetType()
-        //                  .GetProperty("data")
-        //                  ?.GetValue(response, null)
-        //                  ?.ToString() ?? "";
-
-        //    bool isSent = (bool?)response.GetType()
-        //                     .GetProperty("success")
-        //                     ?.GetValue(response, null) ?? false;
-
-        //    //bool isSent = response.success ?? false;
-        //    if(isSent)
-        //    {
-        //        var otpDto = new OTP_DTO
-        //        {
-        //            Email = email,
-        //            OTP = otpValue
-        //        };
-        //        _authDal.InsertUpdateOTP(otpDto);
-        //    }
-
-        //    return Json(response, JsonRequestBehavior.AllowGet);
-        //}
-
         public JsonResult ValidateOTP(OTP_DTO model)
         {
             try
@@ -246,18 +218,14 @@ namespace Auth.Controllers
         [HttpPost]
         public JsonResult GetProfile()
         {
-            long userId =
-                Convert.ToInt64(HttpContext.Items["UserID"]);
-
-            string email =
-                HttpContext.Items["Email"].ToString();
-
             return Json(new
             {
                 success = true,
-                userId = userId,
-                email = email
-            }, JsonRequestBehavior.AllowGet);
+                userId = HttpContext.Items["UserID"],
+                email = HttpContext.Items["Email"],
+                userName = HttpContext.Items["UserName"],
+                role = HttpContext.Items["Role"]
+            });
         }
 
         [HttpPost]

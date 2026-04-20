@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using Auth.DAL; 
 
 namespace Auth.Filters
 {
@@ -15,10 +16,7 @@ namespace Auth.Filters
         {
             try
             {
-                string authHeader =
-                    httpContext.Request.Headers["Authorization"];
-                // check if the header is reaching
-                System.Diagnostics.Debug.WriteLine(authHeader);
+                string authHeader = httpContext.Request.Headers["Authorization"];
 
                 if (string.IsNullOrEmpty(authHeader))
                     return false;
@@ -28,14 +26,10 @@ namespace Auth.Filters
 
                 string token = authHeader.Substring(7);
 
-                var secret =
-                    ConfigurationManager.AppSettings["JwtSecret"];
-
-                var issuer =
-                    ConfigurationManager.AppSettings["JwtIssuer"];
+                var secret = ConfigurationManager.AppSettings["JwtSecret"];
+                var issuer = ConfigurationManager.AppSettings["JwtIssuer"];
 
                 var tokenHandler = new JwtSecurityTokenHandler();
-
                 var key = Encoding.UTF8.GetBytes(secret);
 
                 tokenHandler.ValidateToken(token,
@@ -48,30 +42,34 @@ namespace Auth.Filters
                         ValidAudience = issuer,
 
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey =
-                            new SymmetricSecurityKey(key),
+                        IssuerSigningKey = new SymmetricSecurityKey(key),
 
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.Zero
                     },
-                    out SecurityToken validatedToken
+                    out SecurityToken validatedToken);
+
+                var jwtToken = (JwtSecurityToken)validatedToken;
+
+                long userId = Convert.ToInt64(
+                    jwtToken.Claims.First(x =>
+                    x.Type.Contains("nameidentifier")).Value
                 );
 
-                var jwtToken =
-                    (JwtSecurityToken)validatedToken;
+               
+                var _authDAL = new AuthDAL();
+                var user = _authDAL.GetUserById(userId);
 
-                // Save user data for controller use
-                httpContext.Items["UserID"] =
-                    jwtToken.Claims.First(x =>
-                    x.Type.Contains("nameidentifier")).Value;
+                if (user == null || !user.IsActive)
+                {
+                    return false;
+                }
 
-                httpContext.Items["Email"] =
-                    jwtToken.Claims.First(x =>
-                    x.Type.Contains("email")).Value;
-
-                httpContext.Items["Role"] =
-                    jwtToken.Claims.First(x =>
-                    x.Type.Contains("role")).Value;
+                // Save fresh DB values
+                httpContext.Items["UserID"] = user.UserID;
+                httpContext.Items["Email"] = user.Email;
+                httpContext.Items["UserName"] = user.UserName;
+                httpContext.Items["Role"] = user.UserTypeCode ?? "User";
 
                 return true;
             }
@@ -89,10 +87,9 @@ namespace Auth.Filters
                 Data = new
                 {
                     success = false,
-                    message = "Unauthorized"
+                    message = "Invalid or expired token"
                 },
-                JsonRequestBehavior =
-                    JsonRequestBehavior.AllowGet
+                JsonRequestBehavior = JsonRequestBehavior.AllowGet
             };
         }
     }

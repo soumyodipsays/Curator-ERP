@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = "Sign In";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
     var loginUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Login";
     var profileUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/GetProfile";
     var sendOTPUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/SendOTP";
@@ -14,48 +15,38 @@
 
                 <div class="text-center mb-4">
                     <span class="fw-bold fs-4 text-dark">Curator.</span>
-                    <p class="text-muted small mt-1 mb-0">Welcome back. Sign in to continue.</p>
-                </div>
-
-                <div class="d-grid gap-2 mb-3">
-                    <a href="/Account/GoogleLogin"
-                       class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2 rounded-pill py-2">
-                        <img src="https://img.icons8.com/color/48/google-logo.png"
-                             alt="Google"
-                             style="width:20px; height:20px;" />
-                        Sign in with Google
-                    </a>
-                    @*<a href="/Account/AppleLogin" class="btn btn-dark d-flex align-items-center justify-content-center gap-2 rounded-pill py-2">
-                            <i class="bi bi-apple"></i> Continue with Apple
-                        </a>*@
-                </div>
-
-                <div class="d-flex align-items-center gap-2 my-3">
-                    <hr class="flex-grow-1 m-0">
-                    <span class="text-muted small">or</span>
-                    <hr class="flex-grow-1 m-0">
+                    <p class="text-muted small mt-1 mb-0">
+                        Welcome back. Sign in to continue.
+                    </p>
                 </div>
 
                 <form id="loginForm">
-                    @Html.AntiForgeryToken()
+
                     <div class="mb-3">
-                        <label class="form-label small fw-medium text-dark">Email address</label>
+                        <label class="form-label small fw-medium text-dark">
+                            Email address
+                        </label>
+
                         <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0 text-muted">
+                            <span class="input-group-text bg-light border-end-0">
                                 <i class="bi bi-envelope"></i>
                             </span>
+
                             @Html.TextBox("Email", "", new
                             {
                                 @class = "form-control border-start-0 bg-light",
-                              @placeholder = "you@example.com",
-                                @type = "email"
+                                type = "email",
+                                placeholder = "you@example.com",
+                                required = "required"
                             })
                         </div>
                     </div>
 
                     <div class="mb-4">
                         <div class="d-flex justify-content-between">
-                            <label class="form-label small fw-medium text-dark">Password</label>
+                            <label class="form-label small fw-medium text-dark">
+                                Password
+                            </label>
 
                             <a href="@Url.Action("ForgotPassword","User")"
                                class="small text-decoration-none"
@@ -65,15 +56,16 @@
                         </div>
 
                         <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0 text-muted">
+                            <span class="input-group-text bg-light border-end-0">
                                 <i class="bi bi-lock"></i>
                             </span>
 
                             @Html.Password("Password", "", new
                             {
                                 @class = "form-control border-start-0 bg-light",
-                                @placeholder = "••••••••",
-                                id = "login-pw"
+                                placeholder = "••••••••",
+                                id = "login-pw",
+                                required = "required"
                             })
 
                             <button type="button"
@@ -85,29 +77,60 @@
                     </div>
 
                     <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="remember" name="RememberMe">
-                        <label class="form-check-label small text-muted" for="remember">Keep me signed in</label>
+                        <input type="checkbox"
+                               class="form-check-input"
+                               id="remember">
+
+                        <label class="form-check-label small text-muted"
+                               for="remember">
+                            Keep me signed in
+                        </label>
                     </div>
 
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-dark rounded-pill py-2 fw-medium">Sign In</button>
+                        <button type="submit"
+                                class="btn btn-dark rounded-pill py-2 fw-medium">
+                            Sign In
+                        </button>
                     </div>
+
                 </form>
 
                 <p class="text-center text-muted small mt-4 mb-0">
                     Don't have an account?
+
                     <a href="@Url.Action("Register","User")"
-                       class="text-decoration-none fw-medium" style="color:#0071e3">Create one</a>
+                       class="text-decoration-none fw-medium"
+                       style="color:#0071e3">
+                        Create one
+                    </a>
                 </p>
+
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
 <script>
+
+$(document).ready(function () {
+
+    // already logged in
+    const token =
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("token");
+
+    if (token) {
+        validateExistingToken(token);
+    }
+
+});
+
+
 $('#loginForm').on('submit', function (e) {
+
     e.preventDefault();
 
     var data = {
@@ -123,81 +146,121 @@ $('#loginForm').on('submit', function (e) {
         data: JSON.stringify(data),
 
         success: function (res) {
+
             if (res.success) {
-                localStorage.setItem("token", res.accessToken);
-                localStorage.setItem("user", JSON.stringify(res.user));
-                alert("Login success");
-                testProfileApi();
+
+                saveToken(res.accessToken);
+
+                window.location.href = '@Url.Action("Dashboard","Home")';
             }
             else {
-                // Check if the error message from spValidate_User indicates non-verification
-                if (res.message.includes("not verified")) {
-                    alert(res.message);
 
-                    var emailAddress = $('input[name=Email]').val();
-                    sessionStorage.setItem('pendingEmail', emailAddress);
+                if (res.message &&
+                    res.message.toLowerCase().includes("not verified")) {
 
-                    // Trigger a new OTP so the user actually has a code to enter
-                    $.ajax({
-                        url: '@sendOTPUrl',
-                        type: 'POST',
-                        data: { email: emailAddress },
-                        success: function (otpRes) {
-                            // Redirect to the Verify page, passing email in the URL
-                            window.location.href = '@Url.Action("VerifyOTP", "User")';
-                        },
-                        error: function () {
-                            alert("Account exists but failed to send verification email. Please try again.");
-                        }
-                    });
-                } else {
-                    alert(res.message);
+                    var email =
+                        $('input[name=Email]').val();
+
+                    sessionStorage.setItem(
+                        "pendingEmail",
+                        email
+                    );
+
+                    resendOtp(email);
+                }
+                else {
+                    alert(res.message || "Login failed");
                 }
             }
         },
 
-        error: function (err) {
-            console.log(err);
+        error: function () {
             alert("Login failed");
         }
     });
+
 });
 
 
-function testProfileApi() {
+function saveToken(token) {
 
-    const token = localStorage.getItem("token");
+    if ($('#remember').is(':checked')) {
+        localStorage.setItem("token", token);
+    }
+    else {
+        sessionStorage.setItem("token", token);
+    }
+}
+
+
+function validateExistingToken(token) {
 
     $.ajax({
         url: '@profileUrl',
         type: 'POST',
 
         headers: {
-            "Authorization": "Bearer " + token
+            Authorization: 'Bearer ' + token
         },
 
         success: function (res) {
-            console.log("Protected Route Success:", res);
-            alert("JWT Guard Working");
+
+            if (res.success) {
+                window.location.href = '@Url.Action("Dashboard","Home")';
+            }
+            else {
+                logoutUser();
+            }
         },
 
-        error: function (error) {
-            console.log(error);
-            alert("JWT Guard Failed");
+        error: function () {
+            logoutUser();
         }
     });
-    }
+}
 
-    function togglePw(id, btn) {
-        var input = document.getElementById(id);
-        var icon = btn.querySelector("i");
 
-        if (input.type === "password") {
-            input.type = "text";
-            icon.className = "bi bi-eye-slash";
-        } else {
-            input.type = "password";
-            icon.className = "bi bi-eye";
+function resendOtp(email) {
+
+    $.ajax({
+        url: '@sendOTPUrl',
+        type: 'POST',
+        data: { email: email },
+
+        success: function () {
+            alert("Your account is not verified. OTP sent.");
+            window.location.href =
+                '@Url.Action("VerifyOTP","User")';
+        },
+
+        error: function () {
+            alert("Failed to send OTP.");
         }
+    });
+}
+
+
+function logoutUser() {
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
+}
+
+
+function togglePw(id, btn) {
+
+    var input = document.getElementById(id);
+    var icon = btn.querySelector("i");
+
+    if (input.type === "password") {
+        input.type = "text";
+        icon.className = "bi bi-eye-slash";
     }
+    else {
+        input.type = "password";
+        icon.className = "bi bi-eye";
+    }
+}
+
 </script>

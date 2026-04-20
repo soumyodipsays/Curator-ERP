@@ -181,6 +181,7 @@
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="DAL\AuthDAL.cs" />
     <Compile Include="DTOs\OTP_UpsertDTO.cs" />
+    <Compile Include="DTOs\UserDTO.cs" />
     <Compile Include="DTOs\UserLoginDTO.cs" />
     <Compile Include="DTOs\UserRegistrationDTO.cs" />
     <Compile Include="Filters\JwtGuardAttribute.cs" />
