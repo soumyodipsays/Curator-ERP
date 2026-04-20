@@ -159,6 +159,7 @@
         let CURRENT_PRODUCT = null;
         let SELECTED_SIZE = null;
         let SELECTED_COLOR = null;
+        let SELECTED_BRAND_LIST = [];
 
         function calculatePrice(p) {
             const isPercentage = p.IsInrOrPercentage == 'P';
@@ -507,59 +508,33 @@
             toast.show();
         }
 
-        function getFilteredProducts(){
-            const activeCategory = document.querySelector('.cat-pill.active')?.dataset.cat
+        function getFilteredProducts() {
+            const activeCategory =
+                document.querySelector('.cat-pill.active')?.dataset.cat || "all";
 
-            if(activeCategory == "all") return PRODUCTS
-            
-            const filteredProducts = PRODUCTS.filter(p => p.Category == activeCategory)
+            console.log("activeCategory:", activeCategory);
+            console.log("selectedBrands:", SELECTED_BRAND_LIST);
+
+            // If all category + no brand selected → return all products
+            if (activeCategory === "all" && SELECTED_BRAND_LIST.length === 0) {
+                return PRODUCTS;
+            }
+
+            const filteredProducts = PRODUCTS.filter(p =>
+                // Category filter
+                (activeCategory === "all" || p.Category === activeCategory) &&
+
+                // Brand filter
+                (
+                    SELECTED_BRAND_LIST.length === 0 ||
+                    SELECTED_BRAND_LIST.includes(p.Brand)
+                )
+            );
+
+            console.log("filteredProducts:", filteredProducts);
 
             return filteredProducts;
         }
-
-        /* ---- Filters + Sort ---- */
-        /*function getFilteredProducts() {
-            const activeCat = document.querySelector('.cat-pill.active')?.dataset.cat || 'all';
-            const maxPrice = parseInt(document.getElementById('priceRange').value);
-            const sortVal = document.getElementById('sortSelect').value;
-
-            let filtered = PRODUCTS.filter(p => {
-                const catMatch =
-                    activeCat === 'all' ||
-                    (activeCat === 'sale' && p.IsSale) ||
-                    p.CategoryID.toLowerCase() === activeCat ||
-                    p.SubCategoryID.toLowerCase() === activeCat;
-
-                const priceMatch = p.Price <= maxPrice;
-
-                return catMatch && priceMatch;
-            });
-
-            // clone array before sorting
-            filtered = [...filtered];
-
-            if (sortVal === 'Price: Low to High')
-                filtered.sort((a, b) => a.Price - b.Price);
-
-            else if (sortVal === 'Price: High to Low')
-                filtered.sort((a, b) => b.Price - a.Price);
-
-            else if (sortVal === 'Newest First')
-                filtered.sort((a, b) => b.ProductID - a.ProductID);
-
-            else if (sortVal === 'Top Rated')
-                filtered.sort((a, b) => b.Rating - a.Rating);
-
-            return filtered;
-        }*/
-
-       /* document.querySelectorAll('.cat-pill').forEach(pill => {
-            pill.addEventListener('click', () => {
-                document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-                pill.classList.add('active');
-                renderProducts(getFilteredProducts());
-            });
-        });*/
 
         $(document).on('click', '.cat-pill', function(){
 
@@ -603,8 +578,6 @@
             });
         });
 
-        /* ---- INIT — load products on page ready ---- */
-        /* In MVC: replaced by $.ajax({ url:'/Product/GetProducts', success: renderProducts }) */
         document.addEventListener('DOMContentLoaded', () => {
             //renderProducts(PRODUCTS);
         });
@@ -678,8 +651,10 @@
 
         $(document).on('click', '.size-chip', function () {
 
+
             const selectedSize = $(this).data('size') || "all"
             console.log(selectedSize)
+            //getFilteredProducts("", selectedSize)
 
             if (selectedSize == "all") {
                 $('.size-chip').not(this).removeClass('active')
@@ -694,30 +669,49 @@
 
         $(document).on('change', '.form-check-input[data-brand]', function () {
 
-            const selectedBrand = $(this).data('brand') || "all"
-            console.log(selectedBrand)
+            const $all = $('#brand-all');
+            const $others = $('.form-check-input[data-brand]').not('#brand-all');
 
-            if (selectedBrand == "all") {
-                if ($(this).is(":checked")) {
-                    $(".form-check-input[data-brand]").not(this).prop('checked', false);
-                }
-            } else {
-                // If any other brand is checked → uncheck "All"
+            // If "All" clicked
+            if ($(this).is('#brand-all')) {
+
                 if ($(this).is(':checked')) {
-                    $('#brand-all').prop('checked', false);
+                    $others.prop('checked', false);
+                } else {
+                    $all.prop('checked', true); // keep at least one selected
                 }
 
-                // If no brand is checked → select "All"
-                const anyChecked = $('.form-check-input[data-brand]')
-                    .not('#brand-all')
-                    .is(':checked');
+            } else {
+
+                // Any normal brand clicked
+                if ($(this).is(':checked')) {
+                    $all.prop('checked', false);
+                }
+
+                // If no normal brand selected -> auto select all
+                const anyChecked = $others.is(':checked');
 
                 if (!anyChecked) {
-                    $('#brand-all').prop('checked', true);
+                    $all.prop('checked', true);
                 }
-
             }
-        })
+
+            // Build selected brand list (ignore "all")
+            let selectedBrand = $('.form-check-input[data-brand]:checked')
+                .not('#brand-all')
+                .map(function () {
+                    return $(this).data('brand');
+                })
+                .get();
+
+            // Empty array means ALL
+            SELECTED_BRAND_LIST = selectedBrand;
+
+            console.log("SELECTED_BRAND_LIST:", SELECTED_BRAND_LIST);
+
+            // Optional refresh
+            renderProducts(getFilteredProducts());
+        });
     }
 
     function renderBrands(brandsList) {
@@ -796,6 +790,10 @@
 
             //console.log("Selected:", category, categoryId);
             setActiveCategory(category)
+        })
+
+        $("#btn-apply-filters").on('click', function () {
+            renderProducts(getFilteredProducts());
         })
 
         getAllProducts()

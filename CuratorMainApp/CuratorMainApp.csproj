@@ -259,6 +259,7 @@
     <Content Include="SP\spUser_InsertUpdate.sql" />
     <Content Include="SP\spUser_ResetPassword.sql" />
     <Content Include="SP\spValidate_User.sql" />
+
     <Content Include="SP\sp_GetFilterSidebarDetails.sql" />
     <Content Include="SP\sp_ValidateUser.sql" />
     <Content Include="Web.config" />
