@@ -125,12 +125,18 @@ namespace Auth.Controllers
                     user.Email,
                     user.UserTypeCode
                 );
-                return Json(new
+                return Json(new LoginResponse
                 {
-                    success = true,
-                    message = "User logged in successfully",
-                    accessToken = token,
-                    user = user
+                    Success = true,
+                    Message = "Login success",
+                    AccessToken = token,
+                    User = new
+                    {
+                        UserID = user.UserID,
+                        Email = user.Email,
+                        UserName = user.UserName,
+                        Role = user.Role ?? "User"
+                    }
                 });
             }
             catch (SqlException sqlex)
@@ -215,7 +221,6 @@ namespace Auth.Controllers
         }
 
         [JwtGuard]
-        [HttpPost]
         public JsonResult GetProfile()
         {
             return Json(new
@@ -223,9 +228,8 @@ namespace Auth.Controllers
                 success = true,
                 userId = HttpContext.Items["UserID"],
                 email = HttpContext.Items["Email"],
-                userName = HttpContext.Items["UserName"],
                 role = HttpContext.Items["Role"]
-            });
+            }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]

@@ -113,154 +113,114 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
+<script src="~/Scripts/auth.js"></script>
+
 <script>
 
-$(document).ready(function () {
+    $(document).ready(function () {
 
-    // already logged in
-    const token =
-        localStorage.getItem("token") ||
-        sessionStorage.getItem("token");
+        // if already logged in
+        if (Auth.getToken()) {
 
-    if (token) {
-        validateExistingToken(token);
-    }
+            Auth.validate(function () {
+                window.location.href = '@Url.Action("Index","Home")';
+            });
 
-});
+        }
+
+    });
 
 
-$('#loginForm').on('submit', function (e) {
+    $('#loginForm').on('submit', function (e) {
 
-    e.preventDefault();
+        e.preventDefault();
 
-    var data = {
-        Email: $('input[name=Email]').val(),
-        Password: $('input[name=Password]').val()
-    };
+        var data = {
+            Email: $('input[name=Email]').val(),
+            Password: $('input[name=Password]').val()
+        };
 
-    $.ajax({
-        url: '@loginUrl',
-        type: 'POST',
-        contentType: 'application/json',
-        dataType: 'json',
-        data: JSON.stringify(data),
+        $.ajax({
+            url: '@loginUrl',
+            type: 'POST',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify(data),
 
-        success: function (res) {
+            success: function (res) {
 
-            if (res.success) {
+                if (res.success) {
 
-                saveToken(res.accessToken);
+                    Auth.login(res.accessToken, true);
 
-                window.location.href = '@Url.Action("Dashboard","Home")';
-            }
-            else {
-
-                if (res.message &&
-                    res.message.toLowerCase().includes("not verified")) {
-
-                    var email =
-                        $('input[name=Email]').val();
-
-                    sessionStorage.setItem(
-                        "pendingEmail",
-                        email
-                    );
-
-                    resendOtp(email);
+                    window.location.href =
+                        '@Url.Action("Index","Home")';
                 }
                 else {
-                    alert(res.message || "Login failed");
+
+                    if (res.message &&
+                        res.message.toLowerCase()
+                        .includes("not verified")) {
+
+                        var email =
+                            $('input[name=Email]').val();
+
+                        sessionStorage.setItem(
+                            "pendingEmail",
+                            email
+                        );
+
+                        resendOtp(email);
+                    }
+                    else {
+                        alert(res.message || "Login failed");
+                    }
                 }
-            }
-        },
+            },
 
-        error: function () {
-            alert("Login failed");
-        }
+            error: function () {
+                alert("Login failed");
+            }
+        });
+
     });
 
-});
 
+    function resendOtp(email) {
 
-function saveToken(token) {
+        $.ajax({
+            url: '@sendOTPUrl',
+            type: 'POST',
+            data: { email: email },
 
-    if ($('#remember').is(':checked')) {
-        localStorage.setItem("token", token);
-    }
-    else {
-        sessionStorage.setItem("token", token);
-    }
-}
+            success: function () {
 
+                alert("OTP sent successfully.");
 
-function validateExistingToken(token) {
+                window.location.href =
+                    '@Url.Action("VerifyOTP","User")';
+            },
 
-    $.ajax({
-        url: '@profileUrl',
-        type: 'POST',
-
-        headers: {
-            Authorization: 'Bearer ' + token
-        },
-
-        success: function (res) {
-
-            if (res.success) {
-                window.location.href = '@Url.Action("Dashboard","Home")';
+            error: function () {
+                alert("Failed to send OTP.");
             }
-            else {
-                logoutUser();
-            }
-        },
+        });
 
-        error: function () {
-            logoutUser();
-        }
-    });
-}
-
-
-function resendOtp(email) {
-
-    $.ajax({
-        url: '@sendOTPUrl',
-        type: 'POST',
-        data: { email: email },
-
-        success: function () {
-            alert("Your account is not verified. OTP sent.");
-            window.location.href =
-                '@Url.Action("VerifyOTP","User")';
-        },
-
-        error: function () {
-            alert("Failed to send OTP.");
-        }
-    });
-}
-
-
-function logoutUser() {
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
-    localStorage.removeItem("user");
-    sessionStorage.removeItem("user");
-}
-
-
-function togglePw(id, btn) {
-
-    var input = document.getElementById(id);
-    var icon = btn.querySelector("i");
-
-    if (input.type === "password") {
-        input.type = "text";
-        icon.className = "bi bi-eye-slash";
     }
-    else {
-        input.type = "password";
-        icon.className = "bi bi-eye";
+
+
+    function togglePw(id, btn) {
+
+        var input = document.getElementById(id);
+        var icon = btn.querySelector("i");
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.className = "bi bi-eye-slash";
+        } else {
+            input.type = "password";
+            icon.className = "bi bi-eye";
+        }
     }
-}
 
 </script>

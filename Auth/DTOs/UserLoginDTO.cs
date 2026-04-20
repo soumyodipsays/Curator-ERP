@@ -19,4 +19,12 @@ namespace Auth.DTOs
         ErrorMessage = "Password must be between 6 and 15 characters.")]
         public string Password { get; set; }
     }
+
+    public class LoginResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public string AccessToken { get; set; }
+        public object User { get; set; }
+    }
 }
