@@ -213,11 +213,14 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\curator-checkout.css" />
+    <Content Include="Content\curator-profile.css" />
+    <Content Include="Scripts\curator-profile.js" />
     <Content Include="Content\curator.css" />
     <Content Include="Content\Product.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="Scripts\auth.js" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -307,6 +310,10 @@
     <Content Include="Views\Checkout\Address.cshtml" />
     <Content Include="Views\Checkout\Review.cshtml" />
     <Content Include="Views\_ViewImports.cshtml" />
+    <Content Include="Views\User\Profile.cshtml" />
+    <Content Include="Views\Shared\_ProfileHeader.cshtml" />
+    <Content Include="Views\Shared\_ProfileFields.cshtml" />
+    <Content Include="Views\Shared\_ProfileAddresses.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

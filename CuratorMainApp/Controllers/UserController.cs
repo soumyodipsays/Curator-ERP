@@ -29,5 +29,11 @@ namespace CuratorMainApp.Controllers
         {
             return View();
         }
+
+        [HttpGet]
+        public new ActionResult Profile()
+        {
+            return View();
+        }
     }
 }

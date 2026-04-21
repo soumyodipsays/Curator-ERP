@@ -1,0 +1,270 @@
+﻿@* =====================================================
+    PARTIAL: _ProfileAddresses.cshtml
+    Called from: Views/Account/Profile.cshtml
+    AJAX later:
+      GET  /Account/GetAddresses        → render cards
+      POST /Account/SaveAddress         → insert tblAddress
+      POST /Account/UpdateAddress       → update tblAddress
+      POST /Account/DeleteAddress       → delete tblAddress
+      POST /Account/SetDefaultAddress   → update default flag
+    ===================================================== *@
+
+@{
+    var addresses = new[]
+    {
+        new {
+            AddressID  = 1,
+            Address1   = "42B, Park Street, Lake Gardens",
+            Address2   = "Near Ruby Hospital",
+            City       = "Kolkata",
+            StateName  = "West Bengal",
+            StateID    = 1,
+            PinCode    = "700045",
+            Location   = "Home",
+            IsDefault  = true,
+            ModifiedOn = "Nov 2, 2024",
+            ModifiedBy = "Arjun"
+        },
+        new {
+            AddressID  = 2,
+            Address1   = "7th Floor, Merlin Infinite, Salt Lake",
+            Address2   = "Sector V",
+            City       = "Kolkata",
+            StateName  = "West Bengal",
+            StateID    = 1,
+            PinCode    = "700091",
+            Location   = "Office",
+            IsDefault  = false,
+            ModifiedOn = "Mar 5, 2024",
+            ModifiedBy = "Arjun"
+        }
+    };
+}
+
+<div class="apple-card fade-up" id="addressSection">
+    <div class="apple-card-inner">
+
+        @*{{!-- Section header --}}*@
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <div>
+                <span class="section-eyebrow">Saved Addresses</span>
+                <h2 class="section-title-sm">Delivery Locations</h2>
+            </div>
+            <button class="btn-profile-blue-sm" onclick="openAddressModal()">
+                <i class="bi bi-plus-lg"></i> Add Address
+            </button>
+        </div>
+        <p class="section-sub-sm mb-4">Manage your delivery addresses.</p>
+
+        @*{{!-- Address cards ─────────────────────────────────────────── --}}*@
+        <div id="addressList">
+            @foreach (var addr in addresses)
+            {
+                <div class="addr-profile-card @(addr.IsDefault ? "addr-default" : "")"
+                     id="addrCard-@addr.AddressID">
+
+                    @*{{!-- Card header: type icon + label + action buttons --}}*@
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="addr-type-icon">
+                                @(addr.Location == "Home"   ? "🏠" :
+                              addr.Location == "Office" ? "🏢" : "📍")
+                            </span>
+                            <div>
+                                <span class="addr-type-label">@addr.Location</span>
+                                @if (addr.IsDefault)
+                                {
+                                    <span class="addr-default-badge">Default</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="addr-action-row">
+                            @if (!addr.IsDefault)
+                            {
+                                <button class="addr-icon-btn" title="Set as default"
+                                        onclick="setDefault(@addr.AddressID)">
+                                    <i class="bi bi-star"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="addr-icon-btn addr-icon-star" title="Default" disabled>
+                                    <i class="bi bi-star-fill"></i>
+                                </button>
+                            }
+
+                            <button class="addr-icon-btn" title="Edit"
+                                    onclick="openEditModal(
+                                    @addr.AddressID,
+                                    '@addr.Address1.Replace("'","\\'")',
+                                    '@addr.Address2.Replace("'","\\'")',
+                                    '@addr.City',
+                                    @addr.StateID,
+                                    '@addr.StateName',
+                                    '@addr.PinCode',
+                                    '@addr.Location',
+                                    @(addr.IsDefault ? "true" : "false"))">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+
+                            @if (!addr.IsDefault)
+                            {
+                                <button class="addr-icon-btn addr-icon-delete" title="Delete"
+                                        onclick="deleteAddress(@addr.AddressID)">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    @*{{!-- Address lines --}}*@
+                    <div class="addr-line-main">@addr.Address1</div>
+                    @if (!string.IsNullOrEmpty(addr.Address2))
+                    {
+                        <div class="addr-line-sub">@addr.Address2</div>
+                    }
+                    <div class="addr-line-city">
+                        @addr.City, @addr.StateName — @addr.PinCode
+                    </div>
+
+                    @*{{!-- Audit footer --}}*@
+                    <div class="addr-audit-row">
+                        <i class="bi bi-clock" style="font-size:.65rem"></i>
+                        Updated @addr.ModifiedOn by @addr.ModifiedBy
+                    </div>
+
+                </div>
+            }
+        </div>
+
+        @*{{!-- Empty state (shown when no addresses) --}}*@
+        <div id="noAddressMsg" style="display:none;text-align:center;padding:32px 0">
+            <i class="bi bi-geo-alt" style="font-size:2.5rem;color:var(--gray-3)"></i>
+            <p style="color:var(--gray-4);margin-top:8px;margin-bottom:0">
+                No addresses saved yet.
+            </p>
+        </div>
+
+    </div>
+</div>
+
+@*{{!-- ══════════════════════════════════════════════════════════
+     ADD / EDIT ADDRESS MODAL
+     Shared for both add (AddressID=0) and edit (AddressID=n)
+     POST /Account/SaveAddress  or  /Account/UpdateAddress
+     ══════════════════════════════════════════════════════════ --}}*@
+<div class="modal fade" id="addressModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content addr-modal-content">
+            <div class="addr-modal-body">
+
+                @*{{!-- Modal header --}}*@
+                <div class="addr-modal-header">
+                    <h5 class="addr-modal-title" id="addrModalTitle">Add New Address</h5>
+                    <button class="nav-icon-btn" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                @*{{!-- Hidden: tracks add vs edit --}}*@
+                <input type="hidden" id="modalAddressId" value="0" />
+
+                <div class="row g-3">
+
+                    @*{{!-- Address Line 1 — tblAddress.Address1 --}}*@
+                    <div class="col-12">
+                        <label class="apple-label">
+                            Address Line 1 <span style="color:var(--red)">*</span>
+                        </label>
+                        <input class="apple-input" type="text" id="m-addr1"
+                               placeholder="House / Flat no., Building, Street"
+                               maxlength="100" />
+                        <span class="form-error" id="merr-addr1">Please enter address line 1</span>
+                    </div>
+
+                    @*{{!-- Address Line 2 — tblAddress.Address2 --}}*@
+                    <div class="col-12">
+                        <label class="apple-label">Address Line 2</label>
+                        <input class="apple-input" type="text" id="m-addr2"
+                               placeholder="Area, Colony, Landmark (optional)"
+                               maxlength="100" />
+                    </div>
+
+                    @*{{!-- City — tblAddress.City --}}*@
+                    <div class="col-12 col-sm-6">
+                        <label class="apple-label">
+                            City <span style="color:var(--red)">*</span>
+                        </label>
+                        <input class="apple-input" type="text" id="m-city"
+                               placeholder="e.g. Kolkata" maxlength="50" />
+                        <span class="form-error" id="merr-city">Please enter city</span>
+                    </div>
+
+                    @*{{!-- PIN Code — tblAddress.PinCode --}}*@
+                    <div class="col-12 col-sm-6">
+                        <label class="apple-label">
+                            PIN Code <span style="color:var(--red)">*</span>
+                        </label>
+                        <input class="apple-input" type="text" id="m-pin"
+                               placeholder="6-digit PIN" maxlength="10"
+                               oninput="this.value=this.value.replace(/\D/g,'')" />
+                        <span class="form-error" id="merr-pin">Enter a valid PIN code</span>
+                    </div>
+
+                    @*{{!-- State — tblAddress.StateID --}}*@
+                    <div class="col-12 col-sm-6">
+                        <label class="apple-label">
+                            State <span style="color:var(--red)">*</span>
+                        </label>
+                        <select class="apple-select" id="m-state">
+                            <option value="">Select State</option>
+                            <option value="1" data-name="West Bengal">West Bengal</option>
+                            <option value="2" data-name="Maharashtra">Maharashtra</option>
+                            <option value="3" data-name="Delhi">Delhi</option>
+                            <option value="4" data-name="Karnataka">Karnataka</option>
+                            <option value="5" data-name="Tamil Nadu">Tamil Nadu</option>
+                            <option value="6" data-name="Telangana">Telangana</option>
+                            <option value="7" data-name="Gujarat">Gujarat</option>
+                            <option value="8" data-name="Rajasthan">Rajasthan</option>
+                            <option value="9" data-name="Punjab">Punjab</option>
+                            <option value="10" data-name="Kerala">Kerala</option>
+                        </select>
+                        <span class="form-error" id="merr-state">Please select a state</span>
+                    </div>
+
+                    @*{{!-- Location type — tblAddress.Location --}}*@
+                    <div class="col-12 col-sm-6">
+                        <label class="apple-label">Address Type</label>
+                        <select class="apple-select" id="m-location">
+                            <option value="Home">🏠 Home</option>
+                            <option value="Office">🏢 Office</option>
+                            <option value="Other">📍 Other</option>
+                        </select>
+                    </div>
+
+                    @*{{!-- Set as default --}}*@
+                    <div class="col-12">
+                        <label class="d-flex align-items-center gap-2"
+                               style="cursor:pointer;font-size:.88rem;font-weight:500;color:var(--black)">
+                            <input type="checkbox" id="m-default" class="form-check-input"
+                                   style="width:18px;height:18px;accent-color:var(--black);margin:0" />
+                            Set as default delivery address
+                        </label>
+                    </div>
+
+                </div>
+
+                <div style="height:20px"></div>
+
+                <button class="btn-apple-blue" id="addrModalSaveBtn"
+                        onclick="submitAddressModal()">
+                    <i class="bi bi-check-lg"></i>
+                    <span id="addrModalBtnText">Save Address</span>
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,66 @@
+﻿@* Views/Shared/_ProfileHeader.cshtml *@
+
+@{
+    var avatarUrl = "https://i.pravatar.cc/150?img=12";
+    var firstName = "Arjun";
+    var lastName = "Mehta";
+    var username = "arjun_m";
+    var memberSince = "June 2023";
+    var totalOrders = 14;
+    var wishlistCount = 7;
+    var addressCount = 2;
+}
+
+<div class="profile-header-card fade-up">
+
+    @*{{!-- Avatar + Identity --}}*@
+    <div class="d-flex align-items-center gap-4 flex-wrap">
+
+        @*{{!-- Avatar with camera overlay --}}*@
+        <div class="avatar-wrap" onclick="triggerAvatarUpload()" title="Change photo">
+            <img src="@avatarUrl"
+                 alt="@firstName @lastName"
+                 class="avatar-img"
+                 id="avatarPreview" />
+            <div class="avatar-overlay">
+                <i class="bi bi-camera-fill"></i>
+            </div>
+        </div>
+        <input type="file" id="avatarInput" accept="image/*"
+               style="display:none" onchange="uploadAvatar(this)" />
+
+        @*{{!-- Name block --}}*@
+        <div class="flex-grow-1">
+            <div class="profile-name">@firstName @lastName</div>
+            <div class="profile-handle">@@@username</div>
+            <div class="profile-since">
+                <i class="bi bi-calendar3"></i>
+                Member since @memberSince
+            </div>
+        </div>
+
+        @*{{!-- Edit shortcut (desktop) --}}*@
+        <a href="#personalSection" class="btn-profile-outline d-none d-md-inline-flex">
+            <i class="bi bi-pencil"></i> Edit Profile
+        </a>
+    </div>
+
+    @*{{!-- Stats strip --}}*@
+    <div class="stats-strip">
+        <div class="stat-item">
+            <span class="stat-num" id="stat-orders">@totalOrders</span>
+            <span class="stat-label">Orders</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="stat-num" id="stat-wishlist">@wishlistCount</span>
+            <span class="stat-label">Saved</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="stat-num" id="stat-addresses">@addressCount</span>
+            <span class="stat-label">Addresses</span>
+        </div>
+    </div>
+
+</div>

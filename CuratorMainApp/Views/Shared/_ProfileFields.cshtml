@@ -1,0 +1,173 @@
+﻿@* Views/Shared/_ProfileFields.cshtml *@
+
+@{
+    var firstName = "Arjun";
+    var lastName  = "Mehta";
+    var username  = "arjun_m";
+    var email     = "arjun.mehta@email.com";
+    var phone     = "+91 98765 43210";
+}
+
+<div class="apple-card fade-up" id="personalSection">
+    <div class="apple-card-inner">
+
+        <span class="section-eyebrow">Personal Info</span>
+        <h2 class="section-title-sm mb-1">Your Details</h2>
+        <p class="section-sub-sm mb-4">
+            Click <i class="bi bi-pencil" style="font-size:.75rem"></i> on any field to edit.
+        </p>
+
+        @*{{!-- ══ FIRST NAME ══════════════════════════════════════════════ --}}*@
+        <div class="field-row" id="field-FirstName">
+            <div class="field-display">
+                <div class="field-meta">
+                    <span class="field-label">First Name</span>
+                    <span class="field-value" id="val-FirstName">@firstName</span>
+                </div>
+                <button class="field-edit-btn" onclick="startEdit('FirstName')"
+                        title="Edit first name">
+                    <i class="bi bi-pencil"></i>
+                </button>
+            </div>
+            <div class="field-edit-form" id="edit-FirstName">
+                <input class="apple-input field-input" type="text"
+                       id="input-FirstName" value="@firstName"
+                       placeholder="First name" maxlength="50"
+                       onkeydown="handleFieldKey(event,'FirstName')" />
+                <div class="field-edit-actions">
+                    <button class="field-save-btn" onclick="saveField('FirstName')">
+                        <i class="bi bi-check-lg"></i> Save
+                    </button>
+                    <button class="field-cancel-btn" onclick="cancelEdit('FirstName')">
+                        Cancel
+                    </button>
+                </div>
+                <span class="field-error" id="err-FirstName"></span>
+            </div>
+        </div>
+
+        @*{{!-- ══ LAST NAME ══════════════════════════════════════════════ --}}*@
+        <div class="field-row" id="field-LastName">
+            <div class="field-display">
+                <div class="field-meta">
+                    <span class="field-label">Last Name</span>
+                    <span class="field-value" id="val-LastName">@lastName</span>
+                </div>
+                <button class="field-edit-btn" onclick="startEdit('LastName')"
+                        title="Edit last name">
+                    <i class="bi bi-pencil"></i>
+                </button>
+            </div>
+            <div class="field-edit-form" id="edit-LastName">
+                <input class="apple-input field-input" type="text"
+                       id="input-LastName" value="@lastName"
+                       placeholder="Last name" maxlength="50"
+                       onkeydown="handleFieldKey(event,'LastName')" />
+                <div class="field-edit-actions">
+                    <button class="field-save-btn" onclick="saveField('LastName')">
+                        <i class="bi bi-check-lg"></i> Save
+                    </button>
+                    <button class="field-cancel-btn" onclick="cancelEdit('LastName')">
+                        Cancel
+                    </button>
+                </div>
+                <span class="field-error" id="err-LastName"></span>
+            </div>
+        </div>
+
+        @*{{!-- ══ USERNAME ══════════════════════════════════════════════ --}}*@
+        <div class="field-row" id="field-Username">
+            <div class="field-display">
+                <div class="field-meta">
+                    <span class="field-label">Username</span>
+                    <span class="field-value" id="val-Username">@@@username</span>
+                </div>
+                <button class="field-edit-btn" onclick="startEdit('Username')"
+                        title="Edit username">
+                    <i class="bi bi-pencil"></i>
+                </button>
+            </div>
+            <div class="field-edit-form" id="edit-Username">
+                <div class="input-prefix-wrap">
+                    <span class="input-prefix">@@</span>
+                    <input class="apple-input field-input" type="text"
+                           id="input-Username" value="@username"
+                           placeholder="username" maxlength="50"
+                           style="padding-left:32px"
+                           onkeydown="handleFieldKey(event,'Username')" />
+                </div>
+                <div class="field-edit-actions">
+                    <button class="field-save-btn" onclick="saveField('Username')">
+                        <i class="bi bi-check-lg"></i> Save
+                    </button>
+                    <button class="field-cancel-btn" onclick="cancelEdit('Username')">
+                        Cancel
+                    </button>
+                </div>
+                <span class="field-error" id="err-Username"></span>
+            </div>
+        </div>
+
+        @*{{!-- ══ EMAIL ════════════════════════════════════════════════ --}}*@
+        <div class="field-row" id="field-Email">
+            <div class="field-display">
+                <div class="field-meta">
+                    <span class="field-label">Email Address</span>
+                    <span class="field-value" id="val-Email">@email</span>
+                    <span class="verified-badge">
+                        <i class="bi bi-patch-check-fill"></i> Verified
+                    </span>
+                </div>
+                <button class="field-edit-btn" onclick="startEdit('Email')"
+                        title="Edit email">
+                    <i class="bi bi-pencil"></i>
+                </button>
+            </div>
+            <div class="field-edit-form" id="edit-Email">
+                <input class="apple-input field-input" type="email"
+                       id="input-Email" value="@email"
+                       placeholder="email@example.com"
+                       onkeydown="handleFieldKey(event,'Email')" />
+                <div class="field-edit-actions">
+                    <button class="field-save-btn" onclick="saveField('Email')">
+                        <i class="bi bi-check-lg"></i> Save
+                    </button>
+                    <button class="field-cancel-btn" onclick="cancelEdit('Email')">
+                        Cancel
+                    </button>
+                </div>
+                <span class="field-error" id="err-Email"></span>
+            </div>
+        </div>
+
+        @*{{!-- ══ PHONE ════════════════════════════════════════════════ --}}*@
+        <div class="field-row" id="field-Phone" style="border-bottom:none">
+            <div class="field-display">
+                <div class="field-meta">
+                    <span class="field-label">Phone Number</span>
+                    <span class="field-value" id="val-Phone">@phone</span>
+                </div>
+                <button class="field-edit-btn" onclick="startEdit('Phone')"
+                        title="Edit phone">
+                    <i class="bi bi-pencil"></i>
+                </button>
+            </div>
+            <div class="field-edit-form" id="edit-Phone">
+                <input class="apple-input field-input" type="tel"
+                       id="input-Phone" value="@phone"
+                       placeholder="+91 98765 43210"
+                       onkeydown="handleFieldKey(event,'Phone')" />
+                <div class="field-edit-actions">
+                    <button class="field-save-btn" onclick="saveField('Phone')">
+                        <i class="bi bi-check-lg"></i> Save
+                    </button>
+                    <button class="field-cancel-btn" onclick="cancelEdit('Phone')">
+                        Cancel
+                    </button>
+                </div>
+                <span class="field-error" id="err-Phone"></span>
+            </div>
+        </div>
+
+    </div>
+</div>

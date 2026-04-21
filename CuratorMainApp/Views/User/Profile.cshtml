@@ -1,0 +1,109 @@
+﻿@* Views/Account/Profile.cshtml *@
+@{
+    ViewData["Title"] = "My Profile";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/curator-profile.css" asp-append-version="true" />
+}
+
+<div class="container-xl px-4 py-4" style="padding-top:24px!important">
+    <div class="row g-4">
+
+        @*{{!-- ── SIDE NAV (desktop only) ── --}}*@
+        <div class="col-12 col-lg-3 d-none d-lg-block">
+            <div class="profile-sidenav">
+                <a href="#personalSection" class="sidenav-item active">
+                    <i class="bi bi-person"></i>
+                    <span>Personal Info</span>
+                </a>
+                <a href="#addressSection" class="sidenav-item">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>Addresses</span>
+                    <span class="sidenav-count"></span>
+                </a>
+                <a href="/Order/History" class="sidenav-item">
+                    <i class="bi bi-box-seam"></i>
+                    <span>My Orders</span>
+                    <span class="sidenav-count"></span>
+                </a>
+                <a href="/Wishlist" class="sidenav-item">
+                    <i class="bi bi-heart"></i>
+                    <span>Wishlist</span>
+                    <span class="sidenav-count"></span>
+                </a>
+                <a href="#" class="sidenav-item">
+                    <i class="bi bi-shield-lock"></i>
+                    <span>Security</span>
+                </a>
+                <a href="/Account/Logout" class="sidenav-item sidenav-danger">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sign Out</span>
+                </a>
+            </div>
+        </div>
+
+        @*{{!-- ── MAIN CONTENT ── --}}*@
+        <div class="col-12 col-lg-9">
+
+            @*{{!-- 1. Profile Header — avatar, name, stats --}}*@
+            @Html.Partial("_ProfileHeader")
+
+            @*{{!-- 2. Quick links grid --}}*@
+            <div class="quick-links-grid fade-up">
+                <a href="/Order/History" class="quick-link-card">
+                    <div class="ql-icon">📦</div>
+                    <span class="ql-title">My Orders</span>
+                    <span class="ql-sub">14 orders placed</span>
+                </a>
+                <a href="/Wishlist" class="quick-link-card">
+                    <div class="ql-icon">❤️</div>
+                    <span class="ql-title">Wishlist</span>
+                    <span class="ql-sub">7 saved items</span>
+                </a>
+                <a href="/Order/Track" class="quick-link-card">
+                    <div class="ql-icon">🚚</div>
+                    <span class="ql-title">Track Order</span>
+                    <span class="ql-sub">Check live status</span>
+                </a>
+                <a href="#" class="quick-link-card">
+                    <div class="ql-icon">🔒</div>
+                    <span class="ql-title">Security</span>
+                    <span class="ql-sub">Password &amp; 2FA</span>
+                </a>
+            </div>
+
+            @*{{!-- 3. Editable fields — firstName, lastName, username, email, phone --}}*@
+            @Html.Partial("_ProfileFields")
+
+            <div style="height:12px"></div>
+
+            @*{{!-- 4. Addresses — cards + add/edit modal --}}*@
+            @Html.Partial("_ProfileAddresses")
+
+            @*{{!-- 5. Danger zone --}}*@
+            <div class="danger-zone fade-up" id="dangerSection">
+                <span class="section-eyebrow" style="color:var(--red)">Danger Zone</span>
+                <h5 class="danger-title">Account Actions</h5>
+                <p class="danger-sub">These actions cannot be undone. Please be certain.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="/Account/Logout" class="btn-danger-ghost">
+                        <i class="bi bi-box-arrow-right"></i> Sign Out
+                    </a>
+                    <button class="btn-danger-ghost"
+                            onclick="if(confirm('Delete your account? This cannot be undone.')){}">
+                        <i class="bi bi-trash3"></i> Delete Account
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script src="~/Scripts/curator-profile.js" asp-append-version="true"></script>
+}

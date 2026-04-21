@@ -1,0 +1,604 @@
+﻿/* =============================================
+   CURATOR — Profile Page Styles
+   wwwroot/css/curator-profile.css
+   Only loaded on /Account/Profile via @section Styles
+   ============================================= */
+
+/* =============================================
+   PROFILE HEADER CARD  (_ProfileHeader.cshtml)
+   ============================================= */
+.profile-header-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xs);
+    padding: 28px;
+    margin-bottom: 20px;
+}
+
+/* Avatar */
+.avatar-wrap {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.avatar-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--white);
+    box-shadow: var(--shadow-sm);
+    transition: filter .25s;
+}
+
+.avatar-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0,0,0,.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.1rem;
+    opacity: 0;
+    transition: opacity .2s;
+}
+
+.avatar-wrap:hover .avatar-overlay {
+    opacity: 1;
+}
+
+.avatar-wrap:hover .avatar-img {
+    filter: brightness(.75);
+}
+
+/* Name block */
+.profile-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1.1;
+}
+
+.profile-handle {
+    font-size: .85rem;
+    color: var(--blue);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.profile-since {
+    font-size: .75rem;
+    color: var(--gray-4);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Stats strip */
+.stats-strip {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gray-2);
+}
+
+.stat-item {
+    flex: 1;
+    text-align: center;
+}
+
+.stat-num {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--black);
+}
+
+.stat-label {
+    font-size: .7rem;
+    color: var(--gray-4);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.stat-divider {
+    width: 1px;
+    height: 36px;
+    background: var(--gray-2);
+    flex-shrink: 0;
+}
+
+/* Small outline button */
+.btn-apple-outline-sm {
+    background: transparent;
+    color: var(--blue);
+    border: 1.5px solid var(--blue);
+    border-radius: 980px;
+    padding: 8px 18px;
+    font-size: .82rem;
+    font-weight: 500;
+    font-family: var(--sf);
+    cursor: pointer;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+    .btn-apple-outline-sm:hover {
+        background: var(--blue);
+        color: #fff;
+    }
+
+/* Small blue button (address section) */
+.btn-apple-blue-sm {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 980px;
+    padding: 8px 18px;
+    font-size: .82rem;
+    font-weight: 500;
+    font-family: var(--sf);
+    cursor: pointer;
+    transition: background .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+    .btn-apple-blue-sm:hover {
+        background: var(--blue-h);
+    }
+
+/* =============================================
+   PROFILE SIDE NAV  (quick links)
+   ============================================= */
+.profile-sidenav {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xs);
+    overflow: hidden;
+    position: sticky;
+    top: 80px;
+}
+
+.sidenav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    font-size: .88rem;
+    font-weight: 500;
+    color: var(--black);
+    border-bottom: 1px solid var(--gray-2);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    text-decoration: none;
+}
+
+    .sidenav-item:last-child {
+        border-bottom: none;
+    }
+
+    .sidenav-item:hover {
+        background: var(--gray-1);
+    }
+
+    .sidenav-item.active {
+        color: var(--blue);
+        background: #f0f7ff;
+        font-weight: 600;
+    }
+
+    .sidenav-item i {
+        font-size: 1rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    .sidenav-item .sidenav-badge {
+        margin-left: auto;
+        background: var(--black);
+        color: #fff;
+        font-size: .6rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 980px;
+    }
+
+/* =============================================
+   EDITABLE FIELD ROWS  (_ProfileFields.cshtml)
+   ============================================= */
+.field-row {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--gray-2);
+    transition: background .15s;
+}
+
+    .field-row:hover {
+        background: transparent;
+    }
+
+.field-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.field-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.field-label {
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--gray-4);
+    display: block;
+    margin-bottom: 3px;
+}
+
+.field-value {
+    font-size: .95rem;
+    font-weight: 500;
+    color: var(--black);
+    display: block;
+    letter-spacing: -.01em;
+}
+
+/* Verified badge */
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #e8f9ed;
+    color: #1b873f;
+    font-size: .65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 980px;
+    margin-top: 4px;
+}
+
+/* Edit pencil button */
+.field-edit-btn {
+    background: var(--gray-1);
+    border: none;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--gray-4);
+    font-size: .85rem;
+    transition: all .2s;
+    flex-shrink: 0;
+}
+
+    .field-edit-btn:hover {
+        background: var(--gray-2);
+        color: var(--black);
+    }
+
+/* Edit form (appears below display row) */
+.field-edit-form {
+    margin-top: 12px;
+    animation: slideDown .2s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.field-input {
+    margin-bottom: 10px;
+}
+
+.field-edit-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.field-save-btn {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 980px;
+    padding: 8px 18px;
+    font-size: .82rem;
+    font-weight: 600;
+    font-family: var(--sf);
+    cursor: pointer;
+    transition: background .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+    .field-save-btn:hover {
+        background: var(--blue-h);
+    }
+
+.field-cancel-btn {
+    background: none;
+    border: none;
+    color: var(--gray-4);
+    font-size: .82rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--sf);
+    padding: 0;
+    transition: color .15s;
+}
+
+    .field-cancel-btn:hover {
+        color: var(--black);
+    }
+
+.field-error {
+    display: block;
+    font-size: .72rem;
+    color: var(--red);
+    margin-top: 4px;
+    min-height: 16px;
+}
+
+/* @ prefix for username input */
+.input-prefix-wrap {
+    position: relative;
+}
+
+.input-prefix {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: .9rem;
+    color: var(--gray-4);
+    font-weight: 600;
+    z-index: 1;
+}
+
+/* =============================================
+   ADDRESS PROFILE CARDS  (_ProfileAddresses.cshtml)
+   ============================================= */
+.addr-profile-card {
+    background: var(--gray-1);
+    border: 1.5px solid var(--gray-2);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    transition: all .2s;
+    position: relative;
+}
+
+    .addr-profile-card:hover {
+        box-shadow: var(--shadow-sm);
+        border-color: var(--gray-3);
+    }
+
+    .addr-profile-card.default {
+        background: #f0f7ff;
+        border-color: var(--blue);
+    }
+
+.addr-type-icon {
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+.addr-type-label {
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--gray-5);
+}
+
+.default-badge {
+    display: inline-block;
+    background: var(--blue);
+    color: #fff;
+    font-size: .62rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 980px;
+    letter-spacing: .05em;
+    margin-left: 6px;
+}
+
+/* Address action buttons row */
+.addr-action-btns {
+    display: flex;
+    gap: 4px;
+}
+
+.addr-action-btn {
+    background: var(--white);
+    border: 1.5px solid var(--gray-2);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: .82rem;
+    color: var(--gray-4);
+    transition: all .15s;
+}
+
+    .addr-action-btn:hover {
+        background: var(--gray-2);
+        color: var(--black);
+        border-color: var(--gray-3);
+    }
+
+    .addr-action-btn:disabled {
+        cursor: default;
+        opacity: .6;
+    }
+
+    .addr-action-btn.default-star {
+        color: var(--orange);
+        border-color: var(--orange);
+    }
+
+    .addr-action-btn.delete-btn:hover {
+        background: #fff0f0;
+        color: var(--red);
+        border-color: var(--red);
+    }
+
+.addr-full-line {
+    font-size: .88rem;
+    font-weight: 500;
+    color: var(--black);
+    line-height: 1.4;
+}
+
+    .addr-full-line.secondary {
+        color: var(--gray-4);
+        font-weight: 400;
+    }
+
+.addr-city-line {
+    font-size: .82rem;
+    color: var(--gray-5);
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.addr-audit {
+    font-size: .65rem;
+    color: var(--gray-4);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--gray-2);
+}
+
+/* =============================================
+   QUICK LINKS STRIP (orders, wishlist, etc.)
+   ============================================= */
+.quick-links-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.quick-link-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    box-shadow: var(--shadow-xs);
+    cursor: pointer;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .25s;
+    text-decoration: none;
+    display: block;
+}
+
+    .quick-link-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+.ql-icon {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.ql-label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--black);
+    display: block;
+}
+
+.ql-sub {
+    font-size: .72rem;
+    color: var(--gray-4);
+}
+
+/* =============================================
+   DANGER ZONE (bottom of page)
+   ============================================= */
+.danger-zone {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xs);
+    padding: 24px;
+    border: 1.5px solid #ffe5e5;
+}
+
+.btn-danger-outline {
+    background: transparent;
+    color: var(--red);
+    border: 1.5px solid var(--red);
+    border-radius: 980px;
+    padding: 10px 20px;
+    font-size: .85rem;
+    font-weight: 600;
+    font-family: var(--sf);
+    cursor: pointer;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+    .btn-danger-outline:hover {
+        background: var(--red);
+        color: #fff;
+    }
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 991px) {
+    .profile-sidenav {
+        position: static;
+    }
+}
+
+@media (max-width: 575px) {
+    .quick-links-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .stats-strip {
+        gap: 0;
+    }
+
+    .profile-name {
+        font-size: 1.2rem;
+    }
+}
