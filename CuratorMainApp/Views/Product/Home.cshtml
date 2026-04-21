@@ -511,7 +511,7 @@
         function getFilteredProducts() {
             const activeCategory =
                 document.querySelector('.cat-pill.active')?.dataset.cat || "all";
-            let price = $('#priceRange').val();
+            let price = Number($('#priceRange').val());
 
             console.log("price_range",price);
             console.log("Sizes_list", SELECTED_SIZE_LIST)
@@ -519,7 +519,7 @@
             console.log("selectedBrands:", SELECTED_BRAND_LIST);
 
             // If all category + no brand selected → return all products
-            if (activeCategory === "all" && SELECTED_BRAND_LIST.length === 0 && SELECTED_SIZE_LIST.length === 0) {
+            if (activeCategory === "all" && SELECTED_BRAND_LIST.length === 0 && SELECTED_SIZE_LIST.length === 0 && price === 0) {
                 return PRODUCTS;
             }
 
@@ -536,12 +536,13 @@
                     SELECTED_SIZE_LIST.length === 0 ||
                     p.VariantList?.some(v => SELECTED_SIZE_LIST.includes(v.SizeName))
                 )
-                //&&
+                &&
 
-                //(
-                //    price === 0 || p.price <= price
+                (
+                    price === 0 ||
+                    p.VariantList?.some(v => Number(v.Price) <= price)
                     
-                //)
+                )
             );
 
             console.log("filteredProducts:", filteredProducts);
