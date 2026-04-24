@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web;
 using DataAccessLayer.Dapper;
 using Product.Models;
+using Product.DTOs;
 
 
 namespace Product.DAL
@@ -59,5 +60,7 @@ namespace Product.DAL
             },param);
 
         }
+
+        
     }
 }

@@ -241,6 +241,7 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\search.js" />
+    <Content Include="SP\spCartItems_GetList.sql" />
     <Content Include="SP\CreateTable.sql" />
     <Content Include="SP\Ecommerce.sql" />
     <Content Include="SP\Product_Color_Size_LookUp.sql" />

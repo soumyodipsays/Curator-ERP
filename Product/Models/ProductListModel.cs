@@ -103,7 +103,7 @@ namespace Product.Models
     public class SideFilterSize
     {
         public int SizeID { get; set; }
-        public string Size {  get; set; }
+        public string Size { get; set; }
     }
 
     public class SideFilterModel
@@ -111,4 +111,6 @@ namespace Product.Models
         public List<SideFilterBrand> BrandList { get; set; }
         public List<SideFilterSize> SizeList { get; set; }
     }
+
+    
 }

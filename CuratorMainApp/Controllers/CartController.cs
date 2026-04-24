@@ -1,5 +1,4 @@
-﻿// Controllers/CartController.cs
-// ─────────────────────────────────────────────────────────────────────────────
+﻿// ─────────────────────────────────────────────────────────────────────────────
 // Handles: /Cart          → Page 1 of checkout (cart view)
 //          /Cart/Add      → AJAX: add product to cart
 //          /Cart/UpdateQty→ AJAX: change quantity  (tblOrderDetail.Quantity)

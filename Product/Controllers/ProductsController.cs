@@ -16,22 +16,6 @@ namespace Product.Controllers
     {
         private readonly ProductListDAL product_list_dal = new ProductListDAL();
 
-        // GET: Products
-        //public JsonResult GetProducts()
-        //{
-        //    var products = new List<Models.ProductListModel>{ new Models.ProductListModel
-        //    {
-        //        ProductID = 1,
-        //        ProductName = "Sculpted Wool Overcoat",
-        //        Price = 890,
-        //        ImageURL = "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&q=80",
-        //        Rating = 4.9,
-        //    }
-        //};
-
-        //    return Json(products, JsonRequestBehavior.AllowGet);
-        //}
-
         public JsonResult GetProductList(long CustomerID)
         {
             var result = product_list_dal.GetProductList(CustomerID);
