@@ -7,14 +7,18 @@
             sessionStorage.getItem("token");
     }
 
-    function saveToken(token, remember) {
+    function saveToken(token, remember, UserID) {
 
         clear();
 
-        if (remember)
+        if (remember) {
             localStorage.setItem("token", token);
-        else
+        }
+        else {
             sessionStorage.setItem("token", token);
+        }
+
+        localStorage.setItem("UserID", UserID);
     }
     function login(token, remember) {
 

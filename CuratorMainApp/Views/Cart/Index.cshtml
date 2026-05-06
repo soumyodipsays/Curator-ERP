@@ -1,5 +1,6 @@
 ﻿@model Curator.Web.Models.ViewModels.CartViewModel
 @using System.Linq
+@using System.Configuration
 
 @* Views/Cart/Index.cshtml *@
 @* Controller: CartController.Index() *@
@@ -8,6 +9,8 @@
     ViewBag.Title = "Your Bag";
     ViewBag.NavData = Model.Nav;
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var productURL = ConfigurationManager.AppSettings["ProductServiceBaseUrl"];
 }
 
 @section Styles {
@@ -130,5 +133,30 @@
             }
 
         });
+    </script>
+
+    <script>
+
+        function getCartDetailsByUserID(userId) {
+
+            $.ajax({
+                url: `@productURL/Cart/GetCartDetails`,
+                type: 'GET',
+                data: {
+                    UserID: userId
+                },
+                success: function (response) {
+                    console.log("S-response: ", response);
+                    loadCart(response)
+                },
+                error: function (response) {
+                    console.log("E-response: ", response);
+                },
+            })
+        }
+
+        $(document).ready(function () {
+            getCartDetailsByUserID(29);
+        })
     </script>
 }

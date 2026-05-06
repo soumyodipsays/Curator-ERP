@@ -10,6 +10,7 @@ namespace Product.Models
         public long CartID { get; set; }
         public long UserID { get; set; }
         public long ProductID { get; set; }
+        public string ProductName { get; set; }
         public int Quantity { get; set; }
         public DateTime? AddDate { get; set; }
         public bool IsBuy { get; set; }
@@ -22,5 +23,9 @@ namespace Product.Models
         public DateTime CreatedOn { get; set; }
         public string ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
+        public string ImageURL { get; set; }
+        public decimal Price { get; set; }
+        public decimal Discount { get; set; }
+        public string BrandName { get; set; }
     }
 }

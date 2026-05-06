@@ -175,7 +175,7 @@
 
                     showMessage("Login successful.", "success");
 
-                    Auth.login(res.AccessToken, true);
+                    Auth.login(res.AccessToken, true, res.User.UserID);
 
                     setTimeout(function () {
                         window.location.href =
