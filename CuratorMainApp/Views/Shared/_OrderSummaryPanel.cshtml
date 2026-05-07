@@ -33,8 +33,8 @@
             Subtotal (@Model.ItemCount items)
         </span>
 
-        <span class="summary-value">
-            $@Model.Amount.ToString("N0")
+        <span class="summary-value green">
+            ₹<span id="sub-total-amt"></span>
         </span>
     </div>
 
@@ -44,7 +44,7 @@
             <span class="summary-label">Product Discount</span>
 
             <span class="summary-value green" id="discountAmt">
-                -$@Model.DiscountAmount.ToString("N0")
+                - ₹<span id="discountAmt-span"></span>
             </span>
         </div>
     }
@@ -57,8 +57,8 @@
 
         <span class="summary-value green" id="couponAmt">
             @(Model.CouponAmount > 0
-                ? "-$" + Model.CouponAmount.ToString("N0")
-                : "-$0")
+                ? "-₹" + Model.CouponAmount.ToString("N0")
+                : "-₹0")
         </span>
     </div>
 
@@ -78,7 +78,7 @@
         <span>Total</span>
 
         <span id="totalAmt">
-            $@Model.PaymentAmount.ToString("N0")
+            ₹ <span id="total-amt-span"></span>
         </span>
     </div>
 
@@ -173,3 +173,43 @@
     </div>
 
 </div>
+
+
+<script>
+
+function calculateSubTotal(cartItems) { 
+
+    const initialAmount = 0;
+    const subTotal = cartItems.reduce(
+        (acc, currVal) => acc + currVal.Price,
+        initialAmount
+    );
+
+    console.log(subTotal);
+    return subTotal;
+}
+
+function calculateDiscountedPrice(cartItems) { 
+
+    const initialDiscountAmount = 0;
+    const totalDiscountAmount = cartItems.reduce(
+        (acc, currVal) => acc + countDisCount(currVal.IsInrOrPercentage, currVal.Price, currVal.Discount),
+        initialDiscountAmount
+    );
+
+    console.log("Discount total: ", totalDiscountAmount);
+    return totalDiscountAmount;
+}
+
+function renderSummaryCard(cartItems) { 
+    const subtotal = calculateSubTotal(cartItems)
+    const totalDiscountPrice = calculateDiscountedPrice(cartItems)
+
+    const totalDiscount = subtotal - totalDiscountPrice;
+
+    $('#sub-total-amt').text(subtotal);
+    $('#discountAmt-span').text(totalDiscount);
+    $('#total-amt-span').text(totalDiscountPrice);
+
+}
+</script>

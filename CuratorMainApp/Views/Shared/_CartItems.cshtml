@@ -55,20 +55,41 @@ async function loadCart(items) {
                     ${item.color ? ` · ${item.color}` : ""}
                 </div>
 
-                <div>
-                    <button onclick="changeCartQty(${item.cartID}, -1)">-</button>
-                    <span>${item.Quantity}</span>
-                    <button onclick="changeCartQty(${item.cartID}, 1)">+</button>
+                <div class="qty-wrapper d-flex align-items-center gap-3 mt-1 flex-wrap">
+                    <button class="qty-btn-sm" onclick="changeCartQty(this, -1)">-</button>
+                    <span class="qty-num" data-qty=${item.Quantity}>${item.Quantity}</span>
+                    <button class="qty-btn-sm" onclick="changeCartQty(this, 1)">+</button>
 
-                    <button onclick="removeItem(${item.cartID})">Remove</button>
+                    <button class="btn-danger-ghost" onclick="removeItem(${item.CartID})">Remove</button>
                 </div>
             </div>
 
-            <div>
-                <div>${"₹"+ countDisCount(item.IsInrOrPercentage, item.Price, item.Discount)}</div>
-                ${item.Price ? `<div>${"₹"+item.Price}</div>` : ""}
-                ${item.Discount? `<div>-${item.type === "P"? item.Discount + "%": "₹" + item.Discount }</div>`: ""}
-            </div>
+            <div class="d-flex flex-column gap-1">
+
+                    <!-- Discounted Price -->
+                    <div class="fw-bold text-success fs-5">
+                        ${"₹" + countDisCount(item.IsInrOrPercentage, item.Price, item.Discount)}
+                    </div>
+
+                    <!-- Original Price -->
+                    ${item.Price ? `
+                        <div class="text-muted text-decoration-line-through small">
+                            ₹${item.Price}
+                        </div>
+                    ` : ""}
+
+                    <!-- Discount Badge -->
+                    ${item.Discount ? `
+                        <div>
+                            <span class="badge bg-danger">
+                                - ${item.type === "P"
+                                ? item.Discount + "%"
+                                : "₹" + item.Discount}
+                            </span>
+                        </div>
+                    ` : ""}
+
+                </div>
         </div>
     `).join('');
 }

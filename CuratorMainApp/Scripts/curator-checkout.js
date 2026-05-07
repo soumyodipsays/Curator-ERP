@@ -7,14 +7,21 @@
 /* ---- Cart: Quantity change ---- */
 /* Maps: tblOrderDetail.Quantity, tblOrderDetail.CartID */
 function changeCartQty(btn, delta) {
-    const qtyEl = btn.parentElement.querySelector('.qty-num');
-    const current = parseInt(qtyEl.dataset.qty);
+
+    btn = $(btn);
+
+    const container = btn.closest('.qty-wrapper');
+    const qtyEl = container.find('.qty-num');
+
+    const current = parseInt(qtyEl.attr('data-qty')) || 1;
+
     const newQty = Math.max(1, Math.min(10, current + delta));
-    qtyEl.dataset.qty = newQty;
-    qtyEl.textContent = newQty;
-    const cartId = btn.closest('[data-cart-id]')?.dataset.cartId;
-    // AJAX: $.post('/Cart/UpdateQty', { cartId, qty: newQty }, recalcTotals);
-    showToast('Quantity updated');
+
+    qtyEl.attr('data-qty', newQty);
+    qtyEl.text(newQty);
+
+    const cartId = btn.closest('[data-cart-id]').attr('data-cart-id');
+
 }
 
 /* ---- Cart: Remove item ---- */

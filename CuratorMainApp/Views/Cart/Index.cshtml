@@ -148,6 +148,9 @@
                 success: function (response) {
                     console.log("S-response: ", response);
                     loadCart(response)
+                    
+
+                    renderSummaryCard(response);
                 },
                 error: function (response) {
                     console.log("E-response: ", response);
@@ -156,7 +159,7 @@
         }
 
         $(document).ready(function () {
-            getCartDetailsByUserID(14);
+            getCartDetailsByUserID(29);
         })
     </script>
 }
