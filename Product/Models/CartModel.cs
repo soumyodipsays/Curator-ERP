@@ -27,5 +27,6 @@ namespace Product.Models
         public decimal Price { get; set; }
         public decimal Discount { get; set; }
         public string BrandName { get; set; }
+        public string IsInrOrPercentage { get; set; }
     }
 }

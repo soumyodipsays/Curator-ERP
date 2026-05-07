@@ -7,6 +7,19 @@
 <div id="cart-container"></div>
 
 <script>
+
+function countDisCount(type, realPrice, discount) {
+    const validTypes = ["I", "P"];
+
+    if (!validTypes.includes(type)) {
+        return "Invalid type";
+    }
+
+    return type === "I"
+        ? Math.round(realPrice - discount)
+        : Math.round(realPrice - (realPrice * discount / 100));
+}
+
 async function loadCart(items) {
     // const res = await fetch('/Cart/GetCartItems');
     // const items = await res.json();
@@ -52,9 +65,9 @@ async function loadCart(items) {
             </div>
 
             <div>
-                <div>$${item.Price}</div>
-                ${item.Price ? `<div>$${item.Price}</div>` : ""}
-                ${item.Discount ? `<div>-${item.Discount}%</div>` : ""}
+                <div>${"₹"+ countDisCount(item.IsInrOrPercentage, item.Price, item.Discount)}</div>
+                ${item.Price ? `<div>${"₹"+item.Price}</div>` : ""}
+                ${item.Discount? `<div>-${item.type === "P"? item.Discount + "%": "₹" + item.Discount }</div>`: ""}
             </div>
         </div>
     `).join('');
