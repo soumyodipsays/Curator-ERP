@@ -4,38 +4,54 @@
    Only loaded on checkout pages via @section Scripts
    ============================================= */
 
+// --- Core Cart Actions ---
 /* ---- Cart: Quantity change ---- */
 /* Maps: tblOrderDetail.Quantity, tblOrderDetail.CartID */
-function changeCartQty(btn, delta) {
+window.changeCartQty = async function (cartId, change) {
+    const item = CART_ITEMS.find(x => x.CartID === cartId);
 
-    btn = $(btn);
+    if (!item) return;
 
-    const container = btn.closest('.qty-wrapper');
-    const qtyEl = container.find('.qty-num');
+    const newQuantity = item.Quantity + change;
 
-    const current = parseInt(qtyEl.attr('data-qty')) || 1;
+    if (newQuantity < 1) {
+        return;
+    }
 
-    const newQty = Math.max(1, Math.min(10, current + delta));
+    item.Quantity = newQuantity;
+    renderCart();
+    renderSummaryCard(CART_ITEMS);
 
-    qtyEl.attr('data-qty', newQty);
-    qtyEl.text(newQty);
+}
 
-    const cartId = btn.closest('[data-cart-id]').attr('data-cart-id');
+function countDiscount(type, realPrice, discount, qty) {
+    const validTypes = ["I", "P"];
 
+    if (!validTypes.includes(type)) {
+        return realPrice;
+    }
+
+    return type === "I"
+        ? (qty * realPrice) - discount
+        : (realPrice * qty) - ((realPrice * qty) * discount / 100);
 }
 
 /* ---- Cart: Remove item ---- */
 /* Maps: tblOrderDetail.CartID */
-function removeItem(btn) {
-    const item = btn.closest('.cart-item');
-    const cartId = item.dataset.cartId;
-    item.style.opacity = '0';
-    item.style.transform = 'translateX(20px)';
-    item.style.transition = 'all .3s';
-    setTimeout(() => item.remove(), 300);
-    // AJAX: $.post('/Cart/Remove', { cartId }, refreshCart);
-    showToast('Item removed', 'bi-trash3', '#ff3b30');
+window.removeItem = async function (cartId) {
+    CART_ITEMS = CART_ITEMS.filter(x => x.CartID !== cartId);
+    renderCart();
+
+    try {
+        // Make sure this matches your actual C# route
+        await fetch(`/Cart/RemoveItem?cartId=${cartId}`, {
+            method: 'POST'
+        });
+    } catch (err) {
+        console.error("Failed to remove from database", err);
+    }
 }
+
 
 /* ---- Cart: Coupon ---- */
 /* Maps: tblOrder.CouponAmount, tblOrder.PaymentAmount */
