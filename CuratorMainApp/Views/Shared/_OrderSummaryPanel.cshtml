@@ -176,40 +176,40 @@
 
 
 <script>
+    function calculateSubTotal(CART_ITEMS) {
+        const initialAmount = 0;
+        const subTotal = CART_ITEMS.reduce(
+            (acc, currVal) => acc + (currVal.Price * currVal.Quantity),
+            initialAmount
+        );
 
-function calculateSubTotal(cartItems) { 
+        console.log("Subtotal: ", subTotal);
+        return subTotal;
+    }
 
-    const initialAmount = 0;
-    const subTotal = cartItems.reduce(
-        (acc, currVal) => acc + currVal.Price,
-        initialAmount
-    );
+    function calculateDiscountedPrice(CART_ITEMS) {
+        const initialDiscountAmount = 0;
+        const totalDiscountAmount = CART_ITEMS.reduce(
+            (acc, currVal) => acc + (countDiscount(currVal.IsInrOrPercentage, currVal.Price, currVal.Discount,currVal.Quantity)),
+            initialDiscountAmount
+        );
 
-    console.log(subTotal);
-    return subTotal;
-}
+        console.log("Discount total: ", totalDiscountAmount);
+        return totalDiscountAmount;
+    }
 
-function calculateDiscountedPrice(cartItems) { 
+    function renderSummaryCard(CART_ITEMS) {
+        // Failsafe: if the array is empty or undefined, do nothing
+        if (!CART_ITEMS || CART_ITEMS.length === 0) return;
 
-    const initialDiscountAmount = 0;
-    const totalDiscountAmount = cartItems.reduce(
-        (acc, currVal) => acc + countDisCount(currVal.IsInrOrPercentage, currVal.Price, currVal.Discount),
-        initialDiscountAmount
-    );
+        const subtotal = calculateSubTotal(CART_ITEMS);
+        const totalDiscountPrice = calculateDiscountedPrice(CART_ITEMS);
 
-    console.log("Discount total: ", totalDiscountAmount);
-    return totalDiscountAmount;
-}
+        const totalDiscount = subtotal - totalDiscountPrice;
 
-function renderSummaryCard(cartItems) { 
-    const subtotal = calculateSubTotal(cartItems)
-    const totalDiscountPrice = calculateDiscountedPrice(cartItems)
-
-    const totalDiscount = subtotal - totalDiscountPrice;
-
-    $('#sub-total-amt').text(subtotal);
-    $('#discountAmt-span').text(totalDiscount);
-    $('#total-amt-span').text(totalDiscountPrice);
-
-}
+        // Update the HTML spans and lock to 2 decimal places
+        $('#sub-total-amt').text(subtotal.toFixed(2));
+        $('#discountAmt-span').text(totalDiscount.toFixed(2));
+        $('#total-amt-span').text(totalDiscountPrice.toFixed(2));
+    }
 </script>
