@@ -3,10 +3,10 @@ using System;
 using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
-using Auth.DAL; 
 
 namespace Auth.Filters
 {
@@ -16,9 +16,10 @@ namespace Auth.Filters
         {
             try
             {
-                string authHeader = httpContext.Request.Headers["Authorization"];
+                string authHeader =
+                    httpContext.Request.Headers["Authorization"];
 
-                if (string.IsNullOrEmpty(authHeader))
+                if (string.IsNullOrWhiteSpace(authHeader))
                     return false;
 
                 if (!authHeader.StartsWith("Bearer "))
@@ -26,13 +27,17 @@ namespace Auth.Filters
 
                 string token = authHeader.Substring(7);
 
-                var secret = ConfigurationManager.AppSettings["JwtSecret"];
-                var issuer = ConfigurationManager.AppSettings["JwtIssuer"];
+                string secret =
+                    ConfigurationManager.AppSettings["JwtSecret"];
+
+                string issuer =
+                    ConfigurationManager.AppSettings["JwtIssuer"];
 
                 var tokenHandler = new JwtSecurityTokenHandler();
+
                 var key = Encoding.UTF8.GetBytes(secret);
 
-                tokenHandler.ValidateToken(token,
+                var validationParameters =
                     new TokenValidationParameters
                     {
                         ValidateIssuer = true,
@@ -42,39 +47,61 @@ namespace Auth.Filters
                         ValidAudience = issuer,
 
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(key),
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(key),
 
                         ValidateLifetime = true,
+
                         ClockSkew = TimeSpan.Zero
-                    },
-                    out SecurityToken validatedToken);
+                    };
 
-                var jwtToken = (JwtSecurityToken)validatedToken;
-
-                long userId = Convert.ToInt64(
-                    jwtToken.Claims.First(x =>
-                    x.Type.Contains("nameidentifier")).Value
+                var principal = tokenHandler.ValidateToken(
+                    token,
+                    validationParameters,
+                    out SecurityToken validatedToken
                 );
 
-               
-                var _authDAL = new AuthDAL();
-                var user = _authDAL.GetUserById(userId);
+                var claims = principal.Claims;
 
-                if (user == null || !user.IsActive)
-                {
+                string userIdValue = claims
+                    .FirstOrDefault(x =>
+                        x.Type == ClaimTypes.NameIdentifier)
+                    ?.Value;
+
+                if (string.IsNullOrWhiteSpace(userIdValue))
                     return false;
-                }
 
-                // Save fresh DB values
-                httpContext.Items["UserID"] = user.UserID;
-                httpContext.Items["Email"] = user.Email;
-                httpContext.Items["UserName"] = user.UserName;
-                httpContext.Items["Role"] = user.UserTypeCode ?? "User";
+                long userId = Convert.ToInt64(userIdValue);
+
+                string email = claims
+                    .FirstOrDefault(x =>
+                        x.Type == ClaimTypes.Email)
+                    ?.Value;
+
+                string userName = claims
+                    .FirstOrDefault(x =>
+                        x.Type == ClaimTypes.Name)
+                    ?.Value;
+
+                string role = claims
+                    .FirstOrDefault(x =>
+                        x.Type == ClaimTypes.Role)
+                    ?.Value ?? "User";
+
+                // Store user info in request context
+                httpContext.Items["UserID"] = userId;
+                httpContext.Items["Email"] = email;
+                httpContext.Items["UserName"] = userName;
+                httpContext.Items["Role"] = role;
 
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine(
+                    "JWT ERROR: " + ex.Message
+                );
+
                 return false;
             }
         }
@@ -89,7 +116,8 @@ namespace Auth.Filters
                     success = false,
                     message = "Invalid or expired token"
                 },
-                JsonRequestBehavior = JsonRequestBehavior.AllowGet
+                JsonRequestBehavior =
+                    JsonRequestBehavior.AllowGet
             };
         }
     }

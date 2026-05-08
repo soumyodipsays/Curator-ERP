@@ -123,19 +123,20 @@ namespace Auth.Controllers
                 string token = jwt.GenerateToken(
                     user.UserID,
                     user.Email,
+                    user.UserName,
                     user.UserTypeCode
                 );
                 return Json(new LoginResponse
                 {
-                    Success = true,
-                    Message = "Login success",
-                    AccessToken = token,
-                    User = new
+                    success = true,
+                    message = "Login success",
+                    accessToken = token,
+                    user = new
                     {
-                        UserID = user.UserID,
-                        Email = user.Email,
-                        UserName = user.UserName,
-                        Role = user.Role ?? "User"
+                        userID = user.UserID,
+                        email = user.Email,
+                        userName = user.UserName,
+                        role = user.Role ?? "User"
                     }
                 });
             }
@@ -220,6 +221,7 @@ namespace Auth.Controllers
 
         }
 
+        [HttpPost]
         [JwtGuard]
         public JsonResult GetProfile()
         {
@@ -227,9 +229,10 @@ namespace Auth.Controllers
             {
                 success = true,
                 userId = HttpContext.Items["UserID"],
+                userName = HttpContext.Items["UserName"],
                 email = HttpContext.Items["Email"],
                 role = HttpContext.Items["Role"]
-            }, JsonRequestBehavior.AllowGet);
+            });
         }
 
         [HttpPost]
