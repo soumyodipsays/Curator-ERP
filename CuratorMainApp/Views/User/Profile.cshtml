@@ -1,7 +1,10 @@
 ﻿@* Views/Account/Profile.cshtml *@
+@using System.Configuration
 @{
     ViewData["Title"] = "My Profile";
-    //Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var authURL = ConfigurationManager.AppSettings["AuthServiceBaseUrl"];
+    
 }
 
 @section Styles {
@@ -55,12 +58,12 @@
                 <a href="/Order/History" class="quick-link-card">
                     <div class="ql-icon">📦</div>
                     <span class="ql-title">My Orders</span>
-                    <span class="ql-sub">14 orders placed</span>
+                    <span class="ql-sub"><span id="order-cnt">0</span> orders placed</span>
                 </a>
                 <a href="/Wishlist" class="quick-link-card">
                     <div class="ql-icon">❤️</div>
                     <span class="ql-title">Wishlist</span>
-                    <span class="ql-sub">7 saved items</span>
+                    <span class="ql-sub"><span id="cart-items-cnt">0</span> saved items</span>
                 </a>
                 <a href="/Order/Track" class="quick-link-card">
                     <div class="ql-icon">🚚</div>
@@ -106,4 +109,56 @@
 
 @section Scripts {
     <script src="~/Scripts/curator-profile.js" asp-append-version="true"></script>
+
+    <script>
+
+        function renderQuickLinkCards(orderCount, cartItemsCount) { 
+            $("#order-cnt").text(orderCount);
+            $("#cart-items-cnt").text(cartItemsCount);
+        }
+
+        function loadUserProfile(userID) { 
+            $.ajax({
+                url: '@authURL/User/GetMyProfile',
+                type: 'GET',
+                data: {
+                    UserID: userID
+                },
+                success: function (response) { 
+                    console.log("S-Response: ", response);
+                    renderProfileBasic(
+                        response.data.FirstName,
+                        response.data.LastName,
+                        response.data.UserName,
+                        response.data.CreatedOn,
+                        response.data.Avatar_url
+                    );
+                    renderProfileStats(
+                        response.data.OrderCount,
+                        response.data.CartProductCount,
+                        "2" //hardcoded
+                    )
+                    renderQuickLinkCards(
+                        response.data.OrderCount,
+                        response.data.CartProductCount
+                    );
+                    renderPersonalInfo(
+                        response.data.FirstName,
+                        response.data.LastName,
+                        response.data.UserName,
+                        response.data.Email,
+                        response.data.Mobile
+                    );
+                },
+                error: function (response) { 
+                    console.log("E-Response: ", response);
+                }
+            })
+        }
+
+        $(document).ready(function () { 
+            loadUserProfile(29)
+        })
+    </script>
 }
+

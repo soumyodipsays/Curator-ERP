@@ -18,8 +18,8 @@
 
         @*{{!-- Avatar with camera overlay --}}*@
         <div class="avatar-wrap" onclick="triggerAvatarUpload()" title="Change photo">
-            <img src="@avatarUrl"
-                 alt="@firstName @lastName"
+            <img src=""
+                 alt=""
                  class="avatar-img"
                  id="avatarPreview" />
             <div class="avatar-overlay">
@@ -31,11 +31,11 @@
 
         @*{{!-- Name block --}}*@
         <div class="flex-grow-1">
-            <div class="profile-name">@firstName @lastName</div>
-            <div class="profile-handle">@@@username</div>
+            <div class="profile-name" id="profile-name"></div>
+            <div class="profile-handle" id="profile-handle"></div>
             <div class="profile-since">
                 <i class="bi bi-calendar3"></i>
-                Member since @memberSince
+                Member since <span id="member-since"></span>
             </div>
         </div>
 
@@ -48,19 +48,52 @@
     @*{{!-- Stats strip --}}*@
     <div class="stats-strip">
         <div class="stat-item">
-            <span class="stat-num" id="stat-orders">@totalOrders</span>
+            <span class="stat-num" id="stat-orders"></span>
             <span class="stat-label">Orders</span>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-            <span class="stat-num" id="stat-wishlist">@wishlistCount</span>
+            <span class="stat-num" id="stat-wishlist"></span>
             <span class="stat-label">Saved</span>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-            <span class="stat-num" id="stat-addresses">@addressCount</span>
+            <span class="stat-num" id="stat-addresses"></span>
             <span class="stat-label">Addresses</span>
         </div>
     </div>
 
 </div>
+
+
+<script>
+
+    function formatDate(rawDateTime) { 
+        const timestamp = parseInt(rawDateTime.match(/\d+/)[0]);
+        const date = new Date(timestamp);
+
+        const formattedDate = date.toLocaleString('en-US', {
+            month: 'long',
+            year: 'numeric'
+        })
+        return formattedDate;
+    }
+
+    function renderProfileBasic(firstName, lastName, userName, createdOn, avatar_url) { 
+
+        $("#avatarPreview")
+            .attr("src", avatar_url)
+            .attr("alt", firstName + " " + lastName);
+
+        $("#profile-name").text(firstName + " " + lastName);
+        $("#profile-handle").text("@@" + userName);
+        $("#member-since").text(formatDate(createdOn));
+
+    }
+
+    function renderProfileStats(totalOrders, wishlistCount, addressCount) { 
+        $("#stat-orders").text(totalOrders);
+        $("#stat-wishlist").text(wishlistCount);
+        $("#stat-addresses").text(addressCount);
+    }
+</script>

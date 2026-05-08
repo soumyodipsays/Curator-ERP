@@ -1,11 +1,12 @@
 ﻿@* Views/Shared/_ProfileFields.cshtml *@
-
+@using System.Configuration
 @{
     var firstName = "Arjun";
-    var lastName  = "Mehta";
-    var username  = "arjun_m";
-    var email     = "arjun.mehta@email.com";
-    var phone     = "+91 98765 43210";
+    var lastName = "Mehta";
+    var username = "arjun_m";
+    var email = "arjun.mehta@email.com";
+    var phone = "+91 98765 43210";
+    var registerUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Register";
 }
 
 <div class="apple-card fade-up" id="personalSection">
@@ -22,7 +23,7 @@
             <div class="field-display">
                 <div class="field-meta">
                     <span class="field-label">First Name</span>
-                    <span class="field-value" id="val-FirstName">@firstName</span>
+                    <span class="field-value" id="val-FirstName"></span>
                 </div>
                 <button class="field-edit-btn" onclick="startEdit('FirstName')"
                         title="Edit first name">
@@ -31,7 +32,7 @@
             </div>
             <div class="field-edit-form" id="edit-FirstName">
                 <input class="apple-input field-input" type="text"
-                       id="input-FirstName" value="@firstName"
+                       id="input-FirstName" value=""
                        placeholder="First name" maxlength="50"
                        onkeydown="handleFieldKey(event,'FirstName')" />
                 <div class="field-edit-actions">
@@ -51,7 +52,7 @@
             <div class="field-display">
                 <div class="field-meta">
                     <span class="field-label">Last Name</span>
-                    <span class="field-value" id="val-LastName">@lastName</span>
+                    <span class="field-value" id="val-LastName"></span>
                 </div>
                 <button class="field-edit-btn" onclick="startEdit('LastName')"
                         title="Edit last name">
@@ -80,7 +81,7 @@
             <div class="field-display">
                 <div class="field-meta">
                     <span class="field-label">Username</span>
-                    <span class="field-value" id="val-Username">@@@username</span>
+                    <span class="field-value" id="val-Username"></span>
                 </div>
                 <button class="field-edit-btn" onclick="startEdit('Username')"
                         title="Edit username">
@@ -113,7 +114,7 @@
             <div class="field-display">
                 <div class="field-meta">
                     <span class="field-label">Email Address</span>
-                    <span class="field-value" id="val-Email">@email</span>
+                    <span class="field-value" id="val-Email"></span>
                     <span class="verified-badge">
                         <i class="bi bi-patch-check-fill"></i> Verified
                     </span>
@@ -145,7 +146,7 @@
             <div class="field-display">
                 <div class="field-meta">
                     <span class="field-label">Phone Number</span>
-                    <span class="field-value" id="val-Phone">@phone</span>
+                    <span class="field-value" id="val-Phone"></span>
                 </div>
                 <button class="field-edit-btn" onclick="startEdit('Phone')"
                         title="Edit phone">
@@ -171,3 +172,108 @@
 
     </div>
 </div>
+
+
+<script>
+    let profileData = {
+        userID: 1,
+        firstName: "",
+        lastName: "",
+        userName: "",
+        email: "",
+        phone: ""
+    };
+
+    function handleFieldKey(event, fieldName) {
+
+        // ENTER → Save
+        if (event.key === "Enter") {
+            saveField(fieldName);
+        }
+
+        // ESC → Cancel
+        if (event.key === "Escape") {
+            cancelEdit(fieldName);
+        }
+    }
+
+    function saveField(fieldName) {
+
+        const value = $("#input-" + fieldName).val();
+
+        // Update local object
+        switch (fieldName) {
+
+            case "FirstName":
+                profileData.firstName = value;
+                break;
+
+            case "LastName":
+                profileData.lastName = value;
+                break;
+
+            case "Username":
+                profileData.userName = value;
+                break;
+
+            case "Email":
+                profileData.email = value;
+                break;
+
+            case "Phone":
+                profileData.phone = value;
+                break;
+        }
+
+        $.ajax({
+            url: "@registerUrl",
+            type: "POST",
+
+            data: {
+                UserID: profileData.userID,
+                FirstName: profileData.firstName,
+                LastName: profileData.lastName,
+                UserName: profileData.userName,
+                Email: profileData.email
+            },
+
+            success: function (response) {
+
+                if (response.success) {
+
+                    if (fieldName === "Username") {
+                        $("#val-" + fieldName).text("@@" + value);
+                    }
+                    else {
+                        $("#val-" + fieldName).text(value);
+                    }
+
+                    cancelEdit(fieldName);
+                }
+            }
+        });
+    }
+
+    function renderPersonalInfo(firstName, lastName, userName, email, phone) {
+
+        profileData.firstName = firstName;
+        profileData.lastName = lastName;
+        profileData.userName = userName;
+        profileData.email = email;
+        profileData.phone = phone;
+
+        // ===== DISPLAY VALUES =====
+        $("#val-FirstName").text(firstName);
+        $("#val-LastName").text(lastName);
+        $("#val-Username").text("@@" + userName);
+        $("#val-Email").text(email);
+        $("#val-Phone").text(phone);
+
+        // ===== INPUT VALUES =====
+        $("#input-FirstName").val(firstName);
+        $("#input-LastName").val(lastName);
+        $("#input-Username").val(userName);
+        $("#input-Email").val(email);
+        $("#input-Phone").val(phone);
+    }
+</script>

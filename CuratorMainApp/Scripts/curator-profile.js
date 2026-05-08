@@ -25,68 +25,68 @@ function cancelEdit(field) {
 
 // Save field via AJAX
 // POST /Account/UpdateField { field, value }
-function saveField(field) {
-    const inputEl = document.getElementById(`input-${field}`);
-    const errEl = document.getElementById(`err-${field}`);
-    const value = inputEl.value.trim();
+// function saveField(field) {
+//     const inputEl = document.getElementById(`input-${field}`);
+//     const errEl = document.getElementById(`err-${field}`);
+//     const value = inputEl.value.trim();
 
-    errEl.textContent = '';
+//     errEl.textContent = '';
 
-    // Client-side validation
-    if (!value) { errEl.textContent = 'This field cannot be empty'; return; }
-    if (field === 'Email' && !value.includes('@')) {
-        errEl.textContent = 'Enter a valid email address'; return;
-    }
-    if (field === 'Username' && value.length < 3) {
-        errEl.textContent = 'Username must be at least 3 characters'; return;
-    }
-    if (field === 'Phone' && value.replace(/\D/g, '').length < 10) {
-        errEl.textContent = 'Enter a valid phone number'; return;
-    }
+//     Client-side validation
+//     if (!value) { errEl.textContent = 'This field cannot be empty'; return; }
+//     if (field === 'Email' && !value.includes('@')) {
+//         errEl.textContent = 'Enter a valid email address'; return;
+//     }
+//     if (field === 'Username' && value.length < 3) {
+//         errEl.textContent = 'Username must be at least 3 characters'; return;
+//     }
+//     if (field === 'Phone' && value.replace(/\D/g, '').length < 10) {
+//         errEl.textContent = 'Enter a valid phone number'; return;
+//     }
 
-    // Show saving state
-    const saveBtn = document.querySelector(`#edit-${field} .field-save-btn`);
-    saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
-    saveBtn.disabled = true;
+//     Show saving state
+//     const saveBtn = document.querySelector(`#edit-${field} .field-save-btn`);
+//     saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+//     saveBtn.disabled = true;
 
-    // AJAX call
-    // REPLACE with real endpoint in production
-    fetch('/Account/UpdateField', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ field, value })
-    })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                // Update display value
-                const display = document.getElementById(`val-${field}`);
-                display.textContent = field === 'Username' ? '@' + value : value;
+//     AJAX call
+//     REPLACE with real endpoint in production
+//     fetch('/Account/UpdateField', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+//         body: new URLSearchParams({ field, value })
+//     })
+//         .then(r => r.json())
+//         .then(data => {
+//             if (data.success) {
+//                 Update display value
+//                 const display = document.getElementById(`val-${field}`);
+//                 display.textContent = field === 'Username' ? '@' + value : value;
 
-                // Animate success
-                display.style.color = 'var(--green)';
-                setTimeout(() => display.style.color = '', 1500);
+//                 Animate success
+//                 display.style.color = 'var(--green)';
+//                 setTimeout(() => display.style.color = '', 1500);
 
-                cancelEdit(field);
-                showToast(`${field.replace(/([A-Z])/g, ' $1').trim()} updated ✓`);
-            } else {
-                errEl.textContent = data.message || 'Update failed';
-            }
-        })
-        .catch(() => {
-            // Demo fallback (no real backend)
-            const display = document.getElementById(`val-${field}`);
-            display.textContent = field === 'Username' ? '@' + value : value;
-            display.style.color = 'var(--green)';
-            setTimeout(() => display.style.color = '', 1500);
-            cancelEdit(field);
-            showToast(`${field.replace(/([A-Z])/g, ' $1').trim()} updated ✓`);
-        })
-        .finally(() => {
-            saveBtn.innerHTML = '<i class="bi bi-check-lg"></i> Save';
-            saveBtn.disabled = false;
-        });
-}
+//                 cancelEdit(field);
+//                 showToast(`${field.replace(/([A-Z])/g, ' $1').trim()} updated ✓`);
+//             } else {
+//                 errEl.textContent = data.message || 'Update failed';
+//             }
+//         })
+//         .catch(() => {
+//             Demo fallback (no real backend)
+//             const display = document.getElementById(`val-${field}`);
+//             display.textContent = field === 'Username' ? '@' + value : value;
+//             display.style.color = 'var(--green)';
+//             setTimeout(() => display.style.color = '', 1500);
+//             cancelEdit(field);
+//             showToast(`${field.replace(/([A-Z])/g, ' $1').trim()} updated ✓`);
+//         })
+//         .finally(() => {
+//             saveBtn.innerHTML = '<i class="bi bi-check-lg"></i> Save';
+//             saveBtn.disabled = false;
+//         });
+// }
 
 // Allow Enter key to save
 document.querySelectorAll('.field-input').forEach(input => {

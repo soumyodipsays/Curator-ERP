@@ -90,5 +90,14 @@ namespace Auth.DAL
 
             return _db.ExecuteSingleRow<UserDTO>(proc, parameters);
         }
+
+        public UserProfileDTO GetUserProfileByID(long userId) 
+        { 
+            var parameters = new DynamicParameters();
+            var proc = "sp_GetUserProfile";
+
+            parameters.Add("@UserID", userId);
+            return _db.ExecuteSingleRow<UserProfileDTO>(proc, parameters);
+        }
     }
 }

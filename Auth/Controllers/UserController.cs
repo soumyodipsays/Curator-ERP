@@ -228,7 +228,8 @@ namespace Auth.Controllers
                 success = true,
                 userId = HttpContext.Items["UserID"],
                 email = HttpContext.Items["Email"],
-                role = HttpContext.Items["Role"]
+                role = HttpContext.Items["Role"],
+                username = HttpContext.Items["UserName"]
             }, JsonRequestBehavior.AllowGet);
         }
 
@@ -252,6 +253,33 @@ namespace Auth.Controllers
                     success = true,
                     message = "Password reset successfully",
                 });
+            }
+            catch (SqlException sqlex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = sqlex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+        public JsonResult GetMyProfile(long UserID)
+        {
+            try
+            {
+                var result = _authDal.GetUserProfileByID(UserID);
+                return Json( new{
+                    success = true,
+                    data = result
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (SqlException sqlex)
             {

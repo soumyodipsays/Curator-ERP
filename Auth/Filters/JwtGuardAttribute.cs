@@ -24,7 +24,10 @@ namespace Auth.Filters
                 if (!authHeader.StartsWith("Bearer "))
                     return false;
 
-                string token = authHeader.Substring(7);
+                //string token = authHeader.Substring(7);
+                string token = authHeader
+                                        .Trim()
+                                        .Split(' ')[1];
 
                 var secret = ConfigurationManager.AppSettings["JwtSecret"];
                 var issuer = ConfigurationManager.AppSettings["JwtIssuer"];
