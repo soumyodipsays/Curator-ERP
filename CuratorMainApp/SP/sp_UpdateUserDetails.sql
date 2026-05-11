@@ -1,59 +1,70 @@
 CREATE OR ALTER PROC sp_UpdateUserDetails
-	@CustomerID udt_ID,
-	@UserID udt_ID,
+(
+    @CustomerID udt_ID,
+    @UserID udt_ID,
 
-	@UserName udt_User,
-	@FirstName udt_Name,
-	@LastName udt_Name,
+    @UserName udt_User = NULL,
+    @FirstName udt_Name = NULL,
+    @LastName udt_Name = NULL,
 
-	@PhoneNumber udt_Phone,
+    @PhoneNumber udt_Phone = NULL,
 
-	@Address1 udt_LongName,
-	@Address2 udt_LongName
+    @Address1 udt_LongName = NULL,
+    @Address2 udt_LongName = NULL
+)
 AS
 BEGIN
-	SET NOCOUNT ON;
+    SET NOCOUNT ON;
 
-	-- Update Username in tblUser
-	UPDATE tblUser
-	SET 
-		UserName = @UserName
-	WHERE UserID = @UserID;
+    DECLARE @ErrMsg VARCHAR(500);
 
-	-- Update firstName, lastName in tblPerson
-	UPDATE p
-	SET
-		p.FirstName = @FirstName,
-		p.LastName = @LastName
-	FROM tblPerson p
-	INNER JOIN tblUser u
-	ON p.PersonID = u.PersonID
-	WHERE u.UserID = @UserID
+    -- Check if user exists
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM tblUser u
+        WHERE u.UserID = @UserID
+    )
+    BEGIN
+        SELECT @ErrMsg = 'User not found.';
+        RAISERROR(@ErrMsg, 16, 1);
+        RETURN;
+    END;
 
-	-- Update Phone Number
-	UPDATE t
-	SET
-		t.Mobile = @PhoneNumber
-	FROM tblTelecom t
-	INNER JOIN tblUser u
-	ON t.PersonID = u.PersonID
-	WHERE u.UserID = @UserID
+    -- Update Username in tblUser
+    UPDATE tblUser
+    SET
+        UserName = ISNULL(@UserName, UserName)
+    WHERE UserID = @UserID;
 
-	-- Update addresses
-	UPDATE a
-	SET
-		a.Address1 = @Address1,
-		a.Address2 = @Address2
-	FROM tblAddress a
-	INNER JOIN tblUser u
-	ON a.PersonID = u.PersonID
-	WHERE u.UserID = @UserID
+    -- Update FirstName + LastName in tblPerson
+    UPDATE p
+    SET
+        p.FirstName = ISNULL(@FirstName, p.FirstName),
+        p.LastName = ISNULL(@LastName, p.LastName)
+    FROM tblPerson p
+    INNER JOIN tblUser u
+        ON p.PersonID = u.PersonID
+    WHERE u.UserID = @UserID;
+
+    -- Update Phone Number
+    UPDATE t
+    SET
+        t.Mobile = ISNULL(@PhoneNumber, t.Mobile)
+    FROM tblTelecom t
+    INNER JOIN tblUser u
+        ON t.PersonID = u.PersonID
+    WHERE u.UserID = @UserID;
+
+    -- Update Addresses
+    UPDATE a
+    SET
+        a.Address1 = ISNULL(@Address1, a.Address1),
+        a.Address2 = ISNULL(@Address2, a.Address2)
+    FROM tblAddress a
+    INNER JOIN tblUser u
+        ON a.PersonID = u.PersonID
+    WHERE u.UserID = @UserID;
+
 END;
-
-/** 
-	first name
-	last name
-	username
-	phone number
-	address -> home and office which is address1 and address2
-**/
+GO
