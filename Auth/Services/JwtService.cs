@@ -16,7 +16,11 @@ public class JwtService
         _issuer = ConfigurationManager.AppSettings["JwtIssuer"];
     }
 
-    public string GenerateToken(long userId, string email, string role)
+    public string GenerateToken(
+            long userId,
+            string email,
+            string userName,
+            string role)
     {
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_secret));
@@ -29,6 +33,7 @@ public class JwtService
         {
             new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
             new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.Name, userName),
             new Claim(ClaimTypes.Role, role ?? "User")
         };
 

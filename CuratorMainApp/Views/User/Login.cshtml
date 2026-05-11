@@ -170,33 +170,68 @@
             }),
 
             success: function (res) {
+                console.log("Login Response:", res);
 
-                if (res.Success) {
+                if (res.success) {
 
-                    showMessage("Login successful.", "success");
+                    showMessage(
+                        "Login successful.",
+                        "success"
+                    );
 
-                    Auth.login(res.AccessToken, true, res.User.UserID);
+                    Auth.login(
+                        res.accessToken,
+                        $('#remember').is(':checked'),
+                        res.user.userID
+                    );
 
-                    setTimeout(function () {
-                        window.location.href =
-                            '@Url.Action("Index","Home")';
-                    }, 800);
+                    Auth.validate(function () {
+
+                        setTimeout(function () {
+
+                            window.location.href =
+                                '@Url.Action("Index","Home")';
+
+                        }, 1000);
+
+                    });
                 }
                 else {
 
-                    if (res.message &&
-                        res.message.toLowerCase().includes("not verified")) {
+                    let errorMessage = "Login failed.";
 
-                        sessionStorage.setItem("pendingEmail", email);
+                    // Handle array validation messages
+                    if (Array.isArray(res.message)) {
 
-                        resendOtp(email);
+                        errorMessage = res.message.join("<br>");
+
                     }
-                    else {
-                        showMessage(res.message || "Login failed.", "danger");
+                    // Handle normal string messages
+                    else if (typeof res.message === "string") {
+
+                        errorMessage = res.message;
+
+                        if (
+                            res.message.toLowerCase()
+                                .includes("not verified")
+                        ) {
+
+                            sessionStorage.setItem(
+                                "pendingEmail",
+                                email
+                            );
+
+                            resendOtp(email);
+                            return;
+                        }
                     }
+
+                    showMessage(errorMessage, "danger");
                 }
 
-                $('#btnLogin').prop('disabled', false).text('Sign In');
+                $('#btnLogin')
+                    .prop('disabled', false)
+                    .text('Sign In');
             },
 
             error: function (xhr) {
@@ -243,9 +278,23 @@
     function showMessage(message, type) {
 
         $('#msgBox')
-            .removeClass('d-none alert-success alert-danger alert-warning')
+            .removeClass(
+                'd-none alert-success alert-danger alert-warning'
+            )
             .addClass('alert-' + type)
-            .text(message);
+            .html(message)
+            .hide()
+            .fadeIn();
+
+        // Auto hide success messages
+        if (type === "success") {
+
+            setTimeout(function () {
+
+                $('#msgBox').fadeOut();
+
+            }, 3000);
+        }
     }
 
     function clearErrors() {

@@ -1,15 +1,30 @@
 ﻿var Auth = (function () {
 
-    var profileUrl = window.AppConfig.profileUrl;
-    var loginPage = "/User/Login";
+    var config = window.AppConfig || {};
+
+    var profileUrl = config.profileUrl || "";
+    var loginPage = config.mvcLoginPage || "/";
+
+    console.log("Profile URL:", profileUrl);
+    console.log("Login Page:", loginPage);
+
     function getToken() {
+
         return localStorage.getItem("token") ||
             sessionStorage.getItem("token");
     }
 
     function saveToken(token, remember, UserID) {
 
+        console.log("Saving Token:", token);
+
         clear();
+
+        if (!token) {
+
+            console.error("TOKEN IS EMPTY");
+            return;
+        }
 
         if (remember) {
             localStorage.setItem("token", token);
@@ -20,13 +35,17 @@
 
         localStorage.setItem("UserID", UserID);
     }
-    function login(token, remember) {
 
-        saveToken(token, remember);
+    function login(token, remember, UserID) {
+
+        saveToken(token, remember, UserID);
     }
 
     function clear() {
+
         localStorage.removeItem("token");
+        localStorage.removeItem("UserID");
+
         sessionStorage.removeItem("token");
         sessionStorage.removeItem("currentUser");
     }
@@ -35,18 +54,42 @@
 
         clear();
 
-        if (msg)
+        if (msg) {
             alert(msg);
+        }
 
-        window.location.href = loginPage;
+        setTimeout(function () {
+            window.location.href = loginPage;
+        }, 2000);
     }
 
     function parseJwt(token) {
 
         try {
-            return JSON.parse(atob(token.split('.')[1]));
+
+            var base64Url = token.split('.')[1];
+
+            var base64 = base64Url
+                .replace(/-/g, '+')
+                .replace(/_/g, '/');
+
+            var jsonPayload = decodeURIComponent(
+                atob(base64)
+                    .split('')
+                    .map(function (c) {
+
+                        return '%' + (
+                            '00' + c.charCodeAt(0).toString(16)
+                        ).slice(-2);
+
+                    }).join('')
+            );
+
+            return JSON.parse(jsonPayload);
         }
-        catch {
+        catch (e) {
+
+            console.error("JWT Parse Error:", e);
             return null;
         }
     }
@@ -55,10 +98,19 @@
 
         var payload = parseJwt(token);
 
-        if (!payload || !payload.exp)
-            return true;
+        console.log("JWT Payload:", payload);
 
-        return payload.exp < Math.floor(Date.now() / 1000);
+        if (!payload || !payload.exp) {
+            console.log("Token invalid or exp missing");
+            return true;
+        }
+
+        var currentTime = Math.floor(Date.now() / 1000);
+
+        console.log("Current Time:", currentTime);
+        console.log("Token Expiry:", payload.exp);
+
+        return payload.exp < currentTime;
     }
 
     function validate(success, fail) {
@@ -66,51 +118,91 @@
         var token = getToken();
 
         if (!token) {
-            if (fail) fail();
+
+            if (fail) {
+                fail();
+            }
+
             return;
         }
 
         if (isExpired(token)) {
+
             logout("Session expired");
             return;
         }
 
+        if (!profileUrl) {
+
+            console.error("Profile URL missing.");
+            logout("Configuration error");
+            return;
+        }
+
         $.ajax({
+
             url: profileUrl,
             type: "POST",
+
             headers: {
                 Authorization: "Bearer " + token
             },
+
             success: function (res) {
+
+                console.log("PROFILE RESPONSE:", res);
 
                 if (res.success) {
 
                     sessionStorage.setItem(
                         "currentUser",
-                        JSON.stringify(res)
+                        JSON.stringify({
+                            userId: res.userId,
+                            userName: res.userName,
+                            email: res.email,
+                            role: res.role
+                        })
                     );
 
-                    if (success) success(res);
-                }
-                else {
-                    logout("Invalid token");
+                    console.log(
+                        "CURRENT USER:",
+                        sessionStorage.getItem("currentUser")
+                    );
+
+                    if (success) {
+                        success(res);
+                    }
                 }
             },
+
             error: function (xhr) {
 
-                if (xhr.status === 401)
+                if (xhr.status === 401) {
+
                     logout("Unauthorized");
-                else if (xhr.status === 404)
-                    alert("Profile route not found");
-                else
-                    alert("Server error");
+                }
+                else if (xhr.status === 404) {
+
+                    console.error("Profile route not found");
+                    alert("Profile API not found.");
+                }
+                else {
+
+                    console.error("Server Error:", xhr);
+                    alert("Server error occurred.");
+                }
             }
         });
     }
 
     function protectPage() {
+
         $(function () {
-            validate();
+
+            validate(function () {
+
+                ajaxToken();
+            });
         });
     }
 
@@ -118,17 +210,21 @@
 
         var data = sessionStorage.getItem("currentUser");
 
-        return data ? JSON.parse(data) : null;
+        return data
+            ? JSON.parse(data)
+            : null;
     }
 
     function ajaxToken() {
 
         $.ajaxSetup({
+
             beforeSend: function (xhr) {
 
                 var token = getToken();
 
                 if (token) {
+
                     xhr.setRequestHeader(
                         "Authorization",
                         "Bearer " + token
@@ -139,7 +235,8 @@
     }
 
     return {
-        login: login, 
+
+        login: login,
         saveToken: saveToken,
         getToken: getToken,
         logout: logout,

@@ -40,7 +40,9 @@
         window.AppConfig = {
             authBaseUrl: '@ConfigurationManager.AppSettings["AuthServiceBaseUrl"]',
             loginUrl: '@ConfigurationManager.AppSettings["AuthServiceBaseUrl"]/User/Login',
-            profileUrl: '@ConfigurationManager.AppSettings["AuthServiceBaseUrl"]/User/GetProfile'
+            profileUrl: '@ConfigurationManager.AppSettings["AuthServiceBaseUrl"]/User/GetProfile',
+
+            mvcLoginPage: '@Url.Action("Login", "User")'
         };
     </script>
 
