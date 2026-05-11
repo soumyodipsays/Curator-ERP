@@ -157,7 +157,8 @@
         }
 
         $(document).ready(function () { 
-            loadUserProfile(29)
+            const userID = localStorage.getItem("UserID");
+            loadUserProfile(userID);
         })
     </script>
 }
