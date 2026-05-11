@@ -89,3 +89,4 @@ Thumbs.db
 Web.local.config
 
 Database/
+*.bak
