@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Helpers;
 
 namespace Product.DTOs
 {
@@ -19,5 +20,6 @@ namespace Product.DTOs
         // 5 = IncreaseQty
         // 6 = DecreaseQty
         public string UserName { get; set; }
+        public string CartItemsJSON { get; set; }
     }
 }

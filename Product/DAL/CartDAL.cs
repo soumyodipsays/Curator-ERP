@@ -26,6 +26,17 @@ namespace Product.DAL
 
             _db.ExecuteWithoutReturn(proc, param);
         }
+        public void UpdateCartToProceed(CartInsertIpdateDTO model)
+        {
+            var proc = "spCart_BulkUpdate";
+            var param = new DynamicParameters();
+
+            param.Add("@UserID", model.UserID);
+            param.Add("@CartItemsJSON", model.CartItemsJSON);
+            param.Add("@UserName", model.UserName);
+
+            _db.ExecuteWithoutReturn(proc, param);
+        }
 
         public List<CartModel> GetCartDetails(long UserID)
         {

@@ -21,6 +21,7 @@ window.changeCartQty = async function (cartId, change) {
     item.Quantity = newQuantity;
     renderCart();
     renderSummaryCard(CART_ITEMS);
+    syncCartWithServer();
 
 }
 
@@ -41,7 +42,7 @@ function countDiscount(type, realPrice, discount, qty) {
 window.removeItem = async function (cartId) {
     CART_ITEMS = CART_ITEMS.filter(x => x.CartID !== cartId);
     renderCart();
-
+    renderSummaryCard(CART_ITEMS)
     try {
         // Make sure this matches your actual C# route
         await fetch(`/Cart/RemoveItem?cartId=${cartId}`, {
