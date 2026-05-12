@@ -11,6 +11,23 @@
     <link rel="stylesheet" href="~/Content/curator-profile.css" asp-append-version="true" />
 }
 
+<style>
+    .field-edit-form {
+        display: none;
+        animation: fadeIn .2s ease;
+    }
+    @@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
 <div class="container-xl px-4 py-4" style="padding-top:24px!important">
     <div class="row g-4">
 

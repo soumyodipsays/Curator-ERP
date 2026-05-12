@@ -1,4 +1,11 @@
-CREATE OR ALTER PROC sp_UpdateUserDetails
+USE [Ecommerce]
+GO
+/****** Object:  StoredProcedure [dbo].[sp_UpdateUserDetails]    Script Date: 5/12/2026 11:47:53 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER   PROC [dbo].[sp_UpdateUserDetails]
 (
     @CustomerID udt_ID,
     @UserID udt_ID,
@@ -17,6 +24,7 @@ BEGIN
     SET NOCOUNT ON;
 
     DECLARE @ErrMsg VARCHAR(500);
+	DECLARE @PersonID INT;
 
     -- Check if user exists
     IF NOT EXISTS
@@ -47,24 +55,79 @@ BEGIN
         ON p.PersonID = u.PersonID
     WHERE u.UserID = @UserID;
 
-    -- Update Phone Number
-    UPDATE t
-    SET
-        t.Mobile = ISNULL(@PhoneNumber, t.Mobile)
-    FROM tblTelecom t
-    INNER JOIN tblUser u
-        ON t.PersonID = u.PersonID
-    WHERE u.UserID = @UserID;
+    
 
-    -- Update Addresses
-    UPDATE a
-    SET
-        a.Address1 = ISNULL(@Address1, a.Address1),
-        a.Address2 = ISNULL(@Address2, a.Address2)
-    FROM tblAddress a
-    INNER JOIN tblUser u
-        ON a.PersonID = u.PersonID
-    WHERE u.UserID = @UserID;
+	-- Get PersonID
+	SELECT @PersonID = PersonID
+	FROM tblUser
+	WHERE UserID = @UserID;
+
+	---------------------------------------------------
+	-- Phone Number UPSERT
+	---------------------------------------------------
+
+	IF EXISTS (
+		SELECT 1
+		FROM tblTelecom
+		WHERE PersonID = @PersonID
+	)
+	BEGIN
+		UPDATE tblTelecom
+		SET Mobile = ISNULL(@PhoneNumber, Mobile)
+		WHERE PersonID = @PersonID;
+	END
+	ELSE
+	BEGIN
+		INSERT INTO tblTelecom
+		(
+			PersonID,
+			Mobile,
+			CreatedBy,
+			CreatedOn
+		)
+		VALUES
+		(
+			@PersonID,
+			@PhoneNumber,
+			N'Admin',
+			GETUTCDATE()
+		);
+	END;
+
+	---------------------------------------------------
+	-- Address UPSERT
+	---------------------------------------------------
+
+	IF EXISTS (
+		SELECT 1
+		FROM tblAddress
+		WHERE PersonID = @PersonID
+	)
+	BEGIN
+		UPDATE tblAddress
+		SET
+			Address1 = ISNULL(@Address1, Address1),
+			Address2 = ISNULL(@Address2, Address2)
+		WHERE PersonID = @PersonID;
+	END
+	ELSE
+	BEGIN
+		INSERT INTO tblAddress
+		(
+			PersonID,
+			Address1,
+			Address2,
+			CreatedBy,
+			CreatedOn
+		)
+		VALUES
+		(
+			@PersonID,
+			@Address1,
+			@Address2,
+			N'Admin',
+			GETUTCDATE()
+		);
+	END;
 
 END;
-GO

@@ -167,10 +167,10 @@
 
     </div>
 </div>
-
+<script src="~/Scripts/auth.js" asp-append-version="true"></script>
 
 <script>
-    const userID = sessionStorage.getItem('userId');
+    const userID = Auth.currentUser().userId;
     console.log("userID: ", userID);
     let profileData = {
         userID: userID,
@@ -181,6 +181,33 @@
         address2: "",
         phone: ""
     };
+
+    function startEdit(fieldName) {
+
+        // Hide ALL edit forms first
+        $(".field-edit-form").hide();
+
+        // Show ALL display rows again
+        $(".field-display").show();
+
+        // Hide current display section
+        $("#field-" + fieldName + " .field-display").hide();
+
+        // Show current edit form
+        $("#edit-" + fieldName).show();
+
+        // Focus input
+        $("#input-" + fieldName).focus();
+    }
+
+    function cancelEdit(fieldName) {
+
+        // Hide edit form
+        $("#edit-" + fieldName).hide();
+
+        // Show display row again
+        $("#field-" + fieldName + " .field-display").show();
+    }
 
     function handleFieldKey(event, fieldName) {
 
@@ -254,6 +281,9 @@
                     }
 
                     cancelEdit(fieldName);
+                    alert(response.message);
+
+                    window.location.reload();
                 }
             }
         });
