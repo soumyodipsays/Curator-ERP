@@ -145,28 +145,31 @@
                 success: function (response) { 
                     console.log("S-Response: ", response);
                     renderProfileBasic(
-                        response.data.FirstName,
-                        response.data.LastName,
-                        response.data.UserName,
-                        response.data.CreatedOn,
-                        response.data.Avatar_url
+                        response.data.User.FirstName,
+                        response.data.User.LastName,
+                        response.data.User.UserName,
+                        response.data.User.CreatedOn,
+                        response.data.User.Avatar_url
                     );
                     renderProfileStats(
-                        response.data.OrderCount,
-                        response.data.CartProductCount,
-                        userID
+                        response.data.User.OrderCount,
+                        response.data.User.CartProductCount,
                     )
                     renderQuickLinkCards(
-                        response.data.OrderCount,
-                        response.data.CartProductCount
+                        response.data.User.OrderCount,
+                        response.data.User.CartProductCount
                     );
                     renderPersonalInfo(
-                        response.data.FirstName,
-                        response.data.LastName,
-                        response.data.UserName,
-                        response.data.Email,
-                        response.data.Mobile
+                        response.data.User.FirstName,
+                        response.data.User.LastName,
+                        response.data.User.UserName,
+                        response.data.User.Email,
+                        response.data.PhoneList[0],
+                        response.data.PhoneList[1]
                     );
+                    renderAddress(
+                        response.data.AddressList
+                    )
                 },
                 error: function (response) { 
                     console.log("E-Response: ", response);

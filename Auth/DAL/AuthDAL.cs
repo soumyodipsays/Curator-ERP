@@ -97,7 +97,14 @@ namespace Auth.DAL
             var proc = "sp_GetUserProfile";
 
             parameters.Add("@UserID", userId);
-            return _db.ExecuteSingleRow<UserProfileDTO>(proc, parameters);
+            return _db.ExecuteMultipleResultSet(proc, multi =>
+            new UserProfileDTO
+            {
+                User = multi.Read<UserProfileDetailsDTO>().FirstOrDefault(),
+
+                PhoneList = multi.Read<UserProfilePhoneDTO>().ToList(),
+                AddressList = multi.Read<UserProfileAddressDTO>().ToList(),
+            }, parameters);
         }
 
         public void UserProfileUpdate(UpdateUserDetailsDTO userDto)

@@ -9,104 +9,93 @@
 
         <span class="section-eyebrow">Personal Info</span>
         <h2 class="section-title-sm mb-1">Your Details</h2>
+
         <p class="section-sub-sm mb-4">
             Click <i class="bi bi-pencil" style="font-size:.75rem"></i> on any field to edit.
         </p>
 
-        @*{{!-- ══ FIRST NAME ══════════════════════════════════════════════ --}}*@
+        <!-- FIRST NAME -->
         <div class="field-row" id="field-FirstName">
             <div class="field-display">
                 <div class="field-meta">
                     <span class="field-label">First Name</span>
                     <span class="field-value" id="val-FirstName"></span>
                 </div>
-                <button class="field-edit-btn" onclick="startEdit('FirstName')"
-                        title="Edit first name">
+                <button class="field-edit-btn" onclick="startEdit('FirstName')">
                     <i class="bi bi-pencil"></i>
                 </button>
             </div>
+
             <div class="field-edit-form" id="edit-FirstName">
-                <input class="apple-input field-input" type="text"
-                       id="input-FirstName" value=""
-                       placeholder="First name" maxlength="50"
-                       onkeydown="handleFieldKey(event,'FirstName')" />
+                <input class="apple-input field-input" id="input-FirstName" type="text"
+                       maxlength="50" onkeydown="handleFieldKey(event,'FirstName')" />
                 <div class="field-edit-actions">
                     <button class="field-save-btn" onclick="saveField('FirstName')">
                         <i class="bi bi-check-lg"></i> Save
                     </button>
-                    <button class="field-cancel-btn" onclick="cancelEdit('FirstName')">
-                        Cancel
-                    </button>
+                    <button class="field-cancel-btn" onclick="cancelEdit('FirstName')">Cancel</button>
                 </div>
-                <span class="field-error" id="err-FirstName"></span>
             </div>
         </div>
 
-        @*{{!-- ══ LAST NAME ══════════════════════════════════════════════ --}}*@
+        <!-- LAST NAME -->
         <div class="field-row" id="field-LastName">
             <div class="field-display">
                 <div class="field-meta">
                     <span class="field-label">Last Name</span>
                     <span class="field-value" id="val-LastName"></span>
                 </div>
-                <button class="field-edit-btn" onclick="startEdit('LastName')"
-                        title="Edit last name">
+                <button class="field-edit-btn" onclick="startEdit('LastName')">
                     <i class="bi bi-pencil"></i>
                 </button>
             </div>
+
             <div class="field-edit-form" id="edit-LastName">
-                <input class="apple-input field-input" type="text"
-                       id="input-LastName" value=""
-                       placeholder="Last name" maxlength="50"
-                       onkeydown="handleFieldKey(event,'LastName')" />
+                <input class="apple-input field-input" id="input-LastName" type="text"
+                       maxlength="50" onkeydown="handleFieldKey(event,'LastName')" />
                 <div class="field-edit-actions">
                     <button class="field-save-btn" onclick="saveField('LastName')">
                         <i class="bi bi-check-lg"></i> Save
                     </button>
-                    <button class="field-cancel-btn" onclick="cancelEdit('LastName')">
-                        Cancel
-                    </button>
+                    <button class="field-cancel-btn" onclick="cancelEdit('LastName')">Cancel</button>
                 </div>
-                <span class="field-error" id="err-LastName"></span>
             </div>
         </div>
 
-        @*{{!-- ══ USERNAME ══════════════════════════════════════════════ --}}*@
+        <!-- USERNAME -->
         <div class="field-row" id="field-Username">
             <div class="field-display">
                 <div class="field-meta">
                     <span class="field-label">Username</span>
                     <span class="field-value" id="val-Username"></span>
                 </div>
-                <button class="field-edit-btn" onclick="startEdit('Username')"
-                        title="Edit username">
+                <button class="field-edit-btn" onclick="startEdit('Username')">
                     <i class="bi bi-pencil"></i>
                 </button>
             </div>
+
             <div class="field-edit-form" id="edit-Username">
                 <div class="input-prefix-wrap">
                     <span class="input-prefix">@@</span>
-                    <input class="apple-input field-input" type="text"
-                           id="input-Username" value=""
-                           placeholder="username" maxlength="50"
-                           style="padding-left:32px"
+                    <input class="apple-input field-input" id="input-Username" type="text"
+                           maxlength="50" style="padding-left:32px"
                            onkeydown="handleFieldKey(event,'Username')" />
                 </div>
+
                 <div class="field-edit-actions">
                     <button class="field-save-btn" onclick="saveField('Username')">
                         <i class="bi bi-check-lg"></i> Save
                     </button>
-                    <button class="field-cancel-btn" onclick="cancelEdit('Username')">
-                        Cancel
-                    </button>
+                    <button class="field-cancel-btn" onclick="cancelEdit('Username')">Cancel</button>
                 </div>
-                <span class="field-error" id="err-Username"></span>
             </div>
         </div>
 
-        @*{{!-- ══ EMAIL ════════════════════════════════════════════════ --}}*@
-        <div class="field-row" id="field-Email">
+        <!-- EMAIL (READ ONLY - FIXED) -->
+        <div class="field-row" id="field-Email" style="border-bottom:none">
+
             <div class="field-display">
+
                 <div class="field-meta">
                     <span class="field-label">Email Address</span>
                     <span class="field-value" id="val-Email"></span>
@@ -114,59 +103,75 @@
                         <i class="bi bi-patch-check-fill"></i> Verified
                     </span>
                 </div>
-                <button class="field-edit-btn" onclick="startEdit('Email')"
-                        title="Edit email">
-                    <i class="bi bi-pencil"></i>
-                </button>
+
             </div>
-            <div class="field-edit-form" id="edit-Email">
-                <input class="apple-input field-input" type="email"
-                       id="input-Email" value=""
-                       placeholder="email@example.com"
-                       onkeydown="handleFieldKey(event,'Email')" />
-                <div class="field-edit-actions">
-                    <button class="field-save-btn" onclick="saveField('Email')">
-                        <i class="bi bi-check-lg"></i> Save
-                    </button>
-                    <button class="field-cancel-btn" onclick="cancelEdit('Email')">
-                        Cancel
-                    </button>
-                </div>
-                <span class="field-error" id="err-Email"></span>
-            </div>
+
         </div>
 
-        @*{{!-- ══ PHONE ════════════════════════════════════════════════ --}}*@
-        <div class="field-row" id="field-Phone" style="border-bottom:none">
+        <!-- PHONE -->
+        <div class="field-row" id="field-Phone">
             <div class="field-display">
                 <div class="field-meta">
                     <span class="field-label">Phone Number</span>
                     <span class="field-value" id="val-Phone"></span>
                 </div>
-                <button class="field-edit-btn" onclick="startEdit('Phone')"
-                        title="Edit phone">
+                <button class="field-edit-btn" onclick="startEdit('Phone')">
                     <i class="bi bi-pencil"></i>
                 </button>
             </div>
+
             <div class="field-edit-form" id="edit-Phone">
-                <input class="apple-input field-input" type="tel"
-                       id="input-Phone" value=""
-                       placeholder="+91 98765 43210"
+                <input class="apple-input field-input" id="input-Phone" type="tel"
                        onkeydown="handleFieldKey(event,'Phone')" />
+
                 <div class="field-edit-actions">
                     <button class="field-save-btn" onclick="saveField('Phone')">
                         <i class="bi bi-check-lg"></i> Save
                     </button>
-                    <button class="field-cancel-btn" onclick="cancelEdit('Phone')">
+                    <button class="field-cancel-btn" onclick="cancelEdit('Phone')">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALTERNATIVE CONTACT -->
+        <div class="field-row" id="field-AltPhone">
+
+            <div class="field-display">
+
+                <div class="field-meta">
+                    <span class="field-label">Alternative Contact</span>
+                    <span class="field-value" id="val-AltPhone"></span>
+                </div>
+
+                <button class="field-edit-btn" onclick="startEdit('AltPhone')">
+                    <i class="bi bi-pencil"></i>
+                </button>
+
+            </div>
+
+            <div class="field-edit-form" id="edit-AltPhone">
+
+                <input class="apple-input field-input"
+                       id="input-AltPhone"
+                       type="tel"
+                       onkeydown="handleFieldKey(event,'AltPhone')" />
+
+                <div class="field-edit-actions">
+                    <button class="field-save-btn" onclick="saveField('AltPhone')">
+                        <i class="bi bi-check-lg"></i> Save
+                    </button>
+                    <button class="field-cancel-btn" onclick="cancelEdit('AltPhone')">
                         Cancel
                     </button>
                 </div>
-                <span class="field-error" id="err-Phone"></span>
+
             </div>
+
         </div>
 
     </div>
 </div>
+
 <script src="~/Scripts/auth.js" asp-append-version="true"></script>
 
 <script>
@@ -179,7 +184,8 @@
         userName: "",
         address1: "",
         address2: "",
-        phone: ""
+        phone: "",
+        altPhone: ""
     };
 
     function startEdit(fieldName) {
@@ -241,16 +247,12 @@
                 profileData.userName = value;
                 break;
 
-            case "address1":
-                profileData.address1 = value;
-                break;
-
-            case "address2":
-                profileData.address2 = value;
-                break;
-
             case "Phone":
                 profileData.phone = value;
+                break;
+
+            case "AltPhone":
+                profileData.altPhone = value;
                 break;
         }
 
@@ -289,26 +291,29 @@
         });
     }
 
-    function renderPersonalInfo(firstName, lastName, userName, email, phone) {
+    function renderPersonalInfo(firstName, lastName, userName, email, phone, altPhone) {
 
         profileData.firstName = firstName;
         profileData.lastName = lastName;
         profileData.userName = userName;
         profileData.email = email;
         profileData.phone = phone;
+        profileData.altPhone = altPhone;
 
         // ===== DISPLAY VALUES =====
         $("#val-FirstName").text(firstName);
         $("#val-LastName").text(lastName);
         $("#val-Username").text("@@" + userName);
         $("#val-Email").text(email);
-        $("#val-Phone").text(phone);
+        $("#val-Phone").text(phone.Mobile || "");     
+        $("#val-AltPhone").text(altPhone.Mobile || "");
 
         // ===== INPUT VALUES =====
         $("#input-FirstName").val(firstName);
         $("#input-LastName").val(lastName);
         $("#input-Username").val(userName);
         $("#input-Email").val(email);
-        $("#input-Phone").val(phone);
+        $("#input-Phone").val(phone.Mobile);
+        $("#input-AltPhone").val(altPhone.Mobile);
     }
 </script>
