@@ -1,63 +1,74 @@
-CREATE OR ALTER PROC sp_GetUserProfile
-	@UserID udt_ID
+ALTER PROC [dbo].[sp_GetUserProfile]
+    @UserID udt_ID
 AS
 BEGIN
-	SET NOCOUNT ON;
+    SET NOCOUNT ON;
 
-	SELECT
-		u.UserID,
-		u.IsActive,
-		u.UserName,
-		u.Email,
-		u.CreatedOn,
+    ---------------------------------------------------
+    -- 1. USER CORE DETAILS
+    ---------------------------------------------------
+    SELECT
+        u.UserID,
+        u.IsActive,
+        u.UserName,
+        u.Email,
+        u.CreatedOn,
 
-		p.FirstName,
-		p.MiddleInitials,
-		p.LastName,
-		p.avatar_url,
+        p.FirstName,
+        p.MiddleInitials,
+        p.LastName,
+        p.avatar_url,
 
-		t.Mobile,
+        ISNULL(oc.OrderCount, 0) AS OrderCount,
+        ISNULL(cc.CartProductCount, 0) AS CartProductCount
 
-		ISNULL(oc.OrderCount, 0) AS OrderCount,
-		ISNULL(cc.CartProductCount, 0) AS CartProductCount,
+    FROM tblUser u
 
-		a.Address1,
-		a.Address2,
-		a.City,
-		a.StateID,
-		a.PinCode
+    LEFT JOIN tblPerson p
+        ON u.PersonID = p.PersonID
 
-	FROM tblUser u
+    LEFT JOIN (
+        SELECT
+            UserID,
+            COUNT(*) AS OrderCount
+        FROM tblOrder
+        GROUP BY UserID
+    ) oc
+        ON u.UserID = oc.UserID
 
-	LEFT JOIN tblPerson p
-		ON u.PersonID = p.PersonID
+    LEFT JOIN (
+        SELECT
+            UserID,
+            COUNT(*) AS CartProductCount
+        FROM tblCart
+        GROUP BY UserID
+    ) cc
+        ON u.UserID = cc.UserID
 
-	LEFT JOIN tblTelecom t
-		ON u.PersonID = t.PersonID
+    WHERE u.UserID = @UserID;
 
-	LEFT JOIN tblAddress a
-		ON u.PersonID = a.PersonID
+    ---------------------------------------------------
+    -- 2. PHONES
+    ---------------------------------------------------
+    SELECT
+        t.Mobile
+    FROM tblTelecom t
+    INNER JOIN tblUser u
+        ON u.PersonID = t.PersonID
+    WHERE u.UserID = @UserID;
 
-	LEFT JOIN
-	(
-		SELECT
-			UserID,
-			COUNT(*) AS OrderCount
-		FROM tblOrder
-		GROUP BY UserID
-	) oc
-		ON u.UserID = oc.UserID
-
-	LEFT JOIN
-	(
-		SELECT
-			UserID,
-			COUNT(*) AS CartProductCount
-		FROM tblCart
-		GROUP BY UserID
-	) cc
-		ON u.UserID = cc.UserID
-
-	WHERE u.UserID = @UserID;
+    ---------------------------------------------------
+    -- 3. ADDRESSES
+    ---------------------------------------------------
+    SELECT
+        a.Address1,
+        a.Address2,
+        a.City,
+        a.StateID,
+        a.PinCode
+    FROM tblAddress a
+    INNER JOIN tblUser u
+        ON u.PersonID = a.PersonID
+    WHERE u.UserID = @UserID;
 
 END;
