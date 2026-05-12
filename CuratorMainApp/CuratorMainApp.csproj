@@ -250,6 +250,7 @@
     <Content Include="SP\spCategory_Insert.sql" />
     <Content Include="SP\spColor_Insert.sql" />
     <Content Include="SP\spCoupon_Insert.sql" />
+    <Content Include="SP\spCoupon_Validate.sql" />
     <Content Include="SP\spDiscount_Insert.sql" />
     <Content Include="SP\spFeaturedProduct_Insert.sql" />
     <Content Include="SP\spFlashSaleProduct_Insert.sql" />

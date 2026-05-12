@@ -126,12 +126,22 @@
     @Html.Partial("_ProductDetailModal")
     <!-- ===== END PARTIAL: _ProductDetailModal.cshtml ===== -->
     <!-- Toast notification -->
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999;bottom:80px!important">
-        <div id="cartToast" class="toast apple-toast" role="alert">
-            <div class="d-flex align-items-center gap-2">
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"
+         style="z-index:9999;">
+
+        <div id="cartToast"
+             class="toast"
+             role="alert"
+             aria-live="assertive"
+             aria-atomic="true"
+             data-bs-autohide="true"
+             data-bs-delay="2500">
+
+            <div class="toast-body d-flex align-items-center gap-2">
                 <i class="bi bi-bag-check-fill" style="color:#30b94d"></i>
                 <span id="toastMsg">Added to bag!</span>
             </div>
+
         </div>
     </div>
 
@@ -573,13 +583,29 @@
         }
 
         function updateCartBadge() {
-            document.getElementById('cartCount').textContent = cartCount;
-            document.getElementById('tabBadge').textContent = cartCount;
+
+            const cartCountEl = document.getElementById('cartCount');
+            const tabBadgeEl = document.getElementById('tabBadge');
+
+            if (cartCountEl) {
+                cartCountEl.textContent = cartCount;
+            }
+
+            if (tabBadgeEl) {
+                tabBadgeEl.textContent = cartCount;
+            }
         }
 
         function showToast(msg) {
+
+            const toastEl = document.getElementById('cartToast');
+
             document.getElementById('toastMsg').textContent = msg;
-            const toast = new bootstrap.Toast(document.getElementById('cartToast'), { delay: 2500 });
+
+            const toast = bootstrap.Toast.getOrCreateInstance(toastEl, {
+                delay: 2500
+            });
+
             toast.show();
         }
 
