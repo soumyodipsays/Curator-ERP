@@ -7,6 +7,7 @@
 
 @{
     var productURL = ConfigurationManager.AppSettings["ProductServiceBaseUrl"];
+    var baseURL = ConfigurationManager.AppSettings["CuratorMainAppBaseUrl"];
 }
 
 <div class="summary-card">
@@ -99,7 +100,7 @@
             Proceed to Delivery <i class="bi bi-arrow-right"></i>
         </button>
 
-        <a href="/Product"
+        <a href="@baseURL/Product/Home"
            class="btn-apple-ghost mt-2"
            style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;border-radius:980px;padding:12px;font-size:.85rem;font-weight:500;color:var(--black)">
 
