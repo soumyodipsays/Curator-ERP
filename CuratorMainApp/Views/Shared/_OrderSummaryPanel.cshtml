@@ -307,7 +307,7 @@
         const itemsArray = CART_ITEMS.map(item => ({
             CartID: item.CartID,
             Quantity: item.Quantity,
-            
+
         }));
 
         // 2. Prepare the payload matching your C# CartInsertIpdateDTO
@@ -364,4 +364,46 @@ async function proceedToCheckout() {
         alert("There was an issue saving your cart. Please try again.");
     }
 }
+// ============================================
+// INITIALIZE ON PAGE LOAD
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Check if we have saved cart data in sessionStorage
+    const savedCart = sessionStorage.getItem('CHECKOUT_CART_STATE');
+
+    if (savedCart) {
+        // 2. Restore the global array
+        window.CART_ITEMS = JSON.parse(savedCart);
+
+        // 3. Re-render the math and totals
+        renderSummaryCard(window.CART_ITEMS);
+
+        // 4. Dynamically update Step 2 UI (since you aren't using the C# model)
+        const totalItemsCount = window.CART_ITEMS.reduce((acc, item) => acc + item.Quantity, 0);
+
+        // Update bag count text
+        if (document.getElementById('bag-item-count')) {
+            document.getElementById('bag-item-count').innerText = totalItemsCount;
+        }
+
+        // Inject the images dynamically
+        if (document.getElementById('bag-images')) {
+            document.getElementById('bag-images').innerHTML = window.CART_ITEMS.map(item => `
+                <img src="${item.ImageURL}" style="width:48px;height:48px;border-radius:10px;object-fit:cover" />
+            `).join('');
+        }
+    }
+
+    let currentStep = 1; // Default to Step 1 (Cart)
+    const currentUrl = window.location.pathname.toLowerCase();
+
+    if (currentUrl.includes('/address')) {
+        currentStep = 2; // We are on the Address page
+    } else if (currentUrl.includes('/review') || currentUrl.includes('/payment')) {
+        currentStep = 3; // We are on the Review/Payment page
+    }
+
+    // Instantly hide the wrong buttons and show the correct ones!
+    renderCheckoutStep(currentStep);
+});
 </script>

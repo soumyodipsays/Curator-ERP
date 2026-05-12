@@ -118,6 +118,7 @@
 @section Scripts {
 
     <script src="~/Scripts/curator-checkout.js"></script>
+    @*<script src="~/Scripts/auth.js"></script>*@
 
     <script>
         // --- 1. Global State to store the cart items for changes in UI ---
@@ -159,8 +160,9 @@
             })
         }
 
-        $(document).ready(function () {
-            getCartDetailsByUserID(29);
+$(document).ready(function () {
+            const userID = Auth.currentUser().userId;
+            getCartDetailsByUserID(userID);
         })
     </script>
 }
