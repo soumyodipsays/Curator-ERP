@@ -109,6 +109,7 @@
 
 @section Scripts {
     <script src="~/Scripts/curator-profile.js" asp-append-version="true"></script>
+    <script src="~/Scripts/auth.js" asp-append-version="true"></script>
 
     <script>
 
@@ -136,7 +137,7 @@
                     renderProfileStats(
                         response.data.OrderCount,
                         response.data.CartProductCount,
-                        "2" //hardcoded
+                        userID
                     )
                     renderQuickLinkCards(
                         response.data.OrderCount,
@@ -156,9 +157,9 @@
             })
         }
 
-        $(document).ready(function () { 
-            const userID = localStorage.getItem("UserID");
-            loadUserProfile(userID);
+        $(document).ready(function (){
+            const userData = Auth.currentUser();
+            loadUserProfile(userData.userId);
         })
     </script>
 }

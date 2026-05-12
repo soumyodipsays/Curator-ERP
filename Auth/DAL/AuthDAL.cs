@@ -99,5 +99,23 @@ namespace Auth.DAL
             parameters.Add("@UserID", userId);
             return _db.ExecuteSingleRow<UserProfileDTO>(proc, parameters);
         }
+
+        public void UserProfileUpdate(UpdateUserDetailsDTO userDto)
+        {
+            var parameters = new DynamicParameters();
+            var proc = "sp_UpdateUserDetails";
+            // Map DTO to SP Parameters
+            parameters.Add("@CustomerID", userDto.CustomerID);
+            parameters.Add("@UserID", userDto.UserID); // Handle 0 for new signup
+            parameters.Add("@UserName", userDto.UserName);
+            parameters.Add("@FirstName", userDto.FirstName);
+            parameters.Add("@LastName", userDto.LastName);
+            parameters.Add("@PhoneNumber", userDto.PhoneNumber);
+            parameters.Add("@Address1", userDto.Address1);
+            parameters.Add("@Address2", userDto.Address2);
+
+            // Execute and return the new ID
+            _db.ExecuteWithoutReturn(proc, parameters);
+        }
     }
 }

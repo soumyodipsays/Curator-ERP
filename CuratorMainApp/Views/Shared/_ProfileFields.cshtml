@@ -1,12 +1,7 @@
 ﻿@* Views/Shared/_ProfileFields.cshtml *@
 @using System.Configuration
 @{
-    var firstName = "Arjun";
-    var lastName = "Mehta";
-    var username = "arjun_m";
-    var email = "arjun.mehta@email.com";
-    var phone = "+91 98765 43210";
-    var registerUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Register";
+    var profileUpdateURL = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/UpdateProfileDetails";
 }
 
 <div class="apple-card fade-up" id="personalSection">
@@ -61,7 +56,7 @@
             </div>
             <div class="field-edit-form" id="edit-LastName">
                 <input class="apple-input field-input" type="text"
-                       id="input-LastName" value="@lastName"
+                       id="input-LastName" value=""
                        placeholder="Last name" maxlength="50"
                        onkeydown="handleFieldKey(event,'LastName')" />
                 <div class="field-edit-actions">
@@ -92,7 +87,7 @@
                 <div class="input-prefix-wrap">
                     <span class="input-prefix">@@</span>
                     <input class="apple-input field-input" type="text"
-                           id="input-Username" value="@username"
+                           id="input-Username" value=""
                            placeholder="username" maxlength="50"
                            style="padding-left:32px"
                            onkeydown="handleFieldKey(event,'Username')" />
@@ -126,7 +121,7 @@
             </div>
             <div class="field-edit-form" id="edit-Email">
                 <input class="apple-input field-input" type="email"
-                       id="input-Email" value="@email"
+                       id="input-Email" value=""
                        placeholder="email@example.com"
                        onkeydown="handleFieldKey(event,'Email')" />
                 <div class="field-edit-actions">
@@ -155,7 +150,7 @@
             </div>
             <div class="field-edit-form" id="edit-Phone">
                 <input class="apple-input field-input" type="tel"
-                       id="input-Phone" value="@phone"
+                       id="input-Phone" value=""
                        placeholder="+91 98765 43210"
                        onkeydown="handleFieldKey(event,'Phone')" />
                 <div class="field-edit-actions">
@@ -175,12 +170,15 @@
 
 
 <script>
+    const userID = sessionStorage.getItem('userId');
+    console.log("userID: ", userID);
     let profileData = {
-        userID: 1,
+        userID: userID,
         firstName: "",
         lastName: "",
         userName: "",
-        email: "",
+        address1: "",
+        address2: "",
         phone: ""
     };
 
@@ -216,8 +214,12 @@
                 profileData.userName = value;
                 break;
 
-            case "Email":
-                profileData.email = value;
+            case "address1":
+                profileData.address1 = value;
+                break;
+
+            case "address2":
+                profileData.address2 = value;
                 break;
 
             case "Phone":
@@ -226,7 +228,7 @@
         }
 
         $.ajax({
-            url: "@registerUrl",
+            url: "@profileUpdateURL",
             type: "POST",
 
             data: {
@@ -234,7 +236,10 @@
                 FirstName: profileData.firstName,
                 LastName: profileData.lastName,
                 UserName: profileData.userName,
-                Email: profileData.email
+                CustomerID: 1, //hardcoded
+                PhoneNumber: profileData.phone,
+                Address1: profileData.address1,
+                Address2: profileData.address2
             },
 
             success: function (response) {

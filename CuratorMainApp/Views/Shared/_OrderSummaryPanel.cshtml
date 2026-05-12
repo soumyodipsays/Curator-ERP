@@ -306,11 +306,14 @@
         // 1. Prepare the JSON array
         const itemsArray = CART_ITEMS.map(item => ({
             CartID: item.CartID,
-            Quantity: item.Quantity
+            Quantity: item.Quantity,
+            
         }));
 
         // 2. Prepare the payload matching your C# CartInsertIpdateDTO
         const payload = {
+            UserID: Auth.currentUser().userId,
+            UserName: Auth.currentUser().UserName,
             CartItemsJSON: JSON.stringify(itemsArray)
         };
 

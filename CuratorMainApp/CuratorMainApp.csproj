@@ -246,6 +246,7 @@
     <Content Include="SP\Ecommerce.sql" />
     <Content Include="SP\Product_Color_Size_LookUp.sql" />
     <Content Include="SP\spBrand_Insert.sql" />
+    <Content Include="SP\spCart_BulkUpdate.sql" />
     <Content Include="SP\spCategory_Insert.sql" />
     <Content Include="SP\spColor_Insert.sql" />
     <Content Include="SP\spCoupon_Insert.sql" />
@@ -266,6 +267,7 @@
     <Content Include="SP\spValidate_User.sql" />
     <Content Include="SP\sp_GetFilterSidebarDetails.sql" />
     <Content Include="SP\sp_GetUserProfile.sql" />
+    <Content Include="SP\sp_UpdateUserDetails.sql" />
     <Content Include="SP\sp_ValidateUser.sql" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">

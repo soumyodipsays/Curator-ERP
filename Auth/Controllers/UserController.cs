@@ -34,7 +34,7 @@ namespace Auth.Controllers
                                  .Select(e => e.ErrorMessage)
                     });
                 }
-                    
+
                 if (string.IsNullOrWhiteSpace(model.UserName) ||
                     string.IsNullOrWhiteSpace(model.Password))
                 {
@@ -274,6 +274,7 @@ namespace Auth.Controllers
                 });
             }
         }
+
         public JsonResult GetMyProfile(long UserID)
         {
             try
@@ -293,6 +294,53 @@ namespace Auth.Controllers
                 });
             }
             catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        [JwtGuard]
+        public JsonResult UpdateProfileDetails(UpdateUserDetailsDTO model)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    return Json(new { success = false, message = "Invalid request" });
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = ModelState.Values
+                                 .SelectMany(v => v.Errors)
+                                 .Select(e => e.ErrorMessage)
+                    });
+                }
+
+                _authDal.UserProfileUpdate(model);
+                return Json(new
+                {
+                    success = true,
+                    message = "Profile Updated Successfully"
+                });
+            }
+            catch (SqlException sqlex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = sqlex.Message
+                });
+            }
+            catch (Exception ex) 
             {
                 return Json(new
                 {
