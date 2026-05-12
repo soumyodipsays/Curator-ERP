@@ -35,7 +35,7 @@ BEGIN
 					CASE 
 					WHEN d.IsInrOrPercentage = 'I' 
 					THEN d.INR 
-					ELSE (p.Price*c.Quantity)*d.Percentage* 1.0/100 END
+					ELSE d.Percentage END
 				) AS Discount
 		FROM tblCart c
 		INNER JOIN tblProduct p ON c.ProductID=p.ProductID
