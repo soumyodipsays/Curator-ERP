@@ -18,10 +18,19 @@ namespace Product.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult AddorEditCart(CartInsertIpdateDTO model)
+        [HttpPost]
+        public JsonResult AddOrEditCart(CartInsertIpdateDTO model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Invalid request"
+                    });
+                }
                 _cartDAL.AddOrEditCart(model);
                 return Json(new
                 {

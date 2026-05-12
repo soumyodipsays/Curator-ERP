@@ -6,6 +6,7 @@
     var categoryURL = productURL + "/Products/GetCategoryList";
     var allProductURL = productURL + "/Products/GetProductList";
     var sideFilterProductURL = productURL + "/Products/GetSideFilterDetails";
+    var addToCartURL = productURL + "/Cart/AddOrEditCart";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -484,11 +485,85 @@
                 : '<i class="bi bi-heart-fill" style="color:#e53935"></i> Wishlisted';
         }
 
-        function addToCart() {
-            cartCount += currentQty;
-            updateCartBadge();
-            bootstrap.Modal.getInstance(document.getElementById('productDetailModal'))?.hide();
-            showToast(`${currentQty} item${currentQty > 1 ? 's' : ''} added to bag 🛍️`);
+        function addToCart(cartId) {
+
+            if (!CURRENT_PRODUCT) {
+                showToast("No product selected");
+                return;
+            }
+
+            // Find selected variant
+            const selectedVariant = CURRENT_PRODUCT.VariantList.find(v =>
+                v.SizeName === SELECTED_SIZE &&
+                v.ColorCode === SELECTED_COLOR
+            );
+
+            if (!selectedVariant) {
+                showToast("Please select size/color");
+                return;
+            }
+
+            // Get logged in user
+            const currentUserRaw = sessionStorage.getItem("currentUser");
+
+            if (!currentUserRaw) {
+                showToast("Please login first");
+                return;
+            }
+
+            const currentUser = JSON.parse(currentUserRaw);
+
+            const payload = {
+                CartID: cartId,
+                UserID: currentUser.userId,
+                ProductID: selectedVariant.ProductID,
+                Quantity: currentQty,
+                Status: 1,
+                UserName: currentUser.userName
+            };
+
+            console.log("Cart Payload:", payload);
+
+            $.ajax({
+                url: `@addToCartURL`,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+
+                success: function (res) {
+
+                    console.log("Cart Response:", res);
+
+                    if (res.success) {
+
+                        cartCount += currentQty;
+
+                        updateCartBadge();
+
+                        bootstrap.Modal
+                            .getInstance(document.getElementById('productDetailModal'))
+                            ?.hide();
+
+                        showToast(
+                            `${currentQty} item${currentQty > 1 ? 's' : ''} added to bag 🛍️`
+                        );
+
+                        // reset qty
+                        currentQty = 1;
+                        $('#qtyDisplay').text(1);
+                    }
+                    else {
+                        showToast(res.message || "Failed to add item");
+                    }
+                },
+
+                error: function (xhr) {
+
+                    console.log("Cart Error:", xhr);
+
+                    showToast("Something went wrong");
+                }
+            });
         }
 
         function addToCartQuick(name) {
