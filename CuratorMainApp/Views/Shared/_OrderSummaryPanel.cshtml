@@ -357,6 +357,7 @@ async function proceedToCheckout() {
 
     try {
         await syncCartWithServer();
+        sessionStorage.setItem('CHECKOUT_CART_STATE', JSON.stringify(CART_ITEMS));
         // Redirect after successful save
         window.location.href = "/CuratorMainApp/Checkout/Address";
     } catch (error) {
