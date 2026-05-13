@@ -1,6 +1,6 @@
 USE [Ecommerce]
 GO
-/****** Object:  StoredProcedure [dbo].[sp_UpdateUserDetails]    Script Date: 5/12/2026 11:47:53 AM ******/
+/****** Object:  StoredProcedure [dbo].[sp_UpdateUserDetails]    Script Date: 5/13/2026 10:14:07 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -39,7 +39,19 @@ BEGIN
         RETURN;
     END;
 
-    -- Update Username in tblUser
+    -- Check if username already exists
+	IF EXISTS(
+		SELECT 1
+		FROM tblUser u
+		WHERE u.UserName = @UserName
+	)
+	BEGIN
+		SELECT @ErrMsg = 'Username already exists.';
+        RAISERROR(@ErrMsg, 16, 1);
+        RETURN;
+	END;
+
+	-- Update Username in tblUser
     UPDATE tblUser
     SET
         UserName = ISNULL(@UserName, UserName)
