@@ -37,21 +37,6 @@ function countDiscount(type, realPrice, discount, qty) {
         : (realPrice * qty) - ((realPrice * qty) * discount / 100);
 }
 
-/* ---- Cart: Remove item ---- */
-/* Maps: tblOrderDetail.CartID */
-window.removeItem = async function (cartId) {
-    CART_ITEMS = CART_ITEMS.filter(x => x.CartID !== cartId);
-    renderCart();
-    renderSummaryCard(CART_ITEMS)
-    try {
-        // Make sure this matches your actual C# route
-        await fetch(`/Cart/RemoveItem?cartId=${cartId}`, {
-            method: 'POST'
-        });
-    } catch (err) {
-        console.error("Failed to remove from database", err);
-    }
-}
 
 
 /* ---- Cart: Coupon ---- */

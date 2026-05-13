@@ -121,7 +121,7 @@
     @*<script src="~/Scripts/auth.js"></script>*@
 
     <script>
-        // --- 1. Global State to store the cart items for changes in UI ---
+        // --- Global State to store the cart items for changes in UI ---
         let CART_ITEMS = [];
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -137,9 +137,6 @@
             }
 
         });
-    </script>
-
-    <script>
 
         function getCartDetailsByUserID(userId) {
 
@@ -151,7 +148,7 @@
                 },
                 success: function (response) {
                     console.log("S-response: ", response);
-                    loadCart(response)               
+                    loadCart(response)
                     renderSummaryCard(response);
                 },
                 error: function (response) {
@@ -159,10 +156,65 @@
                 },
             })
         }
+        /* ---- Cart: Remove item ---- */
+        /* Maps: tblOrderDetail.CartID */
 
-$(document).ready(function () {
-            const userID = Auth.currentUser().userId;
-            getCartDetailsByUserID(userID);
-        })
+        window.removeItem = async function (cartId) {
+        const currentUserRaw = sessionStorage.getItem("currentUser");
+
+        if (!currentUserRaw) {
+            console.error("User not logged in");
+            return;
+        }
+
+        const currentUser = JSON.parse(currentUserRaw);
+
+        // 2. Optimistically remove from UI
+        CART_ITEMS = CART_ITEMS.filter(x => x.CartID !== cartId);
+
+        renderCart();
+        renderSummaryCard(CART_ITEMS);
+
+        // 3. Prepare payload
+        const payload = {
+            CartID: cartId,
+            UserID: currentUser.userId,
+            ProductID: 0,
+            Quantity: 0,
+            Status: 2,
+            UserName: currentUser.userName
+        };
+
+        try {
+
+            const apiUrl = '@productURL/Cart/AddOrEditCart';
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            const res = await response.json();
+            if (res.success) {
+                console.log("Item successfully removed from database.");
+            } else {
+                console.error("Server failed to remove item:", res.message);
+            }
+
+        } catch (err) {
+            console.error("Failed to connect to database for removal", err);
+        }
+    };
+
+    $(document).ready(function () {
+                const userID = Auth.currentUser().userId;
+                getCartDetailsByUserID(userID);
+            })
     </script>
 }
