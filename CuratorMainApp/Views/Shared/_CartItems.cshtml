@@ -1,4 +1,9 @@
-﻿<div id="cart-container"></div>
+﻿@using System.Configuration;
+@{ 
+    var productURL = ConfigurationManager.AppSettings["ProductServiceBaseUrl"];
+}
+
+<div id="cart-container"></div>
 
 <script>
     // RESTORED: This is the function your jQuery script at line 1009 is looking for!
@@ -17,7 +22,7 @@
                 <div class="text-center py-5">
                     <i class="bi bi-bag" style="font-size:3rem;color:var(--gray-3)"></i>
                     <h5 class="mt-3">Your bag is empty</h5>
-                    <a href="/Product" class="btn-apple-blue">Start Shopping</a>
+                    <a href="/CuratorMainApp/Product/Home" class="btn-apple-blue">Start Shopping</a>
                 </div>
             `;
             return;
