@@ -38,9 +38,7 @@
                             Your Bag
                         </h2>
 
-                        <span class="section-sub-sm">
-                            @Model.Items.Count item@(Model.Items.Count != 1 ? "s" : "")
-                        </span>
+                        <span class="section-sub-sm" id="cart-item-count"></span>
 
                     </div>
 
@@ -121,100 +119,102 @@
     @*<script src="~/Scripts/auth.js"></script>*@
 
     <script>
-        // --- Global State to store the cart items for changes in UI ---
+        // Global State to store the cart items for changes in UI 
         let CART_ITEMS = [];
 
-        document.addEventListener('DOMContentLoaded', function () {
+        $(document).ready(function () {
 
-            var items = document.querySelectorAll('.fade-up');
+            // Fetch cart details immediately on load
+            const userID = Auth.currentUser().userId;
+            getCartDetailsByUserID(userID);
 
-            for (var i = 0; i < items.length; i++) {
-                (function (el, delay) {
-                    setTimeout(function () {
-                        el.classList.add('visible');
-                    }, delay);
-                })(items[i], i * 80);
-            }
-
+            $('.fade-up').each(function (index, el) {
+                setTimeout(function () {
+                    $(el).addClass('visible');
+                }, index * 80);
+            });
         });
 
-        function getCartDetailsByUserID(userId) {
+        // Extracted this into a function so we can call it after data loads or items are removed
+        function updateCartItemCount() {
+            $("#cart-item-count").text(
+                `${CART_ITEMS.length} item${CART_ITEMS.length !== 1 ? "s" : ""}`
+            );
+        }
 
+        function getCartDetailsByUserID(userId) {
             $.ajax({
-                url: `@productURL/Cart/GetCartDetails`,
+                // Fixed Razor parsing: Use standard quotes instead of backticks
+                url: '@productURL/Cart/GetCartDetails',
                 type: 'GET',
                 data: {
                     UserID: userId
                 },
                 success: function (response) {
                     console.log("S-response: ", response);
-                    loadCart(response)
-                    renderSummaryCard(response);
+
+                    // Update global state
+                    CART_ITEMS = response || [];
+
+                    // Call UI renderers
+                    loadCart(CART_ITEMS);
+                    renderSummaryCard(CART_ITEMS);
+
+                    // Update the text at the top of the bag
+                    updateCartItemCount();
                 },
-                error: function (response) {
-                    console.log("E-response: ", response);
-                },
-            })
+                error: function (xhr, status, error) {
+                    console.error("E-response: ", error);
+                }
+            });
         }
+
         /* ---- Cart: Remove item ---- */
         /* Maps: tblOrderDetail.CartID */
+        window.removeItem = function (cartId) {
+            const currentUserRaw = sessionStorage.getItem("currentUser");
 
-        window.removeItem = async function (cartId) {
-        const currentUserRaw = sessionStorage.getItem("currentUser");
+            if (!currentUserRaw) {
+                console.error("User not logged in");
+                return;
+            }
 
-        if (!currentUserRaw) {
-            console.error("User not logged in");
-            return;
-        }
+            const currentUser = JSON.parse(currentUserRaw);
 
-        const currentUser = JSON.parse(currentUserRaw);
+            // Optimistically remove from UI global state
+            CART_ITEMS = CART_ITEMS.filter(x => x.CartID !== cartId);
 
-        // 2. Optimistically remove from UI
-        CART_ITEMS = CART_ITEMS.filter(x => x.CartID !== cartId);
+            // Re-render UI
+            renderCart();
+            renderSummaryCard(CART_ITEMS);
+            updateCartItemCount(); // Update the top count text
 
-        renderCart();
-        renderSummaryCard(CART_ITEMS);
+            // 3. Prepare payload
+            const payload = {
+                CartID: cartId,
+                UserID: currentUser.userId,
+                ProductID: 0,
+                Quantity: 0,
+                Status: 2,
+                UserName: currentUser.userName
+            };
 
-        // 3. Prepare payload
-        const payload = {
-            CartID: cartId,
-            UserID: currentUser.userId,
-            ProductID: 0,
-            Quantity: 0,
-            Status: 2,
-            UserName: currentUser.userName
-        };
-
-        try {
-
-            const apiUrl = '@productURL/Cart/AddOrEditCart';
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+            $.ajax({
+                url: '@productURL/Cart/AddOrEditCart',
+                type: 'POST',
+                contentType: 'application/json', 
+                data: JSON.stringify(payload),
+                success: function (res) {
+                    if (res.success) {
+                        console.log("Item successfully removed from database.");
+                    } else {
+                        console.error("Server failed to remove item:", res.message);
+                    }
                 },
-                body: JSON.stringify(payload)
+                error: function (xhr, status, error) {
+                    console.error("Failed to connect to database for removal", error);
+                }
             });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            const res = await response.json();
-            if (res.success) {
-                console.log("Item successfully removed from database.");
-            } else {
-                console.error("Server failed to remove item:", res.message);
-            }
-
-        } catch (err) {
-            console.error("Failed to connect to database for removal", err);
-        }
-    };
-
-    $(document).ready(function () {
-                const userID = Auth.currentUser().userId;
-                getCartDetailsByUserID(userID);
-            })
+        };
     </script>
 }

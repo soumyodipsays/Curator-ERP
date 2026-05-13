@@ -41,7 +41,8 @@
 
     <div class="summary-row">
         <span class="summary-label">
-            Subtotal (@Model.ItemCount items)
+            <!-- The ID 'summary-item-count' lets JavaScript inject the number of items -->
+            Subtotal (<span id="summary-item-count">0</span> items)
         </span>
 
         <span class="summary-value green">
@@ -127,7 +128,7 @@
             <div style="font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-4);margin-bottom:10px">
 
                 <span id="bag-item-count">
-                    @Model.ItemCount
+                    0
                 </span>
                 Items in Bag
 
@@ -239,25 +240,13 @@
 
 <script>
     function calculateSubTotal(CART_ITEMS) {
-        const initialAmount = 0;
-        const subTotal = CART_ITEMS.reduce(
-            (acc, currVal) => acc + (currVal.Price * currVal.Quantity),
-            initialAmount
-        );
-
-        console.log("Subtotal: ", subTotal);
-        return subTotal;
+        return CART_ITEMS.reduce((acc, currVal) => acc + (currVal.Price * currVal.Quantity), 0);
     }
 
     function calculateDiscountedPrice(CART_ITEMS) {
-        const initialDiscountAmount = 0;
-        const totalDiscountAmount = CART_ITEMS.reduce(
-            (acc, currVal) => acc + (countDiscount(currVal.IsInrOrPercentage, currVal.Price, currVal.Discount,currVal.Quantity)),
-            initialDiscountAmount
+        return CART_ITEMS.reduce((acc, currVal) =>
+            acc + countDiscount(currVal.IsInrOrPercentage, currVal.Price, currVal.Discount, currVal.Quantity), 0
         );
-
-        console.log("Discount total: ", totalDiscountAmount);
-        return totalDiscountAmount;
     }
 
     function renderSummaryCard(CART_ITEMS) {
@@ -266,101 +255,98 @@
 
         const subtotal = calculateSubTotal(CART_ITEMS);
         const totalDiscountPrice = calculateDiscountedPrice(CART_ITEMS);
-
         const totalDiscount = subtotal - totalDiscountPrice;
+
+        // PERFECT COUNT FEATURE:
+        const totalItemsCount = CART_ITEMS.reduce((total, item) => total + item.Quantity, 0);
+
+        // jQuery makes this super easy. It won't crash even if the element isn't on the page!
+        $('#summary-item-count').text(totalItemsCount);
+        $('#bag-item-count').text(totalItemsCount);
 
         // Update the HTML spans and lock to 2 decimal places
         $('#sub-total-amt').text(subtotal.toFixed(2));
         $('#discountAmt-span').text(totalDiscount.toFixed(2));
         $('#total-amt-span').text(totalDiscountPrice.toFixed(2));
-}
-
+    }
 
     // RENDER CHECKOUT STEP
     function renderCheckoutStep(currentStep) {
-
         // Hide all first
         $('.checkout-step-section').hide();
 
         // Show current step
         if (currentStep === 1) {
             $('#step1-section').show();
-        }
-        else if (currentStep === 2) {
+        } else if (currentStep === 2) {
             $('#step2-section').show();
-        }
-        else if (currentStep === 3) {
+        } else if (currentStep === 3) {
             $('#step3-section').show();
         }
-}
-    async function syncCartWithServer() {
-    if (!CART_ITEMS || CART_ITEMS.length === 0) return;
-
-    try {
-        // 1. Prepare the JSON array
-        const itemsArray = CART_ITEMS.map(item => ({
-            CartID: item.CartID,
-            Quantity: item.Quantity,
-
-        }));
-
-        // 2. Prepare the payload matching your C# CartInsertIpdateDTO
-        const payload = {
-            UserID: Auth.currentUser().userId,
-            UserName: Auth.currentUser().UserName,
-            CartItemsJSON: JSON.stringify(itemsArray)
-        };
-
-        console.log(payload)
-
-        // 3. Let ASP.NET generate the bulletproof URL!
-        const endpointUrl = '@productURL/Cart/SyncCartBulk';
-
-        console.log(endpointUrl)
-        // 4. Send the request
-        const response = await fetch(endpointUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data.success) {
-            console.log("Cart bulk update successful!");
-        } else {
-            console.error("Server logic error:", data.message);
-        }
-    } catch (error) {
-        console.error("Failed to sync cart with backend:", error);
-        throw error;
     }
-}
+
+    async function syncCartWithServer() {
+        if (!CART_ITEMS || CART_ITEMS.length === 0) return;
+
+        try {
+            // 1. Prepare the JSON array
+            const itemsArray = CART_ITEMS.map(item => ({
+                CartID: item.CartID,
+                Quantity: item.Quantity
+            }));
+
+            // 2. Prepare the payload matching your C# CartInsertIpdateDTO
+            const payload = {
+                UserID: Auth.currentUser().userId,
+                UserName: Auth.currentUser().UserName,
+                CartItemsJSON: JSON.stringify(itemsArray)
+            };
+
+            // 3. Let ASP.NET generate the bulletproof URL!
+            const endpointUrl = '@productURL/Cart/SyncCartBulk';
+
+            // 4. Converted Vanilla 'fetch' to jQuery '$.ajax'
+            const response = await $.ajax({
+                url: endpointUrl,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload)
+            });
+
+            if (response.success) {
+                console.log("Cart bulk update successful!");
+            } else {
+                console.error("Server logic error:", response.message);
+            }
+        } catch (error) {
+            console.error("Failed to sync cart with backend:", error);
+            throw error; // Rethrow so proceedToCheckout catches it
+        }
+    }
+
     async function proceedToCheckout() {
-        const btn = document.querySelector('#step1-section button');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = 'Saving... <i class="bi bi-hourglass-split"></i>';
-        btn.disabled = true;
+        const $btn = $('#step1-section button'); // jQuery selector
+        const originalText = $btn.html();
+
+        $btn.html('Saving... <i class="bi bi-hourglass-split"></i>').prop('disabled', true);
 
         try {
             await syncCartWithServer();
             sessionStorage.setItem('CHECKOUT_CART_STATE', JSON.stringify(CART_ITEMS));
+
             // Redirect after successful save
             window.location.href = "/CuratorMainApp/Checkout/Address";
         } catch (error) {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+            $btn.html(originalText).prop('disabled', false);
             alert("There was an issue saving your cart. Please try again.");
         }
     }
 
-    function applyCoupon() {
+    // ============================================
+    // INITIALIZE ON PAGE LOAD (Converted to jQuery)
+    // ============================================
+    $(document).ready(function () {
+        function applyCoupon() {
 
         console.log("applyCoupon called");
         console.log("CART_ITEMS: ", CART_ITEMS);
@@ -502,56 +488,45 @@
                 .text('Unexpected error occurred.');
         }
     }
-// ============================================
-// INITIALIZE ON PAGE LOAD
-// ============================================
-    document.addEventListener('DOMContentLoaded', () => {
-
-        const btn = document.getElementById('btnApplyCoupon');
-
-        if (btn) {
-
-            btn.addEventListener('click', function () {
-                console.log("BUTTON CLICKED");
+        // Setup the Apply Coupon Button
+        $('#btnApplyCoupon').on('click', function () {
+            console.log("BUTTON CLICKED");
+            if (typeof applyCoupon === "function") {
                 applyCoupon();
-            });
+            }
+        });
+
+        // 1. Check if we have saved cart data in sessionStorage
+        const savedCart = sessionStorage.getItem('CHECKOUT_CART_STATE');
+
+        if (savedCart) {
+            // 2. Restore the global array
+            window.CART_ITEMS = JSON.parse(savedCart);
+
+            // 3. Re-render the math and totals (this ALSO instantly fixes your counts!)
+            renderSummaryCard(window.CART_ITEMS);
+
+            // 4. Inject the images dynamically
+            const $bagImages = $('#bag-images');
+            if ($bagImages.length) {
+                const imagesHtml = window.CART_ITEMS.map(item => `
+                    <img src="${item.ImageURL}" style="width:48px;height:48px;border-radius:10px;object-fit:cover" />
+                `).join('');
+                $bagImages.html(imagesHtml);
+            }
         }
-    // 1. Check if we have saved cart data in sessionStorage
-    const savedCart = sessionStorage.getItem('CHECKOUT_CART_STATE');
 
-    if (savedCart) {
-        // 2. Restore the global array
-        window.CART_ITEMS = JSON.parse(savedCart);
+        // 5. Check URL to show correct Step UI
+        let currentStep = 1; // Default to Step 1 (Cart)
+        const currentUrl = window.location.pathname.toLowerCase();
 
-        // 3. Re-render the math and totals
-        renderSummaryCard(window.CART_ITEMS);
-
-        // 4. Dynamically update Step 2 UI (since you aren't using the C# model)
-        const totalItemsCount = window.CART_ITEMS.reduce((acc, item) => acc + item.Quantity, 0);
-
-        // Update bag count text
-        if (document.getElementById('bag-item-count')) {
-            document.getElementById('bag-item-count').innerText = totalItemsCount;
+        if (currentUrl.includes('/address')) {
+            currentStep = 2; // We are on the Address page
+        } else if (currentUrl.includes('/review') || currentUrl.includes('/payment')) {
+            currentStep = 3; // We are on the Review/Payment page
         }
 
-        // Inject the images dynamically
-        if (document.getElementById('bag-images')) {
-            document.getElementById('bag-images').innerHTML = window.CART_ITEMS.map(item => `
-                <img src="${item.ImageURL}" style="width:48px;height:48px;border-radius:10px;object-fit:cover" />
-            `).join('');
-        }
-    }
-
-    let currentStep = 1; // Default to Step 1 (Cart)
-    const currentUrl = window.location.pathname.toLowerCase();
-
-    if (currentUrl.includes('/address')) {
-        currentStep = 2; // We are on the Address page
-    } else if (currentUrl.includes('/review') || currentUrl.includes('/payment')) {
-        currentStep = 3; // We are on the Review/Payment page
-    }
-
-    // Instantly hide the wrong buttons and show the correct ones!
-    renderCheckoutStep(currentStep);
-});
+        // Instantly hide the wrong buttons and show the correct ones!
+        renderCheckoutStep(currentStep);
+    });
 </script>
