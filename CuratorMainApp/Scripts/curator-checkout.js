@@ -41,26 +41,26 @@ function countDiscount(type, realPrice, discount, qty) {
 
 /* ---- Cart: Coupon ---- */
 /* Maps: tblOrder.CouponAmount, tblOrder.PaymentAmount */
-function applyCoupon() {
-    const code = document.getElementById('couponInput').value.trim().toUpperCase();
-    const msgEl = document.getElementById('couponMsg');
-    // AJAX: $.post('/Order/ApplyCoupon', { code }, handleResult);
-    if (code === 'CURATOR10') {
-        msgEl.style.display = 'block';
-        msgEl.style.color = 'var(--green)';
-        msgEl.textContent = '✓ Coupon applied — 10% off!';
-        document.getElementById('couponRow').style.removeProperty('display');
-        document.getElementById('couponAmt').textContent = '−$97';
-        document.getElementById('totalAmt').textContent = '$873';
-        showToast('Coupon applied! You save $97 🎉');
-    } else if (!code) {
-        msgEl.style.display = 'block'; msgEl.style.color = 'var(--red)';
-        msgEl.textContent = 'Please enter a coupon code';
-    } else {
-        msgEl.style.display = 'block'; msgEl.style.color = 'var(--red)';
-        msgEl.textContent = 'Invalid or expired coupon';
-    }
-}
+//function applyCoupon() {
+//    const code = document.getElementById('couponInput').value.trim().toUpperCase();
+//    const msgEl = document.getElementById('couponMsg');
+//    // AJAX: $.post('/Order/ApplyCoupon', { code }, handleResult);
+//    if (code === 'CURATOR10') {
+//        msgEl.style.display = 'block';
+//        msgEl.style.color = 'var(--green)';
+//        msgEl.textContent = '✓ Coupon applied — 10% off!';
+//        document.getElementById('couponRow').style.removeProperty('display');
+//        document.getElementById('couponAmt').textContent = '−$97';
+//        document.getElementById('totalAmt').textContent = '$873';
+//        showToast('Coupon applied! You save $97 🎉');
+//    } else if (!code) {
+//        msgEl.style.display = 'block'; msgEl.style.color = 'var(--red)';
+//        msgEl.textContent = 'Please enter a coupon code';
+//    } else {
+//        msgEl.style.display = 'block'; msgEl.style.color = 'var(--red)';
+//        msgEl.textContent = 'Invalid or expired coupon';
+//    }
+//}
 
 /* ---- Address: select saved address ---- */
 /* Maps: tblAddress.AddressID → tblOrder.DeliveryLocationID */

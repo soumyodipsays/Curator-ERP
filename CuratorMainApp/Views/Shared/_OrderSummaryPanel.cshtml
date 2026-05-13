@@ -8,7 +8,7 @@
 @{
     var productURL = ConfigurationManager.AppSettings["ProductServiceBaseUrl"];
     var baseURL = ConfigurationManager.AppSettings["CuratorMainAppBaseUrl"];
-    //var couponCodeURL = productURL + "/Products/ValidateCoupon";
+    var couponCodeURL = productURL + "/Products/ValidateCoupon";
 }
 
 <div class="summary-card">
@@ -69,7 +69,7 @@
         <span class="summary-value green">
             - ₹<span id="couponAmt">0.00</span>
         </span>
-    </div>>
+    </div>
 
     <div class="summary-row">
         <span class="summary-label">Delivery</span>
@@ -360,9 +360,10 @@
         }
     }
 
-    @*async function applyCoupon() {
+    function applyCoupon() {
 
         console.log("applyCoupon called");
+        console.log("CART_ITEMS: ", CART_ITEMS);
         const couponCode = $('#couponInput').val().trim();
 
 
@@ -376,7 +377,7 @@
             return;
         }
 
-        if (!window.CART_ITEMS || CART_ITEMS.length === 0) {
+        if (CART_ITEMS.length === 0) {
             $('#couponMsg')
                 .show()
                 .css('color', 'red')
@@ -450,7 +451,7 @@
 
                     // Coupon savings
                     $('#couponAmt')
-                        .html(`- ₹${couponDiscount.toFixed(2)}`);
+                        .html(`${couponDiscount.toFixed(2)}`);
 
                     // Final total
                     $('#total-amt-span')
@@ -500,7 +501,7 @@
                 .css('color', 'red')
                 .text('Unexpected error occurred.');
         }
-    }*@
+    }
 // ============================================
 // INITIALIZE ON PAGE LOAD
 // ============================================
