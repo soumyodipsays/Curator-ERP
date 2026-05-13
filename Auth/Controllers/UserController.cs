@@ -349,5 +349,81 @@ namespace Auth.Controllers
                 });
             }
         }
+
+        public JsonResult GetStates()
+        {
+            try
+            {
+                var result = _authDal.GetAllStates();
+                return Json(new
+                {
+                    success = true,
+                    data = result
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (SqlException sqlex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = sqlex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        [JwtGuard]
+        public JsonResult AddNewAddress(NewAddressDTO model)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    return Json(new { success = false, message = "Invalid request" });
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = ModelState.Values
+                                 .SelectMany(v => v.Errors)
+                                 .Select(e => e.ErrorMessage)
+                    });
+                }
+
+                _authDal.AddUserAddress(model);
+                return Json(new
+                {
+                    success = true,
+                    message = "Address Added Successfully"
+                });
+            }
+            catch (SqlException sqlex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = sqlex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

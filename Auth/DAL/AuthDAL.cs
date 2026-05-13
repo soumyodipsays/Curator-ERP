@@ -124,5 +124,31 @@ namespace Auth.DAL
             // Execute and return the new ID
             _db.ExecuteWithoutReturn(proc, parameters);
         }
+
+        public List<StateModel> GetAllStates()
+        {
+            var paramters = new DynamicParameters();
+            var proc = "spState_DDL";
+
+            return _db.ExecuteMultipleRow<StateModel>(proc, paramters);
+        }
+
+        public void AddUserAddress(NewAddressDTO newAddressDTO)
+        {
+            var parameters = new DynamicParameters();
+            var proc = "sp_AddUserAddress";
+            // Map DTO to SP Parameters
+            parameters.Add("@UserID", newAddressDTO.UserID); // Handle 0 for new signup
+            parameters.Add("@Address1", newAddressDTO.Address1);
+            parameters.Add("@Address2", newAddressDTO.Address2);
+            parameters.Add("@City", newAddressDTO.City);
+            parameters.Add("@StateID", newAddressDTO.StateID);
+            parameters.Add("@PinCode", newAddressDTO.PinCode);
+            parameters.Add("@isDefault", newAddressDTO.IsDefault);
+
+
+            // Execute and return the new ID
+            _db.ExecuteWithoutReturn(proc, parameters);
+        }
     }
 }

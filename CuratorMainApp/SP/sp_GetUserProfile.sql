@@ -1,3 +1,10 @@
+USE [Ecommerce]
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GetUserProfile]    Script Date: 5/13/2026 10:36:25 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 ALTER PROC [dbo].[sp_GetUserProfile]
     @UserID udt_ID
 AS
@@ -64,11 +71,13 @@ BEGIN
         a.Address1,
         a.Address2,
         a.City,
-        a.StateID,
+        s.State,
         a.PinCode
     FROM tblAddress a
     INNER JOIN tblUser u
         ON u.PersonID = a.PersonID
+	LEFT JOIN tblState s
+		ON a.StateID = s.StateID
     WHERE u.UserID = @UserID;
 
 END;

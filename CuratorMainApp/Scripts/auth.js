@@ -1,7 +1,7 @@
 ﻿var Auth = (function () {
 
     var config = window.AppConfig || {};
-
+    
     var profileUrl = config.profileUrl || "";
     var loginPage = config.mvcLoginPage || "/";
 
@@ -243,7 +243,7 @@
         validate: validate,
         protectPage: protectPage,
         currentUser: currentUser,
-        ajaxToken: ajaxToken
+        ajaxToken: ajaxToken,
     };
 
 })();

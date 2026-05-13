@@ -1,20 +1,8 @@
-﻿/* =============================================
-   curator-profile.js
-   Cleaned + Optimized Version
-   ============================================= */
-
-"use strict";
-
-/* =========================================================
-   GLOBALS
-========================================================= */
-
-let addressModal = null;
+﻿let addressModal = null;
 
 /* =========================================================
    INIT
 ========================================================= */
-
 document.addEventListener("DOMContentLoaded", () => {
 
     /* Bootstrap Modal */
@@ -43,7 +31,69 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* Side nav observer */
     initSectionObserver();
+
+    loadStates();
 });
+
+/* =========================================================
+   STATES
+========================================================= */
+
+function loadStates(selectedStateId = "") {
+
+    var config = window.AppConfig || {};
+    var authBaseURL = config.authBaseUrl || "";
+    var stateURL = authBaseURL + "/User/GetStates";
+
+    console.log("authBaseURL: ", authBaseURL);
+    console.log("stateURL: ", stateURL);
+
+
+    $.ajax({
+
+        url: stateURL,
+        type: "GET",
+
+        success: function (response) {
+
+            console.log("State S-Response: ", response);
+            if (!response.success) {
+                return;
+            }
+
+
+            const $state = $("#m-state");
+
+            $state.empty();
+
+            $state.append(`
+                <option value="">
+                    Select State
+                </option>
+            `);
+
+            response.data.forEach(state => {
+
+                $state.append(`
+                    <option value="${state.StateID}">
+                        ${state.State}
+                    </option>
+                `);
+
+            });
+
+            if (selectedStateId) {
+                $state.val(selectedStateId);
+            }
+        },
+
+        error: function (response) {
+            console.log("State E-Response: ", response);
+
+            showToast("Failed to load states");
+        }
+    });
+}
 
 /* =========================================================
    INLINE PROFILE FIELD EDITING
@@ -240,17 +290,21 @@ function submitAddressModal() {
 
     const address = getAddressFormData();
 
+    console.log("Address Payload: ", address);
+
     if (!validateAddress(address)) {
         return;
     }
 
-    const isEdit =
-        address.AddressID > 0;
+    var config = window.AppConfig || {};
+    var authBaseURL = config.authBaseUrl || ""
+    const saveAddressURL = authBaseURL + "/User/AddNewAddress";
 
-    const endpoint =
-        isEdit
-            ? "/Account/UpdateAddress"
-            : "/Account/SaveAddress";
+    const isEdit =  address.AddressID > 0;
+
+    const endpoint = isEdit
+            ? "Edit?URL"
+            : saveAddressURL;
 
     setAddressButtonLoading(true);
 
@@ -299,6 +353,10 @@ function getAddressFormData() {
 
     return {
 
+        UserID:
+            Auth.currentUser().UserID ||
+            localStorage.getItem("UserID"),
+
         AddressID:
             parseInt($("#modalAddressId").val()) || 0,
 
@@ -319,9 +377,6 @@ function getAddressFormData() {
 
         StateName:
             $("#m-state option:selected").text(),
-
-        Location:
-            $("#m-location").val(),
 
         IsDefault:
             $("#m-default").is(":checked")
