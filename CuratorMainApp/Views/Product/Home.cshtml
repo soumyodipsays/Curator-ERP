@@ -7,6 +7,7 @@
     var allProductURL = productURL + "/Products/GetProductList";
     var sideFilterProductURL = productURL + "/Products/GetSideFilterDetails";
     var addToCartURL = productURL + "/Cart/AddOrEditCart";
+    var couponCodeURL = productURL + "/Products/ValidateCoupon";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -736,6 +737,148 @@
         })
     }
 
+    function applyCoupon() {
+
+        console.log("applyCoupon called");
+        const couponCode = $('#couponInput').val().trim();
+
+
+        // VALIDATIONS
+        if (!couponCode) {
+            $('#couponMsg')
+                .show()
+                .css('color', 'red')
+                .text('Please enter a coupon code.');
+
+            return;
+        }
+
+        if (!window.CART_ITEMS || CART_ITEMS.length === 0) {
+            $('#couponMsg')
+                .show()
+                .css('color', 'red')
+                .text('Cart is empty.');
+            return;
+        }
+
+        try {
+            // CART CALCULATIONS
+            const subtotal = calculateSubTotal(CART_ITEMS);
+
+            // after product discounts
+            const discountedTotal = calculateDiscountedPrice(CART_ITEMS);
+
+            // payable amount before coupon
+            const cartTotal = discountedTotal;
+
+            // PAYLOAD
+            const payload = {
+                CustomerID: 1, // HARDCODED
+                CouponCode: couponCode,
+                CartTotal: cartTotal
+            };
+
+            console.log("Coupon payload:", payload);
+
+            // AJAX CALL
+            $.ajax({
+                url: `@couponCodeURL`,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+
+                beforeSend: function () {
+                    $('#couponMsg')
+                        .show()
+                        .css('color', '#666')
+                        .text('Applying coupon...');
+                },
+
+                success: function (data) {
+
+                    console.log("Coupon response:", data);
+
+                    // INVALID COUPON
+                    if (!data.IsValid) {
+
+                        $('#couponMsg')
+                            .show()
+                            .css('color', 'red')
+                            .text(data.ReturnMessage || 'Invalid coupon.');
+
+                        $('#couponRow').hide();
+
+                        // Reset total amount
+                        $('#total-amt-span')
+                            .text(cartTotal.toFixed(2));
+
+                        return;
+                    }
+
+                    // VALID COUPON
+                    const couponDiscount =
+                        parseFloat(data.CalculatedDiscountAmount || 0);
+
+                    const finalTotal =
+                        cartTotal - couponDiscount;
+
+                    // Show coupon row
+                    $('#couponRow').show();
+
+                    // Coupon savings
+                    $('#couponAmt')
+                        .html(`- ₹${couponDiscount.toFixed(2)}`);
+
+                    // Final total
+                    $('#total-amt-span')
+                        .text(finalTotal.toFixed(2));
+
+                    // Success message
+                    $('#couponMsg')
+                        .show()
+                        .css('color', 'green')
+                        .text(data.ReturnMessage || 'Coupon applied successfully.');
+
+                    // Save coupon in session
+                    sessionStorage.setItem(
+                        'APPLIED_COUPON',
+                        JSON.stringify({
+                            CouponCode: couponCode,
+                            CouponID: data.CouponID,
+                            DiscountAmount: couponDiscount
+                        })
+                    );
+
+                    console.log("Coupon applied successfully");
+                },
+
+                error: function (xhr, status, error) {
+
+                    console.error("Coupon apply failed");
+
+                    console.error("XHR:", xhr);
+                    console.error("Status:", status);
+                    console.error("Error:", error);
+
+                    $('#couponMsg')
+                        .show()
+                        .css('color', 'red')
+                        .text('Something went wrong while applying coupon.');
+                }
+            });
+
+        }
+        catch (error) {
+
+            console.error("applyCoupon exception:", error);
+
+            $('#couponMsg')
+                .show()
+                .css('color', 'red')
+                .text('Unexpected error occurred.');
+        }
+    }
+
     function setActiveCategory(categoryName) {
         $('.cat-pill').removeClass('active');
 
@@ -959,6 +1102,12 @@
         $('#btn-clear-filters').on('click', function () {
             clearAllFilters();
         });
+
+        $('#btnApplyCoupon').on('click', function () {
+            console.log("BUTTON CLICKED");
+            applyCoupon();
+        });
+
         getAllProducts()
         getSideFilterDetails();
 

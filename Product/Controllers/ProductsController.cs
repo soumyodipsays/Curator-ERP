@@ -1,4 +1,5 @@
 ﻿using Product.DAL;
+using Product.DTOs;
 using Product.Models;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,6 @@ using System.Web.Services.Description;
 
 namespace Product.Controllers
 {
-
-    [Route("api/products")]
     public class ProductsController : Controller
     {
         private readonly ProductListDAL product_list_dal = new ProductListDAL();
@@ -37,6 +36,13 @@ namespace Product.Controllers
         public JsonResult GetSideFilterDetails(long CustomerID)
         {
             var result = product_list_dal.GetSideFilterDetails(CustomerID);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult ValidateCoupon(CouponValidateDTO couponBody)
+        {
+            var result = product_list_dal.ValidateCoupon(couponBody);
             return Json(result, JsonRequestBehavior.AllowGet);
         }
     }

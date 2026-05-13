@@ -138,6 +138,7 @@
     <Compile Include="DAL\CartDAL.cs" />
     <Compile Include="DAL\ProductListDAL.cs" />
     <Compile Include="DTOs\CartInsertIpdateDTO.cs" />
+    <Compile Include="DTOs\CouponValidateDTO.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

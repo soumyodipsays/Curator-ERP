@@ -8,6 +8,7 @@
 @{
     var productURL = ConfigurationManager.AppSettings["ProductServiceBaseUrl"];
     var baseURL = ConfigurationManager.AppSettings["CuratorMainAppBaseUrl"];
+    //var couponCodeURL = productURL + "/Products/ValidateCoupon";
 }
 
 <div class="summary-card">
@@ -26,7 +27,11 @@
                    id="couponInput"
                    value="@Model.AppliedCouponCode" />
 
-            <button class="btn-coupon" onclick="applyCoupon()">Apply</button>
+            <button type="button"
+                    class="btn-coupon"
+                    id="btnApplyCoupon">
+                Apply
+            </button>
         </div>
 
         <div id="couponMsg"
@@ -61,12 +66,10 @@
 
         <span class="summary-label">Coupon Savings</span>
 
-        <span class="summary-value green" id="couponAmt">
-            @(Model.CouponAmount > 0
-                ? "-₹" + Model.CouponAmount.ToString("N0")
-                : "-₹0")
+        <span class="summary-value green">
+            - ₹<span id="couponAmt">0.00</span>
         </span>
-    </div>
+    </div>>
 
     <div class="summary-row">
         <span class="summary-label">Delivery</span>
@@ -272,32 +275,22 @@
         $('#total-amt-span').text(totalDiscountPrice.toFixed(2));
 }
 
-    // ============================================
-    // RENDER CHECKOUT STEP
-    // ============================================
 
+    // RENDER CHECKOUT STEP
     function renderCheckoutStep(currentStep) {
 
         // Hide all first
-
         $('.checkout-step-section').hide();
 
         // Show current step
-
         if (currentStep === 1) {
-
             $('#step1-section').show();
-
         }
         else if (currentStep === 2) {
-
             $('#step2-section').show();
-
         }
         else if (currentStep === 3) {
-
             $('#step3-section').show();
-
         }
 }
     async function syncCartWithServer() {
@@ -349,27 +342,179 @@
         throw error;
     }
 }
-async function proceedToCheckout() {
-    const btn = document.querySelector('#step1-section button');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = 'Saving... <i class="bi bi-hourglass-split"></i>';
-    btn.disabled = true;
+    async function proceedToCheckout() {
+        const btn = document.querySelector('#step1-section button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = 'Saving... <i class="bi bi-hourglass-split"></i>';
+        btn.disabled = true;
 
-    try {
-        await syncCartWithServer();
-        sessionStorage.setItem('CHECKOUT_CART_STATE', JSON.stringify(CART_ITEMS));
-        // Redirect after successful save
-        window.location.href = "/CuratorMainApp/Checkout/Address";
-    } catch (error) {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-        alert("There was an issue saving your cart. Please try again.");
+        try {
+            await syncCartWithServer();
+            sessionStorage.setItem('CHECKOUT_CART_STATE', JSON.stringify(CART_ITEMS));
+            // Redirect after successful save
+            window.location.href = "/CuratorMainApp/Checkout/Address";
+        } catch (error) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            alert("There was an issue saving your cart. Please try again.");
+        }
     }
-}
+
+    @*async function applyCoupon() {
+
+        console.log("applyCoupon called");
+        const couponCode = $('#couponInput').val().trim();
+
+
+        // VALIDATIONS
+        if (!couponCode) {
+            $('#couponMsg')
+                .show()
+                .css('color', 'red')
+                .text('Please enter a coupon code.');
+
+            return;
+        }
+
+        if (!window.CART_ITEMS || CART_ITEMS.length === 0) {
+            $('#couponMsg')
+                .show()
+                .css('color', 'red')
+                .text('Cart is empty.');
+            return;
+        }
+
+        try {
+            // CART CALCULATIONS
+            const subtotal = calculateSubTotal(CART_ITEMS);
+
+            // after product discounts
+            const discountedTotal = calculateDiscountedPrice(CART_ITEMS);
+
+            // payable amount before coupon
+            const cartTotal = discountedTotal;
+
+            // PAYLOAD
+            const payload = {
+                CustomerID: 1, // HARDCODED
+                CouponCode: couponCode,
+                CartTotal: cartTotal
+            };
+
+            console.log("Coupon payload:", payload);
+
+            // AJAX CALL
+            $.ajax({
+                url: `@couponCodeURL`,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+
+                beforeSend: function () {
+                    $('#couponMsg')
+                        .show()
+                        .css('color', '#666')
+                        .text('Applying coupon...');
+                },
+
+                success: function (data) {
+
+                    console.log("Coupon response:", data);
+
+                    // INVALID COUPON
+                    if (!data.IsValid) {
+
+                        $('#couponMsg')
+                            .show()
+                            .css('color', 'red')
+                            .text(data.ReturnMessage || 'Invalid coupon.');
+
+                        $('#couponRow').hide();
+
+                        // Reset total amount
+                        $('#total-amt-span')
+                            .text(cartTotal.toFixed(2));
+
+                        return;
+                    }
+
+                    // VALID COUPON
+                    const couponDiscount =
+                        parseFloat(data.CalculatedDiscountAmount || 0);
+
+                    const finalTotal =
+                        cartTotal - couponDiscount;
+
+                    // Show coupon row
+                    $('#couponRow').show();
+
+                    // Coupon savings
+                    $('#couponAmt')
+                        .html(`- ₹${couponDiscount.toFixed(2)}`);
+
+                    // Final total
+                    $('#total-amt-span')
+                        .text(finalTotal.toFixed(2));
+
+                    // Success message
+                    $('#couponMsg')
+                        .show()
+                        .css('color', 'green')
+                        .text(data.ReturnMessage || 'Coupon applied successfully.');
+
+                    // Save coupon in session
+                    sessionStorage.setItem(
+                        'APPLIED_COUPON',
+                        JSON.stringify({
+                            CouponCode: couponCode,
+                            CouponID: data.CouponID,
+                            DiscountAmount: couponDiscount
+                        })
+                    );
+
+                    console.log("Coupon applied successfully");
+                },
+
+                error: function (xhr, status, error) {
+
+                    console.error("Coupon apply failed");
+
+                    console.error("XHR:", xhr);
+                    console.error("Status:", status);
+                    console.error("Error:", error);
+
+                    $('#couponMsg')
+                        .show()
+                        .css('color', 'red')
+                        .text('Something went wrong while applying coupon.');
+                }
+            });
+
+        }
+        catch (error) {
+
+            console.error("applyCoupon exception:", error);
+
+            $('#couponMsg')
+                .show()
+                .css('color', 'red')
+                .text('Unexpected error occurred.');
+        }
+    }*@
 // ============================================
 // INITIALIZE ON PAGE LOAD
 // ============================================
-document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const btn = document.getElementById('btnApplyCoupon');
+
+        if (btn) {
+
+            btn.addEventListener('click', function () {
+                console.log("BUTTON CLICKED");
+                applyCoupon();
+            });
+        }
     // 1. Check if we have saved cart data in sessionStorage
     const savedCart = sessionStorage.getItem('CHECKOUT_CART_STATE');
 

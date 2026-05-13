@@ -61,6 +61,16 @@ namespace Product.DAL
 
         }
 
-        
+        public CouponValidateResponseDTO ValidateCoupon(CouponValidateDTO dto)
+        {
+            var sp = "spCoupon_Validate";
+
+            var param = new DynamicParameters();
+            param.Add("@CustomerID", dto.CustomerID);
+            param.Add("@CouponCode", dto.CouponCode);
+            param.Add("@CartTotal", dto.CartTotal);
+
+            return _db.ExecuteSingleRow<CouponValidateResponseDTO>(sp, param);
+        }
     }
 }
