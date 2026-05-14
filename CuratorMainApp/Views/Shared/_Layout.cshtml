@@ -33,29 +33,89 @@
     @Html.Partial("_BottomNav")
 
     <!-- Toast Container -->
-    <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div class="toast-container position-fixed bottom-0 end-0 p-4">
 
         <div id="appToast"
-             class="toast align-items-center border-0"
+             class="toast border-0 shadow"
              role="alert"
              aria-live="assertive"
-             aria-atomic="true">
+             aria-atomic="true"
+             style="
+            width:360px;
+            border-radius:22px;
+            background:#ffffff;
+            overflow:hidden;
+            box-shadow:
+                0 10px 35px rgba(15,23,42,0.12);
+         ">
 
-            <div class="d-flex align-items-center p-2">
+            <div class="d-flex align-items-start p-3">
 
-                <i id="toastIcon"
-                   class="bi bi-check-circle-fill me-2"></i>
+                <!-- Icon -->
+                <div style="
+                width:44px;
+                height:44px;
+                border-radius:14px;
+                background:#eef4ff;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                flex-shrink:0;
+                margin-right:14px;
+            ">
 
-                <div id="toastMsg" class="toast-body">
-                    Success
+                    <i id="toastIcon"
+                       class="bi bi-check-circle-fill"
+                       style="
+                        font-size:1.15rem;
+                        color:#2563eb;
+                   ">
+                    </i>
+
                 </div>
 
+                <!-- Content -->
+                <div class="flex-grow-1">
+
+                    <div style="
+                    font-size:.95rem;
+                    font-weight:700;
+                    color:#111827;
+                    margin-bottom:2px;
+                ">
+                        Notification
+                    </div>
+
+                    <div id="toastMsg"
+                         style="
+                        font-size:.88rem;
+                        color:#6b7280;
+                        line-height:1.5;
+                     ">
+
+                        Changes saved successfully.
+
+                    </div>
+
+                </div>
+
+                <!-- Close -->
                 <button type="button"
-                        class="btn-close me-2 m-auto"
+                        class="btn-close ms-3 mt-1"
                         data-bs-dismiss="toast">
                 </button>
 
             </div>
+
+            <!-- Bottom Accent -->
+            <div style="
+            height:4px;
+            background:linear-gradient(
+                90deg,
+                #2563eb,
+                #60a5fa
+            );
+        "></div>
 
         </div>
 
