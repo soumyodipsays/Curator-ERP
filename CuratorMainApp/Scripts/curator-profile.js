@@ -1,15 +1,29 @@
-﻿let addressModal = null;
+﻿/* =============================================
+   curator-profile.js
+   Refactored + Fixed Version
+   ============================================= */
+
+"use strict";
+
+/* =========================================================
+   GLOBALS
+========================================================= */
+
+let addressModal = null;
 
 /* =========================================================
    INIT
 ========================================================= */
+
 document.addEventListener("DOMContentLoaded", () => {
 
     /* Bootstrap Modal */
-    const modalEl = document.getElementById("addressModal");
+    const modalEl =
+        document.getElementById("addressModal");
 
     if (modalEl) {
-        addressModal = new bootstrap.Modal(modalEl);
+        addressModal =
+            new bootstrap.Modal(modalEl);
     }
 
     /* Fade-up animations */
@@ -32,22 +46,53 @@ document.addEventListener("DOMContentLoaded", () => {
     /* Side nav observer */
     initSectionObserver();
 
+    /* Load states */
     loadStates();
+
+    /* Dynamic edit handler */
+    bindAddressEvents();
 });
+
+function showToast(msg, icon = 'bi-check-circle-fill', color = '#30b94d') {
+    const toastEl = document.getElementById('appToast');
+    if (!toastEl) return;
+
+    document.getElementById('toastMsg').textContent = msg;
+    const iconEl = document.getElementById('toastIcon');
+
+    if (iconEl) {
+        iconEl.className = 'bi ' + icon;
+        iconEl.style.color = color;
+    }
+
+    // Ensure bootstrap is loaded before calling Toast
+    if (typeof bootstrap !== 'undefined') {
+        new bootstrap.Toast(toastEl, { delay: 2500 }).show();
+    } else {
+        console.warn("Bootstrap JS is not loaded. Toast cannot be shown.");
+    }
+};
+
+/* =========================================================
+   APP CONFIG
+========================================================= */
+
+function getAuthBaseUrl() {
+
+    const config =
+        window.AppConfig || {};
+
+    return config.authBaseUrl || "";
+}
 
 /* =========================================================
    STATES
 ========================================================= */
 
-function loadStates(selectedStateId = "") {
+function loadStates(selectedStateId) {
 
-    var config = window.AppConfig || {};
-    var authBaseURL = config.authBaseUrl || "";
-    var stateURL = authBaseURL + "/User/GetStates";
-
-    console.log("authBaseURL: ", authBaseURL);
-    console.log("stateURL: ", stateURL);
-
+    const stateURL =
+        getAuthBaseUrl() + "/User/GetStates";
 
     $.ajax({
 
@@ -56,13 +101,12 @@ function loadStates(selectedStateId = "") {
 
         success: function (response) {
 
-            console.log("State S-Response: ", response);
             if (!response.success) {
                 return;
             }
 
-
-            const $state = $("#m-state");
+            const $state =
+                $("#m-state");
 
             $state.empty();
 
@@ -82,13 +126,16 @@ function loadStates(selectedStateId = "") {
 
             });
 
+            console.log("selectedStateId: ", selectedStateId)
+
             if (selectedStateId) {
-                $state.val(selectedStateId);
+                $state.val(String(selectedStateId));
             }
         },
 
         error: function (response) {
-            console.log("State E-Response: ", response);
+
+            console.log("State Error:", response);
 
             showToast("Failed to load states");
         }
@@ -101,28 +148,27 @@ function loadStates(selectedStateId = "") {
 
 function startEdit(field) {
 
-    /* Hide all edit forms */
     document.querySelectorAll(".field-edit-form")
         .forEach(form => {
             form.style.display = "none";
         });
 
-    /* Show current form */
-    const form = document.getElementById(`edit-${field}`);
+    const form =
+        document.getElementById(`edit-${field}`);
 
     if (form) {
         form.style.display = "block";
     }
 
-    /* Clear error */
-    const err = document.getElementById(`err-${field}`);
+    const err =
+        document.getElementById(`err-${field}`);
 
     if (err) {
         err.textContent = "";
     }
 
-    /* Focus input */
-    const input = document.getElementById(`input-${field}`);
+    const input =
+        document.getElementById(`input-${field}`);
 
     if (input) {
         input.focus();
@@ -131,7 +177,8 @@ function startEdit(field) {
 
 function cancelEdit(field) {
 
-    const form = document.getElementById(`edit-${field}`);
+    const form =
+        document.getElementById(`edit-${field}`);
 
     if (form) {
         form.style.display = "none";
@@ -182,7 +229,8 @@ function uploadAvatar(input) {
 
     const file = input.files[0];
 
-    const reader = new FileReader();
+    const reader =
+        new FileReader();
 
     reader.onload = e => {
 
@@ -194,10 +242,6 @@ function uploadAvatar(input) {
         }
 
         showToast("Profile photo updated ✓");
-
-        /* TODO:
-           Upload using FormData API
-        */
     };
 
     reader.readAsDataURL(file);
@@ -209,42 +253,55 @@ function uploadAvatar(input) {
 
 function openAddressModal() {
 
-    setModalMode("Add New Address", "Save Address");
-
-    $("#modalAddressId").val(0);
+    setModalMode(
+        "Add New Address",
+        "Save Address"
+    );
 
     resetAddressForm();
+
+    $("#modalAddressId").val(0);
 
     clearModalErrors();
 
     addressModal?.show();
 }
 
-function openEditModal(
-    id,
-    addr1,
-    addr2,
-    city,
-    stateId,
-    stateName,
-    pin,
-    location,
-    isDefault
-) {
+function openEditModal(address) {
 
-    setModalMode("Edit Address", "Update Address");
+    if (!address) {
+        return;
+    }
 
-    $("#modalAddressId").val(id);
+    setModalMode(
+        "Edit Address",
+        "Update Address"
+    );
 
-    $("#m-addr1").val(addr1 || "");
-    $("#m-addr2").val(addr2 || "");
-    $("#m-city").val(city || "");
-    $("#m-pin").val(pin || "");
-    $("#m-state").val(stateId || "");
-    $("#m-location").val(location || "Home");
+    console.log("Address: ", address);
+
+    loadStates(address.StateID);
+
+    $("#modalAddressId")
+        .val(address.AddressID || 0);
+
+    $("#m-addr1")
+        .val(address.Address1 || "");
+
+    $("#m-addr2")
+        .val(address.Address2 || "");
+
+    $("#m-city")
+        .val(address.City || "");
+
+    $("#m-pin")
+        .val(address.PinCode || "");
+
+    $("#m-location")
+        .val(address.Location || "Home");
 
     $("#m-default")
-        .prop("checked", !!isDefault);
+        .prop("checked", !!address.IsDefault);
 
     clearModalErrors();
 
@@ -253,7 +310,8 @@ function openEditModal(
 
 function setModalMode(title, buttonText) {
 
-    $(".addr-modal-title").text(title);
+    $(".addr-modal-title")
+        .text(title);
 
     $("#modalSaveBtn")
         .html(`
@@ -271,7 +329,8 @@ function resetAddressForm() {
 
     $("#m-state").val("");
 
-    $("#m-location").val("Home");
+    $("#m-location")
+        .val("Home");
 
     $("#m-default")
         .prop("checked", false);
@@ -288,22 +347,27 @@ function clearModalErrors() {
 
 function submitAddressModal() {
 
-    const address = getAddressFormData();
+    const address =
+        getAddressFormData();
 
-    console.log("Address Payload: ", address);
+    console.log("Address Payload:", address);
 
     if (!validateAddress(address)) {
         return;
     }
 
-    var config = window.AppConfig || {};
-    var authBaseURL = config.authBaseUrl || ""
-    const saveAddressURL = authBaseURL + "/User/AddNewAddress";
+    const saveAddressURL =
+        getAuthBaseUrl() + "/User/AddOrEditUserAddress";
 
-    const isEdit =  address.AddressID > 0;
+    const updateAddressURL =
+        getAuthBaseUrl() + "/User/AddOrEditUserAddress";
 
-    const endpoint = isEdit
-            ? "Edit?URL"
+    const isEdit =
+        address.AddressID > 0;
+
+    const endpoint =
+        isEdit
+            ? updateAddressURL
             : saveAddressURL;
 
     setAddressButtonLoading(true);
@@ -317,17 +381,26 @@ function submitAddressModal() {
         success: function (response) {
 
             if (!response.success) {
-                showToast("Failed to save address");
+
+                showToast(
+                    "Failed to save address"
+                );
+
                 return;
             }
 
             addressModal?.hide();
 
+            const savedAddress =
+                response.data;
+
             if (isEdit) {
-                updateAddressCard(response.address);
-            }
-            else {
-                appendAddressCard(response.address);
+
+                updateAddressCard(savedAddress);
+
+            } else {
+
+                appendAddressCard(savedAddress);
             }
 
             showToast(
@@ -335,6 +408,12 @@ function submitAddressModal() {
                     ? "Address updated successfully 📍"
                     : "Address added successfully 📍"
             );
+
+            alert(
+                isEdit
+                    ? "Address updated successfully 📍"
+                    : "Address added successfully 📍"
+            )
         },
 
         error: function () {
@@ -354,32 +433,47 @@ function getAddressFormData() {
     return {
 
         UserID:
-            Auth.currentUser().UserID ||
+            Auth.currentUser()?.UserID ||
             localStorage.getItem("UserID"),
 
         AddressID:
-            parseInt($("#modalAddressId").val()) || 0,
+            parseInt(
+                $("#modalAddressId").val()
+            ) || 0,
 
         Address1:
-            $("#m-addr1").val().trim(),
+            $("#m-addr1")
+                .val()
+                .trim(),
 
         Address2:
-            $("#m-addr2").val().trim(),
+            $("#m-addr2")
+                .val()
+                .trim(),
 
         City:
-            $("#m-city").val().trim(),
+            $("#m-city")
+                .val()
+                .trim(),
 
         PinCode:
-            $("#m-pin").val().trim(),
+            $("#m-pin")
+                .val()
+                .trim(),
 
         StateID:
             $("#m-state").val(),
 
         StateName:
-            $("#m-state option:selected").text(),
+            $("#m-state option:selected")
+                .text(),
+
+        Location:
+            $("#m-location").val(),
 
         IsDefault:
-            $("#m-default").is(":checked")
+            $("#m-default")
+                .is(":checked")
     };
 }
 
@@ -390,22 +484,30 @@ function validateAddress(address) {
     clearModalErrors();
 
     if (!address.Address1) {
+
         $("#merr-addr1").show();
+
         valid = false;
     }
 
     if (!address.City) {
+
         $("#merr-city").show();
+
         valid = false;
     }
 
     if (address.PinCode.length < 6) {
+
         $("#merr-pin").show();
+
         valid = false;
     }
 
     if (!address.StateID) {
+
         $("#merr-state").show();
+
         valid = false;
     }
 
@@ -414,7 +516,8 @@ function validateAddress(address) {
 
 function setAddressButtonLoading(loading) {
 
-    const $btn = $("#modalSaveBtn");
+    const $btn =
+        $("#modalSaveBtn");
 
     if (loading) {
 
@@ -431,14 +534,46 @@ function setAddressButtonLoading(loading) {
     $btn.prop("disabled", false);
 
     const isEdit =
-        parseInt($("#modalAddressId").val()) > 0;
+        parseInt(
+            $("#modalAddressId").val()
+        ) > 0;
 
     $btn.html(`
         <i class="bi bi-check-lg"></i>
         <span>
-            ${isEdit ? "Update Address" : "Save Address"}
+            ${isEdit
+            ? "Update Address"
+            : "Save Address"}
         </span>
     `);
+}
+
+/* =========================================================
+   ADDRESS EVENTS
+========================================================= */
+
+function bindAddressEvents() {
+
+    $(document).on(
+        "click",
+        ".edit-address-btn",
+        function () {
+
+            const raw =
+                $(this).attr("data-address");
+
+            if (!raw) {
+                return;
+            }
+
+            const address =
+                JSON.parse(decodeURIComponent(raw));
+
+            console.log("Edit Address:", address);
+
+            openEditModal(address);
+        }
+    );
 }
 
 /* =========================================================
@@ -477,6 +612,11 @@ function generateAddressCard(address) {
                 ? "🏢"
                 : "📍";
 
+    const encodedAddress =
+        encodeURIComponent(
+            JSON.stringify(address)
+        );
+
     return `
         <div class="addr-profile-card ${address.IsDefault ? "default" : ""}"
              id="addrCard-${address.AddressID}">
@@ -492,11 +632,15 @@ function generateAddressCard(address) {
                     <div>
 
                         <span class="addr-type-label">
-                            ${address.Location}
+                            ${address.Location || "Other"}
                         </span>
 
                         ${address.IsDefault
-            ? `<span class="default-badge">Default</span>`
+            ? `
+                            <span class="default-badge">
+                                Default
+                            </span>
+                        `
             : ""
         }
 
@@ -506,27 +650,19 @@ function generateAddressCard(address) {
 
                 <div class="addr-action-btns">
 
-                    <button class="addr-action-btn"
-                            onclick="openEditModal(
-                                ${address.AddressID},
-                                '${escapeJs(address.Address1)}',
-                                '${escapeJs(address.Address2)}',
-                                '${escapeJs(address.City)}',
-                                '${escapeJs(address.StateID)}',
-                                '${escapeJs(address.StateName)}',
-                                '${escapeJs(address.PinCode)}',
-                                '${escapeJs(address.Location)}',
-                                ${address.IsDefault}
-                            )"
-                            title="Edit">
+                    <button
+                        class="addr-action-btn edit-address-btn"
+                        data-address="${encodedAddress}"
+                        title="Edit">
 
                         <i class="bi bi-pencil"></i>
 
                     </button>
 
-                    <button class="addr-action-btn delete-btn"
-                            onclick="deleteAddress(${address.AddressID})"
-                            title="Delete">
+                    <button
+                        class="addr-action-btn delete-btn"
+                        onclick="deleteAddress(${address.AddressID})"
+                        title="Delete">
 
                         <i class="bi bi-trash3"></i>
 
@@ -537,7 +673,7 @@ function generateAddressCard(address) {
             </div>
 
             <div class="addr-full-line">
-                ${address.Address1}
+                ${address.Address1 || ""}
             </div>
 
             ${address.Address2
@@ -550,9 +686,9 @@ function generateAddressCard(address) {
         }
 
             <div class="addr-city-line">
-                ${address.City},
-                ${address.StateName}
-                — ${address.PinCode}
+                ${address.City || ""},
+                ${address.StateName || ""}
+                — ${address.PinCode || ""}
             </div>
 
         </div>
@@ -571,7 +707,10 @@ function deleteAddress(addressId) {
 
     $.ajax({
 
-        url: "/Account/DeleteAddress",
+        url:
+            getAuthBaseUrl() +
+            "/User/DeleteAddress",
+
         type: "POST",
 
         data: {
@@ -581,7 +720,11 @@ function deleteAddress(addressId) {
         success: function (response) {
 
             if (!response.success) {
-                showToast("Failed to remove address");
+
+                showToast(
+                    "Failed to remove address"
+                );
+
                 return;
             }
 
@@ -606,7 +749,9 @@ function deleteAddress(addressId) {
 
         error: function () {
 
-            showToast("Failed to remove address");
+            showToast(
+                "Failed to remove address"
+            );
         }
     });
 }
@@ -619,7 +764,10 @@ function setDefault(addressId) {
 
     $.ajax({
 
-        url: "/Account/SetDefaultAddress",
+        url:
+            getAuthBaseUrl() +
+            "/User/SetDefaultAddress",
+
         type: "POST",
 
         data: {
@@ -650,7 +798,9 @@ function setDefault(addressId) {
                     </span>
                 `);
 
-            showToast("Default address updated ⭐");
+            showToast(
+                "Default address updated ⭐"
+            );
         }
     });
 }
@@ -662,12 +812,19 @@ function setDefault(addressId) {
 function initSectionObserver() {
 
     const sections =
-        document.querySelectorAll("[id$='Section']");
+        document.querySelectorAll(
+            "[id$='Section']"
+        );
 
     const navItems =
-        document.querySelectorAll(".sidenav-item");
+        document.querySelectorAll(
+            ".sidenav-item"
+        );
 
-    if (!sections.length || !navItems.length) {
+    if (
+        !sections.length ||
+        !navItems.length
+    ) {
         return;
     }
 

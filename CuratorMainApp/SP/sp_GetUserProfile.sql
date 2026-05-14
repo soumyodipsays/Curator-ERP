@@ -1,6 +1,6 @@
 USE [Ecommerce]
 GO
-/****** Object:  StoredProcedure [dbo].[sp_GetUserProfile]    Script Date: 5/13/2026 10:36:25 AM ******/
+/****** Object:  StoredProcedure [dbo].[sp_GetUserProfile]    Script Date: 5/13/2026 5:31:02 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -68,11 +68,14 @@ BEGIN
     -- 3. ADDRESSES
     ---------------------------------------------------
     SELECT
+		a.AddressID,
         a.Address1,
         a.Address2,
         a.City,
+		s.StateID,
         s.State,
-        a.PinCode
+        a.PinCode,
+		a.isDefault
     FROM tblAddress a
     INNER JOIN tblUser u
         ON u.PersonID = a.PersonID

@@ -7,9 +7,11 @@ namespace Auth.DTOs
 {
     public class UserProfileAddressDTO
     {
+        public long AddressID { get; set; }
         public string Address1 { get; set; }
         public string Address2 { get; set; }
         public string City { get; set; }
+        public long StateID { get; set; }
         public string State {  get; set; }
         public string PinCode { get; set; }
         public bool IsDefault { get; set; }
@@ -44,6 +46,7 @@ namespace Auth.DTOs
     public class NewAddressDTO
     {
         public long UserID { get; set; }
+        public long AddressID { get; set; }
         public string Address1 { get; set; }
         public string Address2 { get; set; }
         public string City { get; set; }

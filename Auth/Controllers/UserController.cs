@@ -381,7 +381,7 @@ namespace Auth.Controllers
 
         [HttpPost]
         [JwtGuard]
-        public JsonResult AddNewAddress(NewAddressDTO model)
+        public JsonResult AddOrEditUserAddress(NewAddressDTO model)
         {
             try
             {
@@ -401,7 +401,7 @@ namespace Auth.Controllers
                     });
                 }
 
-                _authDal.AddUserAddress(model);
+                _authDal.AddOrEditUserAddress(model);
                 return Json(new
                 {
                     success = true,
