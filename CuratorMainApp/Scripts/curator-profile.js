@@ -592,86 +592,112 @@ function updateAddressCard(address) {
     $card.replaceWith(newCard);
 }
 
-function generateAddressCard(address) {
+function generateAddressCard(addr) {
 
     const encodedAddress =
         encodeURIComponent(
-            JSON.stringify(address)
+            JSON.stringify(addr)
         );
 
-    return `
-        <div class="addr-profile-card ${address.IsDefault ? "default" : ""}"
-             id="addrCard-${address.AddressID}">
+    let address1 = addr.Address1 || "";
+    let address2 = addr.Address2 || "";
+    let city = addr.City || "";
+    let state = addr.StateName || addr.State || "";
+    let pin = addr.PinCode || addr.Pin || "";
 
-            <div class="d-flex justify-content-between align-items-start mb-3">
+    const html = `
+            <div class="modern-address-card ${addr.IsDefault ? "default-card" : ""}"
+                 id="addrCard-${addr.AddressID}">
 
-                <div>
+                <div class="card-top">
 
-                    ${address.IsDefault
+                    <div class="d-flex align-items-center gap-2">
+
+                        <div class="location-icon">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+
+                        ${addr.IsDefault
             ? `
-                            <span class="default-badge">
-                                Default
-                            </span>
+                                <span class="default-badge">
+                                    Default Address
+                                </span>
+                            `
+            : `
+                                <span class="address-label">
+                                    Saved Address
+                                </span>
+                            `
+        }
+
+                    </div>
+
+                    <div class="action-group">
+
+                        <button class="icon-action-btn edit-address-btn"
+                                title="Edit Address"
+                                data-address='${JSON.stringify(addr)}'>
+
+                            <i class="bi bi-pencil-square"></i>
+
+                        </button>
+
+                        <button class="icon-action-btn delete-btn"
+                                title="Delete Address"
+                                onclick="deleteAddress(${addr.AddressID})">
+
+                            <i class="bi bi-trash3"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="address-content">
+
+                    <div class="primary-address">
+                        ${address1}
+                    </div>
+
+                    ${address2
+            ? `
+                            <div class="secondary-address">
+                                ${address2}
+                            </div>
+                        `
+            : ""
+        }
+
+                    <div class="city-state-row">
+                        <i class="bi bi-building"></i>
+
+                        <span>
+                            ${city ? city + "," : ""}
+                            ${state || ""}
+                            ${pin ? " - " + pin : ""}
+                        </span>
+                    </div>
+
+                    ${addr.Location
+            ? `
+                            <div class="location-row">
+                                <i class="bi bi-pin-map"></i>
+
+                                <span>
+                                    ${addr.Location}
+                                </span>
+                            </div>
                         `
             : ""
         }
 
                 </div>
 
-                <div class="addr-action-btns">
-
-                    <button
-                        class="addr-action-btn edit-address-btn"
-                        data-address="${encodedAddress}"
-                        title="Edit">
-
-                        <i class="bi bi-pencil"></i>
-
-                    </button>
-
-                    <button
-                        class="addr-action-btn delete-btn"
-                        onclick="deleteAddress(${address.AddressID})"
-                        title="Delete">
-
-                        <i class="bi bi-trash3"></i>
-
-                    </button>
-
-                </div>
-
             </div>
+        `;
 
-            <div class="addr-full-line">
-                ${address.Address1 || ""}
-            </div>
-
-            ${address.Address2
-            ? `
-                <div class="addr-full-line secondary">
-                    ${address.Address2}
-                </div>
-            `
-            : ""
-        }
-
-            <div class="addr-city-line">
-                ${address.City || ""},
-                ${address.StateName || address.State || ""}
-                — ${address.PinCode || address.Pin || ""}
-            </div>
-
-            ${address.Location
-            ? `
-                <div class="addr-full-line secondary mt-2">
-                    ${address.Location}
-                </div>
-            `
-            : ""
-        }
-
-        </div>
-    `;
+    return html;
 }
 
 /* =========================================================

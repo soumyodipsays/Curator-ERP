@@ -134,7 +134,7 @@
         </div>
 
         <!-- ALTERNATIVE CONTACT -->
-        <div class="field-row" id="field-AltPhone">
+        @*<div class="field-row" id="field-AltPhone">
 
             <div class="field-display">
 
@@ -167,7 +167,7 @@
 
             </div>
 
-        </div>
+        </div>*@
 
     </div>
 </div>
@@ -185,7 +185,7 @@
         address1: "",
         address2: "",
         phone: "",
-        altPhone: ""
+        //altPhone: ""
     };
 
     function startEdit(fieldName) {
@@ -251,9 +251,9 @@
                 profileData.phone = value;
                 break;
 
-            case "AltPhone":
-                profileData.altPhone = value;
-                break;
+            //case "AltPhone":
+            //    profileData.altPhone = value;
+            //    break;
         }
 
         $.ajax({
@@ -284,7 +284,7 @@
 
                     cancelEdit(fieldName);
                     alert(response.message);
-
+        
                     window.location.reload();
                 } else { 
                     alert(response.message);
@@ -300,7 +300,7 @@
         profileData.userName = userName;
         profileData.email = email;
         profileData.phone = phone;
-        profileData.altPhone = altPhone;
+        //profileData.altPhone = altPhone;
 
         // ===== DISPLAY VALUES =====
         $("#val-FirstName").text(firstName);
@@ -308,7 +308,7 @@
         $("#val-Username").text("@@" + userName);
         $("#val-Email").text(email);
         $("#val-Phone").text(phone.Mobile || "");     
-        $("#val-AltPhone").text(altPhone.Mobile || "");
+        //$("#val-AltPhone").text(altPhone.Mobile || "");
 
         // ===== INPUT VALUES =====
         $("#input-FirstName").val(firstName);
@@ -316,6 +316,6 @@
         $("#input-Username").val(userName);
         $("#input-Email").val(email);
         $("#input-Phone").val(phone.Mobile);
-        $("#input-AltPhone").val(altPhone.Mobile);
+        //$("#input-AltPhone").val(altPhone.Mobile);
     }
 </script>

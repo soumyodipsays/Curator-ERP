@@ -270,6 +270,7 @@
     <Content Include="SP\sp_AddUserAddress.sql" />
     <Content Include="SP\sp_GetFilterSidebarDetails.sql" />
     <Content Include="SP\sp_GetUserProfile.sql" />
+    <Content Include="SP\sp_RemoveAddress.sql" />
     <Content Include="SP\sp_UpdateUserDetails.sql" />
     <Content Include="SP\sp_ValidateUser.sql" />
     <Content Include="Web.config" />
