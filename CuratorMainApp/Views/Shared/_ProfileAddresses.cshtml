@@ -286,14 +286,18 @@ function renderAddress(addressList) {
 
                     <div class="addr-action-row">
 
-                        <button class="addr-icon-btn"
-                                onclick="openEditModal(${addr.AddressID})">
+                        <button class="addr-icon-btn edit-address-btn"
+                                data-address='${JSON.stringify(addr)}'>
+
                             <i class="bi bi-pencil"></i>
+
                         </button>
 
                         <button class="addr-icon-btn addr-icon-delete"
                                 onclick="deleteAddress(${addr.AddressID})">
+
                             <i class="bi bi-trash3"></i>
+
                         </button>
 
                     </div>

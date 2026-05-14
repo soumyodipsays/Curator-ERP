@@ -133,12 +133,13 @@ namespace Auth.DAL
             return _db.ExecuteMultipleRow<StateModel>(proc, paramters);
         }
 
-        public void AddUserAddress(NewAddressDTO newAddressDTO)
+        public void AddOrEditUserAddress(NewAddressDTO newAddressDTO)
         {
             var parameters = new DynamicParameters();
-            var proc = "sp_AddUserAddress";
+            var proc = "sp_UpdateUserDetails";
             // Map DTO to SP Parameters
-            parameters.Add("@UserID", newAddressDTO.UserID); // Handle 0 for new signup
+            parameters.Add("@AddressID", newAddressDTO.AddressID ); // Handle 0 for new signup
+            parameters.Add("@UserID", newAddressDTO.UserID ); // Handle 0 for new signup
             parameters.Add("@Address1", newAddressDTO.Address1);
             parameters.Add("@Address2", newAddressDTO.Address2);
             parameters.Add("@City", newAddressDTO.City);
