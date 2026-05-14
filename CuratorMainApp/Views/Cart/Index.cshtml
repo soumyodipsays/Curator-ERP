@@ -189,7 +189,7 @@
             renderSummaryCard(CART_ITEMS);
             updateCartItemCount(); // Update the top count text
 
-            // 3. Prepare payload
+            // Prepare payload
             const payload = {
                 CartID: cartId,
                 UserID: currentUser.userId,
@@ -198,7 +198,7 @@
                 Status: 2,
                 UserName: currentUser.userName
             };
-
+            console.log(payload)
             $.ajax({
                 url: '@productURL/Cart/AddOrEditCart',
                 type: 'POST',
