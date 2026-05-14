@@ -250,24 +250,68 @@
     }
 
     function renderSummaryCard(CART_ITEMS) {
-        // Failsafe: if the array is empty or undefined, do nothing
+
         if (!CART_ITEMS || CART_ITEMS.length === 0) return;
 
         const subtotal = calculateSubTotal(CART_ITEMS);
-        const totalDiscountPrice = calculateDiscountedPrice(CART_ITEMS);
-        const totalDiscount = subtotal - totalDiscountPrice;
 
-        // PERFECT COUNT FEATURE:
-        const totalItemsCount = CART_ITEMS.reduce((total, item) => total + item.Quantity, 0);
+        const totalDiscountPrice =
+            calculateDiscountedPrice(CART_ITEMS);
 
-        // jQuery makes this super easy. It won't crash even if the element isn't on the page!
+        const totalDiscount =
+            subtotal - totalDiscountPrice;
+
+        const totalItemsCount =
+            CART_ITEMS.reduce((total, item) => total + item.Quantity, 0);
+
+       
+        // RESTORE COUPON
+        const savedCoupon =
+            sessionStorage.getItem('APPLIED_COUPON');
+
+        let couponDiscount = 0;
+
+        if (savedCoupon) {
+
+            const couponData = JSON.parse(savedCoupon);
+
+            couponDiscount =
+                parseFloat(couponData.DiscountAmount || 0);
+
+            // Restore coupon UI
+            $('#couponRow').show();
+
+            $('#couponAmt')
+                .text(couponDiscount.toFixed(2));
+
+            $('#couponInput')
+                .val(couponData.CouponCode);
+
+            $('#couponMsg')
+                .show()
+                .css('color', 'green')
+                .text(`Coupon "${couponData.CouponCode}" applied`);
+        }
+        else {
+            $('#couponRow').hide();
+        }
+
+        // FINAL TOTAL
+        const finalTotal =
+            totalDiscountPrice - couponDiscount;
+
+        // Counts
         $('#summary-item-count').text(totalItemsCount);
         $('#bag-item-count').text(totalItemsCount);
 
-        // Update the HTML spans and lock to 2 decimal places
+        // Amounts
         $('#sub-total-amt').text(subtotal.toFixed(2));
-        $('#discountAmt-span').text(totalDiscount.toFixed(2));
-        $('#total-amt-span').text(totalDiscountPrice.toFixed(2));
+
+        $('#discountAmt-span')
+            .text(totalDiscount.toFixed(2));
+
+        $('#total-amt-span')
+            .text(finalTotal.toFixed(2));
     }
 
     // RENDER CHECKOUT STEP
@@ -342,16 +386,8 @@
         }
     }
 
-    // ============================================
-    // INITIALIZE ON PAGE LOAD (Converted to jQuery)
-    // ============================================
-    $(document).ready(function () {
-        function applyCoupon() {
-
-        console.log("applyCoupon called");
-        console.log("CART_ITEMS: ", CART_ITEMS);
+    function applyCoupon() {
         const couponCode = $('#couponInput').val().trim();
-
 
         // VALIDATIONS
         if (!couponCode) {
@@ -488,12 +524,14 @@
                 .text('Unexpected error occurred.');
         }
     }
+    // ============================================
+    // INITIALIZE ON PAGE LOAD (Converted to jQuery)
+    // ============================================
+    $(document).ready(function () {
         // Setup the Apply Coupon Button
         $('#btnApplyCoupon').on('click', function () {
             console.log("BUTTON CLICKED");
-            if (typeof applyCoupon === "function") {
-                applyCoupon();
-            }
+            applyCoupon();
         });
 
         // 1. Check if we have saved cart data in sessionStorage
