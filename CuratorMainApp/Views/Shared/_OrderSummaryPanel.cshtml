@@ -264,7 +264,7 @@
         const totalItemsCount =
             CART_ITEMS.reduce((total, item) => total + item.Quantity, 0);
 
-       
+
         // RESTORE COUPON
         const savedCoupon =
             sessionStorage.getItem('APPLIED_COUPON');
@@ -333,23 +333,23 @@
         if (!CART_ITEMS || CART_ITEMS.length === 0) return;
 
         try {
-            // Prepare the JSON array
+            // 1. Prepare the JSON array
             const itemsArray = CART_ITEMS.map(item => ({
                 CartID: item.CartID,
                 Quantity: item.Quantity
             }));
 
-            //Prepare the payload matching your C# CartInsertIpdateDTO
+            // 2. Prepare the payload matching your C# CartInsertIpdateDTO
             const payload = {
                 UserID: Auth.currentUser().userId,
                 UserName: Auth.currentUser().UserName,
                 CartItemsJSON: JSON.stringify(itemsArray)
             };
 
-            
+            // 3. Let ASP.NET generate the bulletproof URL!
             const endpointUrl = '@productURL/Cart/SyncCartBulk';
 
-           
+            // 4. Converted Vanilla 'fetch' to jQuery '$.ajax'
             const response = await $.ajax({
                 url: endpointUrl,
                 type: 'POST',
@@ -384,17 +384,9 @@
             $btn.html(originalText).prop('disabled', false);
             alert("There was an issue saving your cart. Please try again.");
         }
-}
+    }
 
-<<<<<<< Updated upstream
     function applyCoupon() {
-=======
-    $(document).ready(function () {
-        function applyCoupon() {
-
-        console.log("applyCoupon called");
-        console.log("CART_ITEMS: ", CART_ITEMS);
->>>>>>> Stashed changes
         const couponCode = $('#couponInput').val().trim();
 
         // VALIDATIONS
