@@ -425,5 +425,46 @@ namespace Auth.Controllers
                 });
             }
         }
+
+        [HttpPost]
+        [JwtGuard]
+        public JsonResult RemoveUserAddress(long UserID, long AddressID)
+        {
+            try
+            {
+                if(UserID == 0)
+                {
+                    return Json(new { success = false, message = "UserID is invalid" });
+                }
+
+                if (AddressID == 0)
+                {
+                    return Json(new { success = false, message = "AddressID is invalid" });
+                }
+
+                _authDal.RemoveUserAddressByID(UserID, AddressID);
+                return Json(new
+                {
+                    success = true,
+                    message = "Address deleted successfully"
+                });
+            }
+            catch(SqlException sqlex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = sqlex.Message
+                });
+            }
+            catch (Exception ex) 
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

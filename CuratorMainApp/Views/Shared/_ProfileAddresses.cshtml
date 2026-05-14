@@ -246,7 +246,7 @@ function renderAddress(addressList) {
         let address2 = addr.Address2 || "";
         let city = addr.City || "";
         let state = addr.StateName || addr.State || "";
-        let pin = addr.PinCode || "";
+        let pin = addr.PinCode || addr.Pin || "";
 
         // If backend dumped everything into Address1, try splitting it
         if ((!city || !pin) && address1.includes("\n")) {
@@ -261,26 +261,22 @@ function renderAddress(addressList) {
             city = city || (parts[2] || "");
         }
 
-        // Extract icon/type
-        let icon = "📍";
-        if (addr.Location === "Home") icon = "🏠";
-        else if (addr.Location === "Office") icon = "🏢";
-
         const html = `
             <div class="addr-profile-card ${addr.IsDefault ? "addr-default" : ""}"
                  id="addrCard-${addr.AddressID}">
 
                 <div class="d-flex justify-content-between align-items-start mb-3">
 
-                    <div class="d-flex align-items-center gap-2">
+                    <div>
 
-                        <span class="addr-type-icon">${icon}</span>
-
-                        <span class="addr-type-label">
-                            ${addr.Location || "Other"}
-                        </span>
-
-                        ${addr.IsDefault ? `<span class="addr-default-badge">Default</span>` : ""}
+                        ${addr.IsDefault
+                ? `
+                                <span class="addr-default-badge">
+                                    Default
+                                </span>
+                            `
+                : ""
+            }
 
                     </div>
 
@@ -304,16 +300,33 @@ function renderAddress(addressList) {
 
                 </div>
 
-                <div class="addr-line-main">${address1}</div>
+                <div class="addr-line-main">
+                    ${address1}
+                </div>
 
                 ${address2
-                ? `<div class="addr-line-sub">${address2}</div>`
+                ? `
+                    <div class="addr-line-sub">
+                        ${address2}
+                    </div>
+                `
                 : ""
             }
 
                 <div class="addr-line-city">
-                    ${city ? city + "," : ""} ${state || ""} ${pin ? "— " + pin : ""}
+                    ${city ? city + "," : ""}
+                    ${state || ""}
+                    ${pin ? "— " + pin : ""}
                 </div>
+
+                ${addr.Location
+                ? `
+                    <div class="addr-line-sub mt-2">
+                        ${addr.Location}
+                    </div>
+                `
+                : ""
+            }
 
             </div>
         `;
@@ -321,5 +334,4 @@ function renderAddress(addressList) {
         $list.append(html);
     });
 }
-
 </script>

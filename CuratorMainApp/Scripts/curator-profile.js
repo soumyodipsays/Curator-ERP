@@ -1,11 +1,4 @@
-﻿/* =============================================
-   curator-profile.js
-   Refactored + Fixed Version
-   ============================================= */
-
-"use strict";
-
-/* =========================================================
+﻿/* =========================================================
    GLOBALS
 ========================================================= */
 
@@ -392,7 +385,7 @@ function submitAddressModal() {
             addressModal?.hide();
 
             const savedAddress =
-                response.data;
+                address;
 
             if (isEdit) {
 
@@ -409,11 +402,7 @@ function submitAddressModal() {
                     : "Address added successfully 📍"
             );
 
-            alert(
-                isEdit
-                    ? "Address updated successfully 📍"
-                    : "Address added successfully 📍"
-            )
+            // window.location.reload();
         },
 
         error: function () {
@@ -605,13 +594,6 @@ function updateAddressCard(address) {
 
 function generateAddressCard(address) {
 
-    const icon =
-        address.Location === "Home"
-            ? "🏠"
-            : address.Location === "Office"
-                ? "🏢"
-                : "📍";
-
     const encodedAddress =
         encodeURIComponent(
             JSON.stringify(address)
@@ -623,19 +605,9 @@ function generateAddressCard(address) {
 
             <div class="d-flex justify-content-between align-items-start mb-3">
 
-                <div class="d-flex align-items-center gap-2">
+                <div>
 
-                    <span class="addr-type-icon">
-                        ${icon}
-                    </span>
-
-                    <div>
-
-                        <span class="addr-type-label">
-                            ${address.Location || "Other"}
-                        </span>
-
-                        ${address.IsDefault
+                    ${address.IsDefault
             ? `
                             <span class="default-badge">
                                 Default
@@ -643,8 +615,6 @@ function generateAddressCard(address) {
                         `
             : ""
         }
-
-                    </div>
 
                 </div>
 
@@ -687,9 +657,18 @@ function generateAddressCard(address) {
 
             <div class="addr-city-line">
                 ${address.City || ""},
-                ${address.StateName || ""}
-                — ${address.PinCode || ""}
+                ${address.StateName || address.State || ""}
+                — ${address.PinCode || address.Pin || ""}
             </div>
+
+            ${address.Location
+            ? `
+                <div class="addr-full-line secondary mt-2">
+                    ${address.Location}
+                </div>
+            `
+            : ""
+        }
 
         </div>
     `;
@@ -701,6 +680,9 @@ function generateAddressCard(address) {
 
 function deleteAddress(addressId) {
 
+    const userID = Auth.currentUser()?.UserID ||
+                    localStorage.getItem("UserID")
+
     if (!confirm("Remove this address?")) {
         return;
     }
@@ -709,12 +691,13 @@ function deleteAddress(addressId) {
 
         url:
             getAuthBaseUrl() +
-            "/User/DeleteAddress",
+            "/User/RemoveUserAddress",
 
         type: "POST",
 
         data: {
-            addressId
+            addressId,
+            userID
         },
 
         success: function (response) {

@@ -151,5 +151,17 @@ namespace Auth.DAL
             // Execute and return the new ID
             _db.ExecuteWithoutReturn(proc, parameters);
         }
+
+        public void RemoveUserAddressByID(long UserID, long AddressID)
+        {
+            var parameters = new DynamicParameters();
+            var proc = "sp_RemoveAddress";
+            // Map DTO to SP Parameters
+            parameters.Add("@AddressID", AddressID); 
+            parameters.Add("@UserID", UserID);
+
+            // Execute
+            _db.ExecuteWithoutReturn(proc, parameters);
+        }
     }
 }
