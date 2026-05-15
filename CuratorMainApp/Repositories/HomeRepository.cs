@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Web;
 
 namespace Curator.Repositories
@@ -23,14 +24,15 @@ namespace Curator.Repositories
 
         private HeroViewModel GetHero()
         {
+            int year = DateTime.Now.Year;
             return new HeroViewModel
             {
                 ImageUrl = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1800&q=85",
-                EyebrowLabel = "New Season — Spring 2025",
+                EyebrowLabel = $"New Season — Spring {year}",
                 Heading = "Style that<br>speaks for itself.",
                 Subtitle = "Meticulously curated pieces for the modern wardrobe.",
                 PrimaryCtaText = "Shop New Arrivals",
-                PrimaryCtaUrl = "/products",
+                PrimaryCtaUrl = "/CuratorMainApp/Product/Home",
                 SecondaryCtaText = "View Collections",
                 SecondaryCtaUrl = "/collections"
             };

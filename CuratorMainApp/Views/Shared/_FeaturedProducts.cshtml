@@ -1,6 +1,10 @@
 @*<%-- Views/Shared/_FeaturedProducts.cshtml --%>
     <%-- Model: IList<Curator.Models.ProductCardViewModel>  (expects at least 3 items) --%>*@
-
+@using System.Configuration
+@{
+    var productURL = ConfigurationManager.AppSettings["ProductServiceBaseUrl"];
+    var addToCartURL = productURL + "/Cart/AddOrEditCart";
+}
 <style>
     /* 1. Keeps the items invisible right as they are injected */
     .ready-to-fade {
@@ -32,7 +36,7 @@
                 <span class="section-eyebrow">Curation 01</span>
                 <h2 class="section-title">Featured Items</h2>
             </div>
-            <a href="@Url.Action("Index", "Products")"
+            <a href="@Url.Action("Home", "Product", new { area = "CuratorMainApp" })"
                class="btn-apple-outline d-none d-md-inline-flex">
                 View All <i class="bi bi-arrow-right"></i>
             </a>
@@ -45,10 +49,11 @@
 </section>
 
 <script>
+    let FEATURED_PRODUCTS = [];
     function renderFeaturedProducts(products) {
         console.log("Rendering products:", products);
         if (!products || products.length === 0) return;
-
+        FEATURED_PRODUCTS = products;
         let html = '';
 
         // ===== HERO PRODUCT =====
@@ -129,8 +134,66 @@
     }
 
     $(document).on("click", ".quick-add-btn", function () {
-        let id = $(this).data("product-id");
-        console.log("Add to Bag:", id);
+
+        let productId = $(this).data("product-id");
+
+        // Find full product from PRODUCTS array
+        const product = FEATURED_PRODUCTS.find(
+            p => Number(p.ProductID) === Number(productId)
+        );
+
+        if (!product || !product.VariantList || product.VariantList.length === 0) {
+            showToast("Product unavailable");
+            return;
+        }
+
+        // Use first variant as quick-add variant
+        const variant = product.VariantList[0];
+
+        // Logged in user
+        const currentUserRaw = sessionStorage.getItem("currentUser");
+
+        if (!currentUserRaw) {
+            showToast("Please login first");
+            return;
+        }
+
+        const currentUser = JSON.parse(currentUserRaw);
+
+        const payload = {
+            CartID: 0,
+            UserID: currentUser.userId,
+            ProductID: variant.ProductID,
+            Quantity: 1,
+            Status: 1,
+            UserName: currentUser.userName
+        };
+
+        $.ajax({
+            url: `@addToCartURL`,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+
+            success: function (res) {
+
+                if (res.success) {
+
+                    cartCount++;
+
+                    updateCartBadge();
+
+                    showToast("Added to bag 🛍️");
+                }
+                else {
+                    showToast(res.message || "Failed to add item");
+                }
+            },
+
+            error: function () {
+                showToast("Something went wrong");
+            }
+        });
     });
 
     $(document).on("click", ".card-wish-btn", function () {
