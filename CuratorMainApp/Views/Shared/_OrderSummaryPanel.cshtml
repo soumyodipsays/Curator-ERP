@@ -333,23 +333,21 @@
         if (!CART_ITEMS || CART_ITEMS.length === 0) return;
 
         try {
-            // 1. Prepare the JSON array
+            // Prepare the JSON array
             const itemsArray = CART_ITEMS.map(item => ({
                 CartID: item.CartID,
                 Quantity: item.Quantity
             }));
 
-            // 2. Prepare the payload matching your C# CartInsertIpdateDTO
+            // Prepare the payload matching C# CartInsertIpdateDTO
             const payload = {
                 UserID: Auth.currentUser().userId,
                 UserName: Auth.currentUser().UserName,
                 CartItemsJSON: JSON.stringify(itemsArray)
             };
 
-            // 3. Let ASP.NET generate the bulletproof URL!
             const endpointUrl = '@productURL/Cart/SyncCartBulk';
 
-            // 4. Converted Vanilla 'fetch' to jQuery '$.ajax'
             const response = await $.ajax({
                 url: endpointUrl,
                 type: 'POST',
@@ -369,7 +367,7 @@
     }
 
     async function proceedToCheckout() {
-        const $btn = $('#step1-section button'); // jQuery selector
+        const $btn = $('#step1-section button'); 
         const originalText = $btn.html();
 
         $btn.html('Saving... <i class="bi bi-hourglass-split"></i>').prop('disabled', true);
@@ -534,7 +532,7 @@
             applyCoupon();
         });
 
-        // 1. Check if we have saved cart data in sessionStorage
+        // 1.Check if we have saved cart data in sessionStorage
         const savedCart = sessionStorage.getItem('CHECKOUT_CART_STATE');
 
         if (savedCart) {

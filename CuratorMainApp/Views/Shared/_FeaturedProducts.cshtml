@@ -119,10 +119,10 @@
 
         html += `</div>`;
 
-        // 1. Inject the HTML into the page
+        // Inject the HTML into the page
         $("#featuredProductsContainer").html(html);
 
-        // 2. Wait 50 milliseconds, then add the animation class
+        // Wait 50 milliseconds, then add the animation class
         setTimeout(function () {
             $(".ready-to-fade").addClass("fade-up-featured_product").removeClass("ready-to-fade");
         }, 50);
@@ -204,7 +204,7 @@
     $(document).ready(function () {
         console.log("Featured Products Script Loaded");
 
-        // FIX 2: Matched the class name here to 'fade-up-featured_product'
+        // Matched the class name here to 'fade-up-featured_product'
         setTimeout(function () {
             $(".ready-to-fade").addClass("fade-up-featured_product").removeClass("ready-to-fade");
         }, 50);

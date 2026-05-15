@@ -61,13 +61,6 @@ namespace Product.Controllers
         {
             try
             {
-                // 1. Set the UserID and UserName securely from your session/authentication context.
-                // Hardcoding for now just so you can test it based on your DB screenshot!
-                //model.UserID = 29;
-                //model.UserName = "Sayan";
-
-                // 2. Call your data access method that you just wrote
-                // (Assuming it's inside a repository class called _cartRepo)
                 _cartDAL.UpdateCartToProceed(model);
 
                 return Json(new { success = true, message = "Cart synced successfully" });

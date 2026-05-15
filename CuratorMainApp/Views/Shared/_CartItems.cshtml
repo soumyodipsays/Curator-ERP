@@ -6,14 +6,13 @@
 <div id="cart-container"></div>
 
 <script>
-    // RESTORED: This is the function your jQuery script at line 1009 is looking for!
-    // I made it globally accessible (window.loadCart) just to be safe.
+    //global function
     window.loadCart = function (items) {
         CART_ITEMS = items || [];
         renderCart();
     }
 
-    // --- UI Rendering ---
+    // UI Rendering 
     function renderCart() {
         const container = document.getElementById("cart-container");
         console.log(CART_ITEMS)

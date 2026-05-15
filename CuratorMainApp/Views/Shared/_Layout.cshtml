@@ -13,7 +13,6 @@
     @*<%-- Site CSS --%>*@
     @Styles.Render("~/Content/curator.css")
 
-    @* Changed "head" to "Styles" to match your @section Styles {} blocks *@
     @RenderSection("Styles", required: false)
 </head>
 <body>
@@ -138,7 +137,6 @@
     <script src="~/Scripts/auth.js"></script>
     <script src="~/Scripts/curator-profile.js"></script>
 
-    @* Changed "scripts" to "Scripts" to match your @section Scripts {} blocks *@
     @RenderSection("Scripts", required: false)
 </body>
 </html>
