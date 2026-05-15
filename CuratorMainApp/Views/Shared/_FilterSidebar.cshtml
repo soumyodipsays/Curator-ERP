@@ -14,11 +14,11 @@
         <!-- Price Range -->
         <span class="filter-title">Price Range</span>
         <div class="price-range">
-            <input type="range" min="0" max="10000" value="1000" id="priceRange"
+            <input type="range" min="0" max="10000" value="0" id="priceRange"
                    oninput="document.getElementById('priceVal').textContent='₹'+this.value">
             <div class="price-labels">
                 <span>₹0</span>
-                <span id="priceVal">₹1000</span>
+                <span id="priceVal">₹0</span>
                 <span>₹10000</span>
             </div>
         </div>
@@ -29,11 +29,6 @@
         <span class="filter-title">Size</span><!-- {{ product.SizeID }} -->
         <div class="size-chips" style="margin-bottom:0">
             <div class="size-chip active" data-size="all">All</div>
-            @*<div class="size-chip">S</div>
-            <div class="size-chip">M</div>
-            <div class="size-chip">L</div>
-            <div class="size-chip">XL</div>
-            <div class="size-chip">XXL</div>*@
         </div>
 
         <div style="height:1px;background:var(--gray-2);margin:20px 0"></div>
