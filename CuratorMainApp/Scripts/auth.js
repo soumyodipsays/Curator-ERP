@@ -5,9 +5,6 @@
     var profileUrl = config.profileUrl || "";
     var loginPage = config.mvcLoginPage || "/";
 
-    console.log("Profile URL:", profileUrl);
-    console.log("Login Page:", loginPage);
-
     function getToken() {
 
         return localStorage.getItem("token") ||
@@ -15,8 +12,6 @@
     }
 
     function saveToken(token, remember, UserID) {
-
-        console.log("Saving Token:", token);
 
         clear();
 
@@ -98,17 +93,12 @@
 
         var payload = parseJwt(token);
 
-        console.log("JWT Payload:", payload);
-
         if (!payload || !payload.exp) {
             console.log("Token invalid or exp missing");
             return true;
         }
 
         var currentTime = Math.floor(Date.now() / 1000);
-
-        console.log("Current Time:", currentTime);
-        console.log("Token Expiry:", payload.exp);
 
         return payload.exp < currentTime;
     }
@@ -150,8 +140,6 @@
 
             success: function (res) {
 
-                console.log("PROFILE RESPONSE:", res);
-
                 if (res.success) {
 
                     sessionStorage.setItem(
@@ -162,11 +150,6 @@
                             email: res.email,
                             role: res.role
                         })
-                    );
-
-                    console.log(
-                        "CURRENT USER:",
-                        sessionStorage.getItem("currentUser")
                     );
 
                     if (success) {

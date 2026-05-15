@@ -163,5 +163,15 @@ namespace Auth.DAL
             // Execute
             _db.ExecuteWithoutReturn(proc, parameters);
         }
+
+        public List<AddressModel> GetAllAddressByUserID(long userID)
+        {
+            var parameters = new DynamicParameters();
+            var proc = "sp_GetAddressesByUserID";
+
+            parameters.Add("@UserID", userID);
+
+            return _db.ExecuteMultipleRow<AddressModel>(proc, parameters);
+        }
     }
 }

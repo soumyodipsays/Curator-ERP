@@ -119,16 +119,12 @@ function loadStates(selectedStateId) {
 
             });
 
-            console.log("selectedStateId: ", selectedStateId)
-
             if (selectedStateId) {
                 $state.val(String(selectedStateId));
             }
         },
 
         error: function (response) {
-
-            console.log("State Error:", response);
 
             showToast("Failed to load states");
         }
@@ -271,8 +267,6 @@ function openEditModal(address) {
         "Update Address"
     );
 
-    console.log("Address: ", address);
-
     loadStates(address.StateID);
 
     $("#modalAddressId")
@@ -342,8 +336,6 @@ function submitAddressModal() {
 
     const address =
         getAddressFormData();
-
-    console.log("Address Payload:", address);
 
     if (!validateAddress(address)) {
         return;
@@ -557,8 +549,6 @@ function bindAddressEvents() {
 
             const address =
                 JSON.parse(decodeURIComponent(raw));
-
-            console.log("Edit Address:", address);
 
             openEditModal(address);
         }

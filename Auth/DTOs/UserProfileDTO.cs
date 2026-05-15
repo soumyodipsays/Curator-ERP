@@ -54,4 +54,5 @@ namespace Auth.DTOs
         public string PinCode { get; set; }
         public bool IsDefault { get; set; }
     }
+
 }

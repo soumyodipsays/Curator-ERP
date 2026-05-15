@@ -466,5 +466,34 @@ namespace Auth.Controllers
                 });
             }
         }
+
+        public JsonResult GetAllAddress(long UserID)
+        {
+            try
+            {
+                var result = _authDal.GetAllAddressByUserID(UserID);
+                return Json(new
+                {
+                    success = true,
+                    data = result
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (SqlException sqlex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = sqlex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

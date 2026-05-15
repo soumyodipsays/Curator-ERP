@@ -533,8 +533,6 @@
                 UserName: currentUser.userName
             };
 
-            console.log("Cart Payload:", payload);
-
             $.ajax({
                 url: `@addToCartURL`,
                 type: 'POST',
@@ -542,8 +540,6 @@
                 data: JSON.stringify(payload),
 
                 success: function (res) {
-
-                    console.log("Cart Response:", res);
 
                     if (res.success) {
 
@@ -615,11 +611,6 @@
                 document.querySelector('.cat-pill.active')?.dataset.cat || "all";
             let price = Number($('#priceRange').val());
 
-            console.log("price_range",price);
-            console.log("Sizes_list", SELECTED_SIZE_LIST)
-            console.log("activeCategory:", activeCategory);
-            console.log("selectedBrands:", SELECTED_BRAND_LIST);
-
             // If all category + no brand selected → return all products
             if (activeCategory === "all" && SELECTED_BRAND_LIST.length === 0 && SELECTED_SIZE_LIST.length === 0 && price === 0) {
                 return PRODUCTS;
@@ -646,8 +637,6 @@
                     
                 )
             );
-
-            console.log("filteredProducts:", filteredProducts);
 
             return filteredProducts;
         }
@@ -728,11 +717,10 @@
             },
             type: 'GET',
             success: function (response) {
-                //console.log("S-Response: ", response)
                 renderCategoryPills(response)
             },
             error: function (response) {
-                //console.log("E-Response: ", response)
+                console.log("E-Response: ", response)
             }
         })
     }
@@ -753,7 +741,6 @@
             },
             type: 'GET',
             success: function (response) {
-                console.log("Products S-Response: ", response)
                 PRODUCTS = response;
                 renderProducts(response)
             },
