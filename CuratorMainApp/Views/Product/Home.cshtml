@@ -641,16 +641,95 @@
             return filteredProducts;
         }
 
+        function sortProducts(products) {
+
+            const sortValue = $('#sortSelect').val();
+
+            let sortedProducts = [...products];
+
+            switch (sortValue) {
+
+                case 'Price: Low to High':
+
+                    sortedProducts.sort((a, b) => {
+
+                        const aPrice = getBestVariant(a.VariantList)
+                            ? calculatePrice(getBestVariant(a.VariantList)).finalPrice
+                            : 0;
+
+                        const bPrice = getBestVariant(b.VariantList)
+                            ? calculatePrice(getBestVariant(b.VariantList)).finalPrice
+                            : 0;
+
+                        return aPrice - bPrice;
+                    });
+
+                    break;
+
+                case 'Price: High to Low':
+
+                    sortedProducts.sort((a, b) => {
+
+                        const aPrice = getBestVariant(a.VariantList)
+                            ? calculatePrice(getBestVariant(a.VariantList)).finalPrice
+                            : 0;
+
+                        const bPrice = getBestVariant(b.VariantList)
+                            ? calculatePrice(getBestVariant(b.VariantList)).finalPrice
+                            : 0;
+
+                        return bPrice - aPrice;
+                    });
+
+                    break;
+
+                case 'Newest First':
+
+                    sortedProducts.sort((a, b) =>
+                        new Date(b.CreatedOn) - new Date(a.CreatedOn)
+                    );
+
+                    break;
+
+                case 'Most Popular':
+
+                    sortedProducts.sort((a, b) =>
+                        (b.Rating || 0) - (a.Rating || 0)
+                    );
+
+                    break;
+
+                case 'Top Rated':
+
+                    sortedProducts.sort((a, b) =>
+                        (b.Rating || 0) - (a.Rating || 0)
+                    );
+
+                    break;
+            }
+
+            return sortedProducts;
+        }
+
         $(document).on('click', '.cat-pill', function(){
 
             const category = $(this).data('cat');
             const categoryID = $(this).data('id');
 
             setActiveCategory(category);
-            renderProducts(getFilteredProducts());
+            let filtered = getFilteredProducts();
+
+            filtered = sortProducts(filtered);
+
+            renderProducts(filtered);
         })
 
-        document.getElementById('sortSelect').addEventListener('change', () => renderProducts(getFilteredProducts()));
+        document.getElementById('sortSelect').addEventListener('change', () => {
+            let filtered = getFilteredProducts();
+            filtered = sortProducts(filtered);
+
+            renderProducts(filtered);
+        });
         //document.getElementById('priceRange').addEventListener('change', () => renderProducts(getFilteredProducts()));
 
         /* ---- View Toggle ---- */
@@ -941,7 +1020,10 @@
         })
 
         $("#btn-apply-filters").on('click', function () {
-            renderProducts(getFilteredProducts());
+            let filtered = getFilteredProducts();
+            filtered = sortProducts(filtered);
+
+            renderProducts(filtered);
         })
 
         $('#btn-clear-filters').on('click', function () {
