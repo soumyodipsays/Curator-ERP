@@ -29,10 +29,7 @@
 
             <a href="@Url.Action("Index", "Cart")" class="nav-icon-btn position-relative" title="Cart">
                 <i class="bi bi-bag"></i>
-                @if (ViewBag.CartCount != null && (int)ViewBag.CartCount > 0)
-                {
-                    <span class="cart-badge">@ViewBag.CartCount</span>
-                }
+                <span class="cart-badge" id="nav-cart-badge" style="display: none;">0</span>
             </a>
 
             @* USER DROPDOWN *@
@@ -167,7 +164,29 @@
 
 
 <script>
+    window.updateGlobalCartBadge = function () {
+        const savedCart_number = sessionStorage.getItem('CHECKOUT_CART_STATE');
+        const $badge = $('#nav-cart-badge');
+
+        // Failsafe: If the badge doesn't exist on the page, stop here.
+        if (!$badge.length) return;
+
+        if (savedCart_number) {
+
+            if (parseInt(savedCart_number) > 0) {
+                // Update the number and show the badge
+                $badge.text(savedCart_number).show();
+            } else {
+                // Hide the badge if the cart is empty
+                $badge.hide();
+            }
+        } else {
+            $badge.hide();
+        }
+    };
+
     $(function () {
+        updateGlobalCartBadge();
         Auth.ajaxToken();
 
         const token = Auth.getToken();
@@ -231,6 +250,7 @@
         /* LOGOUT */
         $("#logoutBtn, #mobileLogoutBtn").on("click", function () {
 
+            sessionStorage.removeItem('CHECKOUT_CART_STATE');
             Auth.logout(false);
 
             window.location.href =

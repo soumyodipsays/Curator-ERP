@@ -206,6 +206,9 @@
                 data: JSON.stringify(payload),
                 success: function (res) {
                     if (res.success) {
+                        let itemNum = parseInt(sessionStorage.getItem('CHECKOUT_CART_STATE'),10) || 0;
+                        sessionStorage.setItem('CHECKOUT_CART_STATE', itemNum - 1);
+
                         console.log("Item successfully removed from database.");
                     } else {
                         console.error("Server failed to remove item:", res.message);

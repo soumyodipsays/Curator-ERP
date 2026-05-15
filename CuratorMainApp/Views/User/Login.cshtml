@@ -6,6 +6,8 @@
     var loginUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/Login";
     var profileUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/GetProfile";
     var sendOTPUrl = ConfigurationManager.AppSettings["AuthServiceBaseUrl"] + "/User/SendOTP";
+    var productURL = ConfigurationManager.AppSettings["ProductServiceBaseUrl"];
+
 }
 
 <div class="container py-5">
@@ -186,7 +188,7 @@
                     );
 
                     Auth.validate(function () {
-
+                        getCartCount(res.user.userID);
                         setTimeout(function () {
 
                             window.location.href =
@@ -301,6 +303,30 @@
         $('#emailError').text('');
         $('#passwordError').text('');
         $('#msgBox').addClass('d-none').text('');
+    }
+    function getCartCount(userId) {
+        $.ajax({
+            url: '@productURL/Cart/GetCartDetails', // Make sure this matches your C# variable name (productUrl or productURL)
+            type: 'GET',
+            data: {
+                UserID: userId
+            },
+            success: function (response) {
+                console.log("Cart details fetched on login: ", response);
+
+                // 1. Save the cart items so the Home page Navbar can read them instantly
+                sessionStorage.setItem('CHECKOUT_CART_STATE', (response.length || 0));
+
+                // 2. NOW redirect the user smoothly!
+                window.location.href = '@Url.Action("Index","Home")';
+            },
+            error: function (xhr, status, error) {
+                console.error("Failed to fetch cart: ", error);
+
+                // Failsafe: Even if the cart fails, still let them go to the Home page
+                window.location.href = '@Url.Action("Index","Home")';
+            }
+        });
     }
 
     function togglePw(id, btn) {

@@ -542,6 +542,8 @@
                 success: function (res) {
 
                     if (res.success) {
+                        let itemNum = parseInt(sessionStorage.getItem('CHECKOUT_CART_STATE'), 10) || 0;
+                        sessionStorage.setItem('CHECKOUT_CART_STATE', itemNum + 1);
 
                         cartCount += currentQty;
 
