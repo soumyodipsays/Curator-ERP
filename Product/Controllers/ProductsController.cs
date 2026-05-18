@@ -27,6 +27,18 @@ namespace Product.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult GetProductListWithPagination(ProductListDTO dto)
+        {
+            var result = product_list_dal.GetProductListWithOffset(dto);
+            foreach (var item in result)
+            {
+                item.VariantList = string.IsNullOrEmpty(item.Variants)
+                    ? new List<ProductVariantModel>()
+                    : Newtonsoft.Json.JsonConvert.DeserializeObject<List<ProductVariantModel>>(item.Variants);
+            }
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
         public JsonResult GetCategoryList(long CustomerID)
         {
             var result = product_list_dal.GetCategoryList(CustomerID);

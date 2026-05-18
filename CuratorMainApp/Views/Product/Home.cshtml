@@ -4,7 +4,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var productURL = ConfigurationManager.AppSettings["ProductServiceBaseUrl"];
     var categoryURL = productURL + "/Products/GetCategoryList";
-    var allProductURL = productURL + "/Products/GetProductList";
+    var allProductURL = productURL + "/Products/GetProductListWithPagination";
     var sideFilterProductURL = productURL + "/Products/GetSideFilterDetails";
     var addToCartURL = productURL + "/Cart/AddOrEditCart";
     var couponCodeURL = productURL + "/Products/ValidateCoupon";
@@ -95,7 +95,7 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="d-flex justify-content-center mt-5" id="paginationWrap">
+                @*<div class="d-flex justify-content-center mt-5" id="paginationWrap">
                     <nav>
                         <ul class="pagination gap-2" style="--bs-pagination-border-radius:980px">
                             <li class="page-item disabled">
@@ -115,7 +115,7 @@
                             </li>
                         </ul>
                     </nav>
-                </div>
+                </div>*@
 
             </div>
         </div>
@@ -166,12 +166,18 @@
         let cartCount = 0;
         let currentQty = 1;
         let isGridView = true;
-        let PRODUCTS;
+        let PRODUCTS = [];
 
         let CURRENT_PRODUCT = null;
         let SELECTED_SIZE_LIST = [];
         let SELECTED_COLOR = null;
         let SELECTED_BRAND_LIST = [];
+
+        let CURRENT_PAGE = 1;
+        let PAGE_SIZE = 10;
+
+        let IS_LOADING = false;
+        let HAS_MORE_PRODUCTS = true;
 
         function calculatePrice(p) {
             const isPercentage = p.IsInrOrPercentage == 'P';
@@ -326,10 +332,19 @@
                 return;
             }
             none.classList.add('d-none');
-            document.getElementById('paginationWrap').classList.remove('d-none');
 
-            grid.innerHTML = products.map(buildGridCard).join('');
-            list.innerHTML = products.map(buildListCard).join('');
+            // grid.innerHTML = products.map(buildGridCard).join('');
+            // list.innerHTML = products.map(buildListCard).join('');
+
+            grid.insertAdjacentHTML(
+                'beforeend',
+                products.map(buildGridCard).join('')
+            );
+
+            list.insertAdjacentHTML(
+                'beforeend',
+                products.map(buildListCard).join('')
+            );
 
             // Update counts
             document.getElementById('resultSummary').textContent = `Showing ${products.length} products`;
@@ -812,23 +827,50 @@
         $(`.cat-pill[data-cat="${categoryName}"]`).addClass('active');
     }
 
-    function getAllProducts()
-    {
+    function getAllProducts() {
+
+        if (IS_LOADING || !HAS_MORE_PRODUCTS)
+            return;
+
+        IS_LOADING = true;
+
         $.ajax({
             url: `@allProductURL`,
             data: {
-                //hardcoded
-                CustomerID: 1
+                CustomerID: 1,
+                PageNumber: CURRENT_PAGE,
+                PageSize: PAGE_SIZE
             },
             type: 'GET',
+
             success: function (response) {
-                PRODUCTS = response;
-                renderProducts(response)
+
+                if (!response || response.length === 0) {
+                    HAS_MORE_PRODUCTS = false;
+                    IS_LOADING = false;
+                    return;
+                }
+
+                // Keep existing functionality
+                PRODUCTS.push(...response);
+
+                // Render only new batch
+                renderProducts(response);
+
+                // last page check
+                if (response.length < PAGE_SIZE) {
+                    HAS_MORE_PRODUCTS = false;
+                }
+
+                CURRENT_PAGE++;
+                IS_LOADING = false;
             },
+
             error: function (response) {
-                console.log("E-Response: ", response)
+                console.log("E-Response: ", response);
+                IS_LOADING = false;
             }
-        })
+        });
     }
 
     function handleSizeSelection() {
@@ -1002,6 +1044,25 @@
         // Render original products
         renderProducts(PRODUCTS);
     }
+
+    $(window).on('scroll', function () {
+
+        if (IS_LOADING || !HAS_MORE_PRODUCTS)
+            return;
+
+        const scrollTop = $(window).scrollTop();
+        const windowHeight = $(window).height();
+        const documentHeight = $(document).height();
+
+        const threshold = 300; // 300px
+
+        if (
+            scrollTop + windowHeight >=
+            documentHeight - threshold
+        ) {
+            getAllProducts();
+        }
+    });
 
     $(document).ready(function () {
 

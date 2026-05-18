@@ -22,6 +22,16 @@ namespace Product.DAL
             return _db.ExecuteMultipleRow<ProductListModel>("spProduct_GetList",param);
         }
 
+        public List<ProductListModel> GetProductListWithOffset(ProductListDTO dto)
+        {
+            DynamicParameters param = new DynamicParameters();
+            param.Add("@CustomerID", dto.CustomerID);
+            param.Add("@@PageNumber", dto.PageNumber);
+            param.Add("@@PageSize", dto.PageSize);
+
+            return _db.ExecuteMultipleRow<ProductListModel>("sp_GetProductListWithOffset", param);
+        }
+
         public List<CategoryListModel> GetCategoryList(long CustomerID)
         {
             DynamicParameters param = new DynamicParameters();

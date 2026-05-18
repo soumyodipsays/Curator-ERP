@@ -24,4 +24,11 @@ namespace Product.DTOs
         public float CalculatedDiscountAmount { get; set; }
         public bool ApplyToAllProducts { get; set; }
     }
+
+    public class ProductListDTO
+    {
+        public long CustomerID { get; set; }
+        public int PageNumber {  get; set; }
+        public int PageSize {  get; set; }
+    }
 }
