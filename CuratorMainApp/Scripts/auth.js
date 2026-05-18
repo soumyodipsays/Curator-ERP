@@ -1,19 +1,21 @@
 ﻿var Auth = (function () {
 
     var config = window.AppConfig || {};
-    
+
     var profileUrl = config.profileUrl || "";
     var loginPage = config.mvcLoginPage || "/";
+    var refreshTokenUrl = config.refreshTokenUrl || "";
+    var logoutUrl = config.logoutUrl || "";
+    var refreshPromise = null;
 
+
+    // TOKEN METHODS
     function getToken() {
 
-        return localStorage.getItem("token") ||
-            sessionStorage.getItem("token");
+        return sessionStorage.getItem("token");
     }
 
-    function saveToken(token, remember, UserID) {
-
-        clear();
+    function saveToken(token) {
 
         if (!token) {
 
@@ -21,31 +23,48 @@
             return;
         }
 
-        if (remember) {
-            localStorage.setItem("token", token);
-        }
-        else {
-            sessionStorage.setItem("token", token);
-        }
-
-        localStorage.setItem("UserID", UserID);
+        sessionStorage.setItem("token", token);
     }
 
-    function login(token, remember, UserID) {
+    function login(token) {
 
-        saveToken(token, remember, UserID);
+        saveToken(token);
+    }
+
+    function clearTokens() {
+
+        sessionStorage.removeItem("token");
     }
 
     function clear() {
 
-        localStorage.removeItem("token");
-        localStorage.removeItem("UserID");
+        clearTokens();
 
-        sessionStorage.removeItem("token");
         sessionStorage.removeItem("currentUser");
     }
 
-    function logout(msg) {
+    // LOGOUT
+    async function logout(msg) {
+
+        try {
+
+            if (logoutUrl) {
+
+                await $.ajax({
+
+                    url: logoutUrl,
+                    type: "POST",
+
+                    xhrFields: {
+                        withCredentials: true
+                    }
+                });
+            }
+        }
+        catch (e) {
+
+            console.warn("Logout API failed:", e);
+        }
 
         clear();
 
@@ -54,10 +73,13 @@
         }
 
         setTimeout(function () {
+
             window.location.href = loginPage;
-        }, 2000);
+
+        }, 500);
     }
 
+    // JWT PARSER
     function parseJwt(token) {
 
         try {
@@ -69,6 +91,7 @@
                 .replace(/_/g, '/');
 
             var jsonPayload = decodeURIComponent(
+
                 atob(base64)
                     .split('')
                     .map(function (c) {
@@ -85,66 +108,124 @@
         catch (e) {
 
             console.error("JWT Parse Error:", e);
+
             return null;
         }
     }
 
+    // TOKEN EXPIRY
     function isExpired(token) {
 
         var payload = parseJwt(token);
 
         if (!payload || !payload.exp) {
-            console.log("Token invalid or exp missing");
+
+            console.warn("Invalid token or missing exp");
+
             return true;
         }
 
-        var currentTime = Math.floor(Date.now() / 1000);
+        var currentTime =
+            Math.floor(Date.now() / 1000);
 
-        return payload.exp < currentTime;
+        // 30-second safety buffer
+        return payload.exp < (currentTime + 30);
     }
 
-    function validate(success, fail) {
+    // REFRESH ACCESS TOKEN
+    async function refreshAccessToken() {
 
-        var token = getToken();
+        // Prevent concurrent refresh requests
+        if (refreshPromise) {
 
-        if (!token) {
-
-            if (fail) {
-                fail();
-            }
-
-            return;
+            return refreshPromise;
         }
 
-        if (isExpired(token)) {
+        refreshPromise = $.ajax({
 
-            logout("Session expired");
-            return;
-        }
-
-        if (!profileUrl) {
-
-            console.error("Profile URL missing.");
-            logout("Configuration error");
-            return;
-        }
-
-        $.ajax({
-
-            url: profileUrl,
+            url: refreshTokenUrl,
             type: "POST",
 
-            headers: {
-                Authorization: "Bearer " + token
-            },
+            xhrFields: {
+                withCredentials: true
+            }
 
-            success: function (res) {
+        }).then(function (res) {
+
+            if (!res.success || !res.accessToken) {
+
+                throw new Error("Invalid refresh response");
+            }
+
+            saveToken(res.accessToken);
+
+            refreshPromise = null;
+
+            return res.accessToken;
+
+        }).catch(function (err) {
+
+            refreshPromise = null;
+
+            console.error("Refresh token failed:", err);
+
+            clear();
+
+            return null;
+        });
+
+        return refreshPromise;
+    }
+
+    // VALIDATE SESSION
+    async function validate(success, fail) {
+
+        try {
+
+            var token = getToken();
+
+            // No token at all
+            if (!token) {
+
+                return false;
+            }
+
+            // Access token expired
+            if (isExpired(token)) {
+
+                token = await refreshAccessToken();
+
+                if (!token) {
+
+                    if (fail) {
+                        fail();
+                    }
+
+                    return false;
+                }
+            }
+
+            // Optional profile validation
+            if (profileUrl) {
+
+                const res = await $.ajax({
+
+                    url: profileUrl,
+                    type: "POST",
+
+                    headers: {
+                        Authorization: "Bearer " + token
+                    }
+                });
 
                 if (res.success) {
 
                     sessionStorage.setItem(
+
                         "currentUser",
+
                         JSON.stringify({
+
                             userId: res.userId,
                             userName: res.userName,
                             email: res.email,
@@ -155,68 +236,98 @@
                     if (success) {
                         success(res);
                     }
-                }
-            },
 
-            error: function (xhr) {
-
-                if (xhr.status === 401) {
-
-                    logout("Unauthorized");
-                }
-                else if (xhr.status === 404) {
-
-                    console.error("Profile route not found");
-                    alert("Profile API not found.");
-                }
-                else {
-
-                    console.error("Server Error:", xhr);
-                    alert("Server error occurred.");
+                    return true;
                 }
             }
-        });
+
+            return true;
+        }
+        catch (xhr) {
+
+            console.error("Validation Error:", xhr);
+
+            if (xhr.status === 401) {
+
+                try {
+
+                    var newToken =
+                        await refreshAccessToken();
+
+                    if (newToken) {
+
+                        if (success) {
+                            success();
+                        }
+
+                        return true;
+                    }
+                }
+                catch (e) {
+
+                    console.error(e);
+                }
+            }
+
+            if (fail) {
+                fail(xhr);
+            }
+
+            return false;
+        }
     }
 
-    function protectPage() {
-
-        $(function () {
-
-            validate(function () {
-
-                ajaxToken();
-            });
-        });
-    }
-
+    // CURRENT USER
     function currentUser() {
 
-        var data = sessionStorage.getItem("currentUser");
+        var data =
+            sessionStorage.getItem("currentUser");
 
         return data
             ? JSON.parse(data)
             : null;
     }
 
+    // GLOBAL AJAX TOKEN HANDLER
     function ajaxToken() {
 
-        $.ajaxSetup({
+        $(document).ajaxSend(function (event, xhr) {
 
-            beforeSend: function (xhr) {
+            var token = getToken();
 
-                var token = getToken();
+            if (token) {
 
-                if (token) {
+                xhr.setRequestHeader(
 
-                    xhr.setRequestHeader(
-                        "Authorization",
-                        "Bearer " + token
-                    );
-                }
+                    "Authorization",
+                    "Bearer " + token
+                );
             }
         });
     }
 
+
+    // PAGE PROTECTION
+    function protectPage() {
+
+        $(async function () {
+
+            var valid = await validate();
+
+            if (!valid) {
+
+                await logout(
+                    "Please login to continue"
+                );
+
+                return;
+            }
+
+            ajaxToken();
+        });
+    }
+
+    // PUBLIC API
     return {
 
         login: login,
@@ -227,6 +338,9 @@
         protectPage: protectPage,
         currentUser: currentUser,
         ajaxToken: ajaxToken,
+        refreshAccessToken: refreshAccessToken,
+        parseJwt: parseJwt,
+        isExpired: isExpired
     };
 
 })();

@@ -126,14 +126,21 @@
 
 <script>
 
-    $(document).ready(function () {
+    $(document).ready(async function () {
 
-        if (Auth.getToken()) {
-            Auth.validate(function () {
-                window.location.href = '@Url.Action("Index","Home")';
-            });
+        const token = Auth.getToken();
+
+        if (!token) {
+            return;
         }
 
+        const isValid = await Auth.validate();
+
+        if (isValid) {
+
+            window.location.href =
+                '@Url.Action("Index","Home")';
+        }
     });
 
     $('#loginForm').on('submit', function (e) {
@@ -157,7 +164,14 @@
             isValid = false;
         }
 
-        if (!isValid) return;
+        if (!isValid) {
+
+            $('#btnLogin')
+                .prop('disabled', false)
+                .text('Sign In');
+
+            return;
+        }
 
         $('#btnLogin').prop('disabled', true).text('Signing In...');
 
@@ -181,22 +195,11 @@
                         "success"
                     );
 
-                    Auth.login(
-                        res.accessToken,
-                        $('#remember').is(':checked'),
-                        res.user.userID
-                    );
+                    Auth.login(res.accessToken);
 
-                    Auth.validate(function () {
-                        getCartCount(res.user.userID);
-                        setTimeout(function () {
+                    Auth.ajaxToken();
 
-                            window.location.href =
-                                '@Url.Action("Index","Home")';
-
-                        }, 1000);
-
-                    });
+                    getCartCount(res.user.userID);
                 }
                 else {
 

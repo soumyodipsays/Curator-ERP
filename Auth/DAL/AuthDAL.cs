@@ -46,6 +46,27 @@ namespace Auth.DAL
             return _db.ExecuteSingleRow<UserModel>(proc, parameters);
         }
 
+        public void SaveRefreshToken(long UserID, string RefreshToken, DateTime RefreshTokenExpiry)
+        {
+            var parameters = new DynamicParameters();
+            var proc = "spRefreshToken_Insert";
+
+            parameters.Add("@UserID", UserID);
+            parameters.Add("@RefreshToken", RefreshToken);
+            parameters.Add("@RefreshTokenExpiry", RefreshTokenExpiry);
+
+            _db.ExecuteWithoutReturn(proc, parameters);
+        }
+
+        public UserModel GetUserByRefreshToken(string RefreshToken) 
+        {
+            var parameters = new DynamicParameters();
+            var proc = "spRefreshToken_GetUserByRefreshToken";
+            parameters.Add("@RefreshToken", RefreshToken);
+
+            return _db.ExecuteSingleRow<UserModel>(proc, parameters);
+        }
+
         public void InsertUpdateOTP(OTP_DTO otpDto)
         {
             var parameters = new DynamicParameters();

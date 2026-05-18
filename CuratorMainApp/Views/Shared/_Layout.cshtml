@@ -124,15 +124,15 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     @using System.Configuration
 
-    <script>
+<script>
         window.AppConfig = {
             authBaseUrl: '@ConfigurationManager.AppSettings["AuthServiceBaseUrl"]',
             loginUrl: '@ConfigurationManager.AppSettings["AuthServiceBaseUrl"]/User/Login',
             profileUrl: '@ConfigurationManager.AppSettings["AuthServiceBaseUrl"]/User/GetProfile',
-
+            refreshTokenUrl: '@ConfigurationManager.AppSettings["AuthServiceBaseUrl"]/User/RefreshToken',
             mvcLoginPage: '@Url.Action("Login", "User")'
         };
-    </script>
+</script>
 
     <script src="~/Scripts/auth.js"></script>
     <script src="~/Scripts/curator-profile.js"></script>

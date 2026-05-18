@@ -4,6 +4,7 @@ using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Security.Cryptography;
 
 public class JwtService
 {
@@ -15,7 +16,19 @@ public class JwtService
         _secret = ConfigurationManager.AppSettings["JwtSecret"];
         _issuer = ConfigurationManager.AppSettings["JwtIssuer"];
     }
+    public string GenerateRefreshToken()
+    {
+        var randomBytes = new byte[64];
 
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomBytes);
+        }
+
+        return Convert.ToBase64String(randomBytes);
+    }
+
+    // this generates access token
     public string GenerateToken(
             long userId,
             string email,
@@ -41,7 +54,7 @@ public class JwtService
             issuer: _issuer,
             audience: _issuer,
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: DateTime.UtcNow.AddMinutes(15),
             signingCredentials: creds
         );
 

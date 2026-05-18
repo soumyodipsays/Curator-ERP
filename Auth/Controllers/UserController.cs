@@ -6,6 +6,7 @@ using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
 
 namespace Auth.Controllers
@@ -120,17 +121,38 @@ namespace Auth.Controllers
 
                 var jwt = new JwtService();
 
-                string token = jwt.GenerateToken(
+                string accessToken = jwt.GenerateToken(
                     user.UserID,
                     user.Email,
                     user.UserName,
                     user.UserTypeCode
                 );
+
+                string refreshToken =
+                    jwt.GenerateRefreshToken();
+
+                // save refresh token in DB
+                _authDal.SaveRefreshToken(
+                    user.UserID,
+                    refreshToken,
+                    DateTime.UtcNow.AddDays(7)
+                );
+
+                Response.Cookies.Add(
+                    new HttpCookie("refreshToken", refreshToken)
+                    {
+                        HttpOnly = true,
+                        Secure = false, // true in HTTPS production
+                        SameSite = SameSiteMode.Strict,
+                        Expires = DateTime.UtcNow.AddDays(7)
+                    }
+                );
+
                 return Json(new LoginResponse
                 {
                     success = true,
                     message = "Login success",
-                    accessToken = token,
+                    accessToken = accessToken,
                     user = new
                     {
                         userID = user.UserID,
@@ -150,6 +172,96 @@ namespace Auth.Controllers
             }
             catch (Exception ex)
             {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult RefreshToken()
+        {
+            try
+            {
+                var refreshToken =
+                    Request.Cookies["refreshToken"]?.Value;
+
+                if (string.IsNullOrWhiteSpace(refreshToken))
+                {
+                    Response.StatusCode = 401;
+
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Refresh token missing"
+                    });
+                }
+
+                var user = _authDal.GetUserByRefreshToken(refreshToken);
+
+                if (user == null)
+                {
+                    Response.StatusCode = 401;
+
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Invalid refresh token"
+                    });
+                }
+
+                if (user.RefreshTokenExpiry < DateTime.UtcNow)
+                {
+                    Response.StatusCode = 401;
+
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Refresh token expired"
+                    });
+                }
+
+                var jwt = new JwtService();
+
+                string newAccessToken =
+                    jwt.GenerateToken(
+                        user.UserID,
+                        user.Email,
+                        user.UserName,
+                        user.UserTypeCode
+                    );
+
+                string newRefreshToken =
+                    jwt.GenerateRefreshToken();
+
+                _authDal.SaveRefreshToken(
+                    user.UserID,
+                    newRefreshToken,
+                    DateTime.UtcNow.AddDays(7)
+                );
+
+                Response.Cookies.Add(
+                    new HttpCookie("refreshToken", newRefreshToken)
+                    {
+                        HttpOnly = true,
+                        Secure = false,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = DateTime.UtcNow.AddDays(7)
+                    }
+                );
+
+                return Json(new
+                {
+                    success = true,
+                    accessToken = newAccessToken
+                });
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 500;
+
                 return Json(new
                 {
                     success = false,
