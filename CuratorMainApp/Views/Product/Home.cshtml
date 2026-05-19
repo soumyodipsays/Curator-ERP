@@ -38,18 +38,14 @@
     </div>
     <!-- ===== PARTIAL: _PageHeader.cshtml | model PageHeaderModel ===== -->
     @Html.Partial("_PageHeader")
-    <!-- ===== END PARTIAL: _PageHeader.cshtml ===== -->
     <!-- ===== PARTIAL: _CategoryPills.cshtml | model List<CategoryModel> ===== -->
     @Html.Partial("_CategoryPillsProduct")
-    <!-- ===== END PARTIAL: _CategoryPills.cshtml ===== -->
-
 
     <div class="container-xl px-4 py-4" style="padding-top:28px!important">
         <div class="row g-4">
 
             <!-- ===== PARTIAL: _FilterSidebar.cshtml | model FilterModel ===== -->
             @Html.Partial("_FilterSidebar")
-            <!-- ===== END PARTIAL: _FilterSidebar.cshtml ===== -->
             <!-- ===== Main product grid area ===== -->
             <div class="col-12 col-lg-9">
 
@@ -79,14 +75,13 @@
                 <div id="productGrid" class="row g-4">
                     <!-- Cards injected by JS (constants now, AJAX later) -->
                     <!-- {% for product in products %} -->
-                    <!-- await Html.PartialAsync("_ProductCard", product) -->
                 </div>
 
                 <!-- List view (hidden by default) -->
                 <div id="productList" class="d-none">
                     <!-- Injected by JS -->
                 </div>
-                <!-- ===== END PARTIAL: _ProductGrid.cshtml ===== -->
+
                 <!-- No results state -->
                 <div id="noResults" class="d-none text-center py-5">
                     <i class="bi bi-search" style="font-size:3rem;color:var(--gray-3)"></i>
@@ -94,38 +89,12 @@
                     <p style="color:var(--gray-4);font-size:.85rem">Try adjusting your filters</p>
                 </div>
 
-                <!-- Pagination -->
-                @*<div class="d-flex justify-content-center mt-5" id="paginationWrap">
-                    <nav>
-                        <ul class="pagination gap-2" style="--bs-pagination-border-radius:980px">
-                            <li class="page-item disabled">
-                                <a class="page-link" style="border-radius:980px;border:1.5px solid var(--gray-2);color:var(--gray-4)">
-                                    <i class="bi bi-chevron-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item active">
-                                <a class="page-link" style="border-radius:980px;background:var(--black);border-color:var(--black)">1</a>
-                            </li>
-                            <li class="page-item"><a class="page-link" style="border-radius:980px;border:1.5px solid var(--gray-2);color:var(--black)">2</a></li>
-                            <li class="page-item"><a class="page-link" style="border-radius:980px;border:1.5px solid var(--gray-2);color:var(--black)">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" style="border-radius:980px;border:1.5px solid var(--gray-2);color:var(--black)">
-                                    <i class="bi bi-chevron-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>*@
-
             </div>
         </div>
     </div>
 
-
-    <!-- ===== PARTIAL: _ProductDetailModal.cshtml | model ProductModel ===== -->
-    <!-- Populated dynamically via JS / AJAX: $.get('/Product/Detail/'+id, renderModal) -->
     @Html.Partial("_ProductDetailModal")
-    <!-- ===== END PARTIAL: _ProductDetailModal.cshtml ===== -->
+
     <!-- Toast notification -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3"
          style="z-index:9999;">
@@ -156,639 +125,564 @@
             <a href="#" class="tab-item"><i class="bi bi-person"></i><span>Profile</span></a>
         </div>
     </div>
-    <!-- ===== END PARTIAL: _BottomNav.cshtml ===== -->
 
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-
-        let cartCount = 0;
-        let currentQty = 1;
-        let isGridView = true;
-        let PRODUCTS = [];
-
-        let CURRENT_PRODUCT = null;
-        let SELECTED_SIZE_LIST = [];
-        let SELECTED_COLOR = null;
-        let SELECTED_BRAND_LIST = [];
-
-        let CURRENT_PAGE = 1;
-        let PAGE_SIZE = 10;
-
-        let IS_LOADING = false;
-        let HAS_MORE_PRODUCTS = true;
-
-        function calculatePrice(p) {
-            const isPercentage = p.IsInrOrPercentage == 'P';
-
-
-            let originalPrice = p.Price;
-            let discountAmount = 0;
-            let finalPrice = p.Price;
-
-            if (p.DiscountID) {
-                discountAmount = isPercentage
-                    ? (p.Price * p.Percentage) / 100
-                    : p.INR;
-
-                discountAmount = Math.round(discountAmount);
-                finalPrice = Math.round(p.Price - discountAmount);
-            }
-
-            return {
-                originalPrice,
-                discountAmount,
-                finalPrice
-            };
-        }
-        
-        function renderStars(rating) {
-            if (!rating) return '<span style="color:var(--gray-3)">★★★★★</span>';
-            const full = Math.floor(rating);
-            const empty = 5 - full;
-            return '★'.repeat(full) + '<span style="color:var(--gray-3)">★</span>'.repeat(empty);
-        }
-
-        function getCardBadge(p) {
-            if (p.IsSale) return `<span class="card-status-badge badge-sale">−${p.DiscountID}%</span>`;
-            if (p.IsNew) return `<span class="card-status-badge badge-new">NEW</span>`;
-            if (!p.IsActive) return `<span class="card-status-badge badge-soon">SOON</span>`;
-            return '';
-        }
-
-        function getBestVariant(variants) {
-            if (!variants || variants.length === 0) return null;
-
-            return variants.reduce((best, v) => {
-                const bestPrice = calculatePrice(best).finalPrice;
-                const currPrice = calculatePrice(v).finalPrice;
-
-                return currPrice < bestPrice ? v : best;
-            });
-        }
-
-        function buildGridCard(product) {
-
-            if (!product.VariantList || product.VariantList.length === 0) return '';
-
-            const p = getBestVariant(product.VariantList);
-
-            const { originalPrice, discountAmount, finalPrice } = calculatePrice(p);
-
-            const hasDiscount = discountAmount > 0;
-
-            const priceHtml = hasDiscount
-                ? `
-                    <span class="price-current">₹${finalPrice}</span>
-                    <span class="price-original text-decoration-line-through ms-2">₹${originalPrice}</span>
-                    <span class="price-save ms-2 text-success">Save ₹${discountAmount}</span>
-                    `
-                            : `<span class="price-current">₹${originalPrice}</span>`;
-
-                        const ratingHtml = product.Rating > 0
-                            ? `
-                    <div class="d-flex align-items-center gap-1 mt-1">
-                        <span class="stars-pc">${renderStars(product.Rating)}</span>
-                        <span class="review-count">${product.Rating}</span>
-                    </div>
-                    `
-                            : '';
-
-                        return `
-                            <div class="col-6 col-md-4 fade-up">
-                                <div class="product-card h-100" onclick="openDetail(${product.ProductID})">
-
-                                    <div class="card-img-wrap position-relative" style="height:240px">
-                                        <img src="${p.ImageURL}" alt="${product.ProductName}" loading="lazy">
-                                        ${getCardBadge(p)}
-                                    </div>
-
-                                    <div class="card-body-pc">
-                                        <span class="card-label-pc">${product.Brand}</span>
-                                        <h6 class="card-name-pc">${product.ProductName}</h6>
-                                        <p class="card-caption">${product.ProductCaption}</p>
-
-                                        ${ratingHtml}
-
-                                        <div class="price-row mt-2">
-                                            ${priceHtml}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>`;
-        }
-
-        function buildListCard(product) {
-
-            if (!product.VariantList || product.VariantList.length === 0) return '';
-
-            const p = getBestVariant(product.VariantList);
-            const { originalPrice, discountAmount, finalPrice } = calculatePrice(p);
-
-            const hasDiscount = discountAmount > 0;
-
-            const priceHtml = hasDiscount
-                ? `
-                    <div>
-                        <div class="price-current">₹${finalPrice}</div>
-                        <div class="price-original text-decoration-line-through">₹${originalPrice}</div>
-                        <div class="price-save text-success">Save ₹${discountAmount}</div>
-                    </div>`
-                            : `<div class="price-current">₹${originalPrice}</div>`;
-
-            return `
-                <div class="list-card fade-up" onclick="openDetail(${product.ProductID})">
-
-                    <div class="list-img">
-                        <img src="${p.ImageURL}" alt="${product.ProductName}">
-                    </div>
-
-                    <div class="list-body d-flex justify-content-between align-items-center">
-
-                        <div>
-                            <span class="card-label-pc">${product.Brand}</span>
-                            <h6>${product.ProductName}</h6>
-                            <p>${product.ProductCaption}</p>
-                        </div>
-
-                        <div class="text-end">
-                            ${priceHtml}
-                        </div>
-
-                    </div>
-                </div>`;
-        }
-
-        function renderProducts(products) {
-            const grid = document.getElementById('productGrid');
-            const list = document.getElementById('productList');
-            const none = document.getElementById('noResults');
-
-            if (!products.length) {
-                grid.innerHTML = ''; list.innerHTML = '';
-                none.classList.remove('d-none');
-                document.getElementById('paginationWrap').classList.add('d-none');
-                return;
-            }
-            none.classList.add('d-none');
-
-            // grid.innerHTML = products.map(buildGridCard).join('');
-            // list.innerHTML = products.map(buildListCard).join('');
-
-            grid.insertAdjacentHTML(
-                'beforeend',
-                products.map(buildGridCard).join('')
-            );
-
-            list.insertAdjacentHTML(
-                'beforeend',
-                products.map(buildListCard).join('')
-            );
-
-            // Update counts
-            document.getElementById('resultSummary').textContent = `Showing ${products.length} products`;
-            document.getElementById('gridResultCount').textContent = `${products.length} Products`;
-
-            // Trigger fade animations
-            setTimeout(() => {
-                document.querySelectorAll('.fade-up').forEach((el, i) => {
-                    setTimeout(() => el.classList.add('visible'), i * 60);
-                });
-            }, 50);
-        }
-
-        function showColorOptions(variantList) {
-
-            //const uniqueColors = [];
-            //const seen = new Set();
-
-            //variantList.forEach(v => {
-            //    if (!seen.has(v.ColorCode)) {
-            //        seen.add(v.ColorCode);
-            //        uniqueColors.push(v);
-            //    }
-            //});
-
-            //SELECTED_COLOR = uniqueColors[0]?.ColorCode;
-
-            SELECTED_COLOR = variantList[0]?.ColorCode;
-
-            document.getElementById('modalColors').innerHTML = variantList.map((v, i) =>
-                `<div class="color-chip ${i === 0 ? 'active' : ''}" 
-                  style="background:${v.ColorCode}"
-                  onclick="selectColor(this, '${v.ColorCode}')">
-                </div>`
-            ).join('');
-
-            // Update UI for first color
-            updateVariantUI();
-        }
-
-        function openDetail(id) {
-
-            const product = PRODUCTS.find(x => Number(x.ProductID) === Number(id));
-            if (!product) return;
-
-            CURRENT_PRODUCT = product;
-
-            const p = getBestVariant(product.VariantList);
-
-            const { finalPrice } = calculatePrice(p);
-
-            document.getElementById('modalImg').src = p.ImageURL;
-            document.getElementById('modalName').textContent = product.ProductName;
-            document.getElementById('modalPrice').textContent = '₹' + finalPrice;
-            document.getElementById('modalCaption').textContent = product.ProductCaption;
-
-            document.getElementById('modalCategory').textContent = product.Category;
-            document.getElementById('modalSubCategory').textContent = product.SubCategory;
-            document.getElementById('modalBrandMeta').textContent = product.Brand;
-
-            document.getElementById('modalDescription').textContent = product.ProductDescription;
-
-            // Status with dot
-            const statusEl = document.getElementById('modalStatus');
-            const isActive = p.IsActive && p.Status === 'Active';
-            statusEl.innerHTML = `<span class="status-dot ${isActive ? 'status-active' : 'status-inactive'}"></span>${p.Status}`;
-
-            // Drop date
-            document.getElementById('modalDropDate').textContent = p.DropDate ? formatDate(p.DropDate) : 'Available';
-
-            // Sizes
-            const sizes = [...new Set(product.VariantList.map(v => v.SizeName))];
-
-            SELECTED_SIZE = sizes[0]; // default
-
-            document.getElementById('modalSizes').innerHTML = sizes.map((s, i) =>
-                `<div class="size-chip ${i === 0 ? 'active' : ''}" 
-              onclick="selectSize(this, '${s}')">${s}</div>`
-            ).join('');
-
-            // Show colors for default size
-            const variantsBySize = product.VariantList.filter(v => v.SizeName === SELECTED_SIZE);
-            showColorOptions(variantsBySize);
-
-            new bootstrap.Modal(document.getElementById('productDetailModal')).show();
-        }
-
-        function formatDate(dateStr) {
-            if (!dateStr) return '—';
-            return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        }
-
-        /* ---- UI Interactions ---- */
-        function changeQty(delta) {
-            currentQty = Math.max(1, Math.min(10, currentQty + delta));
-            document.getElementById('qtyDisplay').textContent = currentQty;
-        }
-        function selectSize(el, size) {
-
-            el
-                .closest('.size-chips')
-                .querySelectorAll('.size-chip')
-                .forEach(c => c.classList.remove('active'));
-
-            el.classList.add('active');
-
-            SELECTED_SIZE = size;
-
-            // filter variants for this size
-            const variantsBySize = CURRENT_PRODUCT.VariantList
-                .filter(v => v.SizeName === size);
-
-            // update colors
-            showColorOptions(variantsBySize);
-        }
-
-        function selectColor(el, colorCode) {
-
-            el
-                .closest('.color-chips')
-                .querySelectorAll('.color-chip')
-                .forEach(c => c.classList.remove('active'));
-
-            el.classList.add('active');
-
-            SELECTED_COLOR = colorCode;
-
-            // update UI based on selection
-            updateVariantUI();
-        }
-
-        function updateVariantUI() {
-
-            if (!CURRENT_PRODUCT) return;
-
-            const variant = CURRENT_PRODUCT.VariantList.find(v =>
-                v.SizeName === SELECTED_SIZE &&
-                v.ColorCode === SELECTED_COLOR
-            );
-
-            if (!variant) return;
-
-            const { finalPrice } = calculatePrice(variant);
-
-            // Update UI
-            document.getElementById('modalImg').src = variant.ImageURL;
-            document.getElementById('modalPrice').textContent = '₹' + finalPrice;
-        }
-
-        function toggleWish(btn) {
-            const icon = btn.querySelector('i');
-            const isWished = icon.classList.contains('bi-heart-fill');
-            icon.classList.toggle('bi-heart', isWished);
-            icon.classList.toggle('bi-heart-fill', !isWished);
-            btn.style.color = isWished ? '' : '#e53935';
-            btn.classList.toggle('wishlisted', !isWished);
-            showToast(isWished ? 'Removed from wishlist' : 'Saved to wishlist ♥');
-        }
-
-        function wishlistToggle(btn) {
-            const isWished = btn.querySelector('i').classList.contains('bi-heart-fill');
-            btn.innerHTML = isWished
-                ? '<i class="bi bi-heart"></i> Save to Wishlist'
-                : '<i class="bi bi-heart-fill" style="color:#e53935"></i> Wishlisted';
-        }
-
-        function addToCart(cartId) {
-
-            if (!CURRENT_PRODUCT) {
-                showToast("No product selected");
-                return;
-            }
-
-            // Find selected variant
-            const selectedVariant = CURRENT_PRODUCT.VariantList.find(v =>
-                v.SizeName === SELECTED_SIZE &&
-                v.ColorCode === SELECTED_COLOR
-            );
-
-            if (!selectedVariant) {
-                showToast("Please select size/color");
-                return;
-            }
-
-            // Get logged in user
-            const currentUserRaw = sessionStorage.getItem("currentUser");
-
-            if (!currentUserRaw) {
-                showToast("Please login first");
-                return;
-            }
-
-            const currentUser = JSON.parse(currentUserRaw);
-
-            const payload = {
-                CartID: cartId,
-                UserID: currentUser.userId,
-                ProductID: selectedVariant.ProductID,
-                Quantity: currentQty,
-                Status: 1,
-                UserName: currentUser.userName
-            };
-
-            $.ajax({
-                url: `@addToCartURL`,
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(payload),
-
-                success: function (res) {
-
-                    if (res.success) {
-                        let itemNum = parseInt(sessionStorage.getItem('CHECKOUT_CART_STATE'), 10) || 0;
-                        sessionStorage.setItem('CHECKOUT_CART_STATE', itemNum + 1);
-
-                        cartCount += currentQty;
-
-                        updateCartBadge();
-
-                        bootstrap.Modal
-                            .getInstance(document.getElementById('productDetailModal'))
-                            ?.hide();
-
-                        showToast(
-                            `${currentQty} item${currentQty > 1 ? 's' : ''} added to bag 🛍️`
-                        );
-
-                        // reset qty
-                        currentQty = 1;
-                        $('#qtyDisplay').text(1);
-                    }
-                    else {
-                        showToast(res.message || "Failed to add item");
-                    }
-                },
-
-                error: function (xhr) {
-
-                    console.log("Cart Error:", xhr);
-
-                    showToast("Something went wrong");
-                }
-            });
-        }
-
-        function addToCartQuick(name) {
-            cartCount++;
-            updateCartBadge();
-            showToast(`"${name.split(' ').slice(0, 2).join(' ')}" added to bag`);
-        }
-
-        function updateCartBadge() {
-
-            const cartCountEl = document.getElementById('cartCount');
-            const tabBadgeEl = document.getElementById('tabBadge');
-
-            if (cartCountEl) {
-                cartCountEl.textContent = cartCount;
-            }
-
-            if (tabBadgeEl) {
-                tabBadgeEl.textContent = cartCount;
-            }
-        }
-
-        function showToast(msg) {
-
-            const toastEl = document.getElementById('cartToast');
-
-            document.getElementById('toastMsg').textContent = msg;
-
-            const toast = bootstrap.Toast.getOrCreateInstance(toastEl, {
-                delay: 2500
-            });
-
-            toast.show();
-        }
-
-        function getFilteredProducts() {
-            const activeCategory =
-                document.querySelector('.cat-pill.active')?.dataset.cat || "all";
-            let price = Number($('#priceRange').val());
-
-            // If all category + no brand selected → return all products
-            if (activeCategory === "all" && SELECTED_BRAND_LIST.length === 0 && SELECTED_SIZE_LIST.length === 0 && price === 0) {
-                return PRODUCTS;
-            }
-
-            const filteredProducts = PRODUCTS.filter(p =>
-                // Category filter
-                (activeCategory === "all" || p.Category === activeCategory) &&
-
-                // Brand filter
-                (
-                    SELECTED_BRAND_LIST.length === 0 ||
-                    SELECTED_BRAND_LIST.includes(p.Brand)
-                ) &&
-                (
-                    SELECTED_SIZE_LIST.length === 0 ||
-                    p.VariantList?.some(v => SELECTED_SIZE_LIST.includes(v.SizeName))
-                )
-                &&
-
-                (
-                    price === 0 ||
-                    p.VariantList?.some(v => Number(v.Price) <= price)
-                    
-                )
-            );
-
-            return filteredProducts;
-        }
-
-        function sortProducts(products) {
-
-            const sortValue = $('#sortSelect').val();
-
-            let sortedProducts = [...products];
-
-            switch (sortValue) {
-
-                case 'Price: Low to High':
-
-                    sortedProducts.sort((a, b) => {
-
-                        const aPrice = getBestVariant(a.VariantList)
-                            ? calculatePrice(getBestVariant(a.VariantList)).finalPrice
-                            : 0;
-
-                        const bPrice = getBestVariant(b.VariantList)
-                            ? calculatePrice(getBestVariant(b.VariantList)).finalPrice
-                            : 0;
-
-                        return aPrice - bPrice;
-                    });
-
-                    break;
-
-                case 'Price: High to Low':
-
-                    sortedProducts.sort((a, b) => {
-
-                        const aPrice = getBestVariant(a.VariantList)
-                            ? calculatePrice(getBestVariant(a.VariantList)).finalPrice
-                            : 0;
-
-                        const bPrice = getBestVariant(b.VariantList)
-                            ? calculatePrice(getBestVariant(b.VariantList)).finalPrice
-                            : 0;
-
-                        return bPrice - aPrice;
-                    });
-
-                    break;
-
-                case 'Newest First':
-
-                    sortedProducts.sort((a, b) =>
-                        new Date(b.CreatedOn) - new Date(a.CreatedOn)
-                    );
-
-                    break;
-
-                case 'Most Popular':
-
-                    sortedProducts.sort((a, b) =>
-                        (b.Rating || 0) - (a.Rating || 0)
-                    );
-
-                    break;
-
-                case 'Top Rated':
-
-                    sortedProducts.sort((a, b) =>
-                        (b.Rating || 0) - (a.Rating || 0)
-                    );
-
-                    break;
-            }
-
-            return sortedProducts;
-        }
-
-        $(document).on('click', '.cat-pill', function(){
-
-            const category = $(this).data('cat');
-            const categoryID = $(this).data('id');
-
-            setActiveCategory(category);
-            let filtered = getFilteredProducts();
-
-            filtered = sortProducts(filtered);
-
-            renderProducts(filtered);
-        })
-
-        document.getElementById('sortSelect').addEventListener('change', () => {
-            let filtered = getFilteredProducts();
-            filtered = sortProducts(filtered);
-
-            renderProducts(filtered);
-        });
-        //document.getElementById('priceRange').addEventListener('change', () => renderProducts(getFilteredProducts()));
-
-        /* ---- View Toggle ---- */
-        document.getElementById('gridViewBtn').addEventListener('click', () => {
-            isGridView = true;
-            document.getElementById('productGrid').classList.remove('d-none');
-            document.getElementById('productList').classList.add('d-none');
-            document.getElementById('gridViewBtn').classList.add('active');
-            document.getElementById('listViewBtn').classList.remove('active');
-        });
-        document.getElementById('listViewBtn').addEventListener('click', () => {
-            isGridView = false;
-            document.getElementById('productGrid').classList.add('d-none');
-            document.getElementById('productList').classList.remove('d-none');
-            document.getElementById('listViewBtn').classList.add('active');
-            document.getElementById('gridViewBtn').classList.remove('active');
-        });
-
-        /* ---- Scroll fade-up ---- */
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach((e, i) => {
-                if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 55);
-            });
-        }, { threshold: 0.1 });
-
-        /* ---- Filter sidebar chip clicks ---- */
-        document.querySelectorAll('.size-chip').forEach(c => {
-            c.addEventListener('click', () => {
-                c.classList.toggle('active');
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            //renderProducts(PRODUCTS);
-        });
-    </script>
 </body>
 </html>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
 <script>
+
+    // Global Variables
+    let cartCount = 0;
+    let currentQty = 1;
+    let isGridView = true;
+    let PRODUCTS = [];
+
+    let CURRENT_PRODUCT = null;
+    let SELECTED_SIZE_LIST = [];
+    let SELECTED_COLOR = null;
+    let SELECTED_BRAND_LIST = [];
+
+    let CURRENT_PAGE = 1;
+    let PAGE_SIZE = 10;
+
+    let IS_LOADING = false;
+    let HAS_MORE_PRODUCTS = true;
+
+    function calculatePrice(p) {
+        const isPercentage = p.IsInrOrPercentage == 'P';
+
+
+        let originalPrice = p.Price;
+        let discountAmount = 0;
+        let finalPrice = p.Price;
+
+        if (p.DiscountID) {
+            discountAmount = isPercentage
+                ? (p.Price * p.Percentage) / 100
+                : p.INR;
+
+            discountAmount = Math.round(discountAmount);
+            finalPrice = Math.round(p.Price - discountAmount);
+        }
+
+        return {
+            originalPrice,
+            discountAmount,
+            finalPrice
+        };
+    }
+
+    function renderStars(rating) {
+        if (!rating) return '<span style="color:var(--gray-3)">★★★★★</span>';
+        const full = Math.floor(rating);
+        const empty = 5 - full;
+        return '★'.repeat(full) + '<span style="color:var(--gray-3)">★</span>'.repeat(empty);
+    }
+
+    function getCardBadge(p) {
+        if (p.IsSale) return `<span class="card-status-badge badge-sale">−${p.DiscountID}%</span>`;
+        if (p.IsNew) return `<span class="card-status-badge badge-new">NEW</span>`;
+        if (!p.IsActive) return `<span class="card-status-badge badge-soon">SOON</span>`;
+        return '';
+    }
+
+    function getBestVariant(variants) {
+        if (!variants || variants.length === 0) return null;
+
+        return variants.reduce((best, v) => {
+            const bestPrice = calculatePrice(best).finalPrice;
+            const currPrice = calculatePrice(v).finalPrice;
+
+            return currPrice < bestPrice ? v : best;
+        });
+    }
+
+    function buildGridCard(product) {
+
+        if (!product.VariantList || product.VariantList.length === 0) return '';
+
+        const p = getBestVariant(product.VariantList);
+
+        const { originalPrice, discountAmount, finalPrice } = calculatePrice(p);
+
+        const hasDiscount = discountAmount > 0;
+
+        const priceHtml = hasDiscount
+            ? `
+                <span class="price-current">₹${finalPrice}</span>
+                <span class="price-original text-decoration-line-through ms-2">₹${originalPrice}</span>
+                <span class="price-save ms-2 text-success">Save ₹${discountAmount}</span>
+                `
+                        : `<span class="price-current">₹${originalPrice}</span>`;
+
+                    const ratingHtml = product.Rating > 0
+                        ? `
+                <div class="d-flex align-items-center gap-1 mt-1">
+                    <span class="stars-pc">${renderStars(product.Rating)}</span>
+                    <span class="review-count">${product.Rating}</span>
+                </div>
+                `
+                        : '';
+
+                    return `
+                        <div class="col-6 col-md-4 fade-up">
+                            <div class="product-card h-100" onclick="openDetail(${product.ProductID})">
+
+                                <div class="card-img-wrap position-relative" style="height:240px">
+                                    <img src="${p.ImageURL}" alt="${product.ProductName}" loading="lazy">
+                                    ${getCardBadge(p)}
+                                </div>
+
+                                <div class="card-body-pc">
+                                    <span class="card-label-pc">${product.Brand}</span>
+                                    <h6 class="card-name-pc">${product.ProductName}</h6>
+                                    <p class="card-caption">${product.ProductCaption}</p>
+
+                                    ${ratingHtml}
+
+                                    <div class="price-row mt-2">
+                                        ${priceHtml}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+    }
+
+    function buildListCard(product) {
+
+        if (!product.VariantList || product.VariantList.length === 0) return '';
+
+        const p = getBestVariant(product.VariantList);
+        const { originalPrice, discountAmount, finalPrice } = calculatePrice(p);
+
+        const hasDiscount = discountAmount > 0;
+
+        const priceHtml = hasDiscount
+            ? `
+                <div>
+                    <div class="price-current">₹${finalPrice}</div>
+                    <div class="price-original text-decoration-line-through">₹${originalPrice}</div>
+                    <div class="price-save text-success">Save ₹${discountAmount}</div>
+                </div>`
+                        : `<div class="price-current">₹${originalPrice}</div>`;
+
+        return `
+            <div class="list-card fade-up" onclick="openDetail(${product.ProductID})">
+
+                <div class="list-img">
+                    <img src="${p.ImageURL}" alt="${product.ProductName}">
+                </div>
+
+                <div class="list-body d-flex justify-content-between align-items-center">
+
+                    <div>
+                        <span class="card-label-pc">${product.Brand}</span>
+                        <h6>${product.ProductName}</h6>
+                        <p>${product.ProductCaption}</p>
+                    </div>
+
+                    <div class="text-end">
+                        ${priceHtml}
+                    </div>
+
+                </div>
+            </div>`;
+    }
+
+    function renderProducts(products) {
+        const grid = document.getElementById('productGrid');
+        const list = document.getElementById('productList');
+        const none = document.getElementById('noResults');
+
+        if (!products.length) {
+            grid.innerHTML = ''; list.innerHTML = '';
+            none.classList.remove('d-none');
+            document.getElementById('paginationWrap').classList.add('d-none');
+            return;
+        }
+        none.classList.add('d-none');
+        grid.insertAdjacentHTML(
+            'beforeend',
+            products.map(buildGridCard).join('')
+        );
+
+        list.insertAdjacentHTML(
+            'beforeend',
+            products.map(buildListCard).join('')
+        );
+
+        // Update counts
+        document.getElementById('resultSummary').textContent = `Showing ${products.length} products`;
+        document.getElementById('gridResultCount').textContent = `${products.length} Products`;
+
+        // Trigger fade animations
+        setTimeout(() => {
+            document.querySelectorAll('.fade-up').forEach((el, i) => {
+                setTimeout(() => el.classList.add('visible'), i * 60);
+            });
+        }, 50);
+    }
+
+    function showColorOptions(variantList) {
+
+        SELECTED_COLOR = variantList[0]?.ColorCode;
+
+        document.getElementById('modalColors').innerHTML = variantList.map((v, i) =>
+            `<div class="color-chip ${i === 0 ? 'active' : ''}"
+                style="background:${v.ColorCode}"
+                onclick="selectColor(this, '${v.ColorCode}')">
+            </div>`
+        ).join('');
+
+        // Update UI for first color
+        updateVariantUI();
+    }
+
+    function openDetail(id) {
+
+        const product = PRODUCTS.find(x => Number(x.ProductID) === Number(id));
+        if (!product) return;
+
+        CURRENT_PRODUCT = product;
+
+        const p = getBestVariant(product.VariantList);
+
+        const { finalPrice } = calculatePrice(p);
+
+        document.getElementById('modalImg').src = p.ImageURL;
+        document.getElementById('modalName').textContent = product.ProductName;
+        document.getElementById('modalPrice').textContent = '₹' + finalPrice;
+        document.getElementById('modalCaption').textContent = product.ProductCaption;
+
+        document.getElementById('modalCategory').textContent = product.Category;
+        document.getElementById('modalSubCategory').textContent = product.SubCategory;
+        document.getElementById('modalBrandMeta').textContent = product.Brand;
+
+        document.getElementById('modalDescription').textContent = product.ProductDescription;
+
+        // Status with dot
+        const statusEl = document.getElementById('modalStatus');
+        const isActive = p.IsActive && p.Status === 'Active';
+        statusEl.innerHTML = `<span class="status-dot ${isActive ? 'status-active' : 'status-inactive'}"></span>${p.Status}`;
+
+        // Drop date
+        document.getElementById('modalDropDate').textContent = p.DropDate ? formatDate(p.DropDate) : 'Available';
+
+        // Sizes
+        const sizes = [...new Set(product.VariantList.map(v => v.SizeName))];
+
+        SELECTED_SIZE = sizes[0]; // default
+
+        document.getElementById('modalSizes').innerHTML = sizes.map((s, i) =>
+            `<div class="size-chip ${i === 0 ? 'active' : ''}"
+            onclick="selectSize(this, '${s}')">${s}</div>`
+        ).join('');
+
+        // Show colors for default size
+        const variantsBySize = product.VariantList.filter(v => v.SizeName === SELECTED_SIZE);
+        showColorOptions(variantsBySize);
+
+        new bootstrap.Modal(document.getElementById('productDetailModal')).show();
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '—';
+        return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    /* ---- UI Interactions ---- */
+    function changeQty(delta) {
+        currentQty = Math.max(1, Math.min(10, currentQty + delta));
+        document.getElementById('qtyDisplay').textContent = currentQty;
+}
+
+    function selectSize(el, size) {
+
+        el
+            .closest('.size-chips')
+            .querySelectorAll('.size-chip')
+            .forEach(c => c.classList.remove('active'));
+
+        el.classList.add('active');
+
+        SELECTED_SIZE = size;
+
+        // filter variants for this size
+        const variantsBySize = CURRENT_PRODUCT.VariantList
+            .filter(v => v.SizeName === size);
+
+        // update colors
+        showColorOptions(variantsBySize);
+    }
+
+    function selectColor(el, colorCode) {
+
+        el
+            .closest('.color-chips')
+            .querySelectorAll('.color-chip')
+            .forEach(c => c.classList.remove('active'));
+
+        el.classList.add('active');
+
+        SELECTED_COLOR = colorCode;
+
+        // update UI based on selection
+        updateVariantUI();
+    }
+
+    function updateVariantUI() {
+
+        if (!CURRENT_PRODUCT) return;
+
+        const variant = CURRENT_PRODUCT.VariantList.find(v =>
+            v.SizeName === SELECTED_SIZE &&
+            v.ColorCode === SELECTED_COLOR
+        );
+
+        if (!variant) return;
+
+        const { finalPrice } = calculatePrice(variant);
+
+        // Update UI
+        document.getElementById('modalImg').src = variant.ImageURL;
+        document.getElementById('modalPrice').textContent = '₹' + finalPrice;
+    }
+
+    function toggleWish(btn) {
+        const icon = btn.querySelector('i');
+        const isWished = icon.classList.contains('bi-heart-fill');
+        icon.classList.toggle('bi-heart', isWished);
+        icon.classList.toggle('bi-heart-fill', !isWished);
+        btn.style.color = isWished ? '' : '#e53935';
+        btn.classList.toggle('wishlisted', !isWished);
+        showToast(isWished ? 'Removed from wishlist' : 'Saved to wishlist ♥');
+    }
+
+    function wishlistToggle(btn) {
+        const isWished = btn.querySelector('i').classList.contains('bi-heart-fill');
+        btn.innerHTML = isWished
+            ? '<i class="bi bi-heart"></i> Save to Wishlist'
+            : '<i class="bi bi-heart-fill" style="color:#e53935"></i> Wishlisted';
+    }
+
+    function addToCart(cartId) {
+
+        if (!CURRENT_PRODUCT) {
+            showToast("No product selected");
+            return;
+        }
+
+        // Find selected variant
+        const selectedVariant = CURRENT_PRODUCT.VariantList.find(v =>
+            v.SizeName === SELECTED_SIZE &&
+            v.ColorCode === SELECTED_COLOR
+        );
+
+        if (!selectedVariant) {
+            showToast("Please select size/color");
+            return;
+        }
+
+        // Get logged in user
+        const currentUserRaw = sessionStorage.getItem("currentUser");
+
+        if (!currentUserRaw) {
+            showToast("Please login first");
+            return;
+        }
+
+        const currentUser = JSON.parse(currentUserRaw);
+
+        const payload = {
+            CartID: cartId,
+            UserID: currentUser.userId,
+            ProductID: selectedVariant.ProductID,
+            Quantity: currentQty,
+            Status: 1,
+            UserName: currentUser.userName
+        };
+
+        $.ajax({
+            url: `@addToCartURL`,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+
+            success: function (res) {
+
+                if (res.success) {
+                    let itemNum = parseInt(sessionStorage.getItem('CHECKOUT_CART_STATE'), 10) || 0;
+                    sessionStorage.setItem('CHECKOUT_CART_STATE', itemNum + 1);
+
+                    cartCount += currentQty;
+
+                    updateCartBadge();
+
+                    bootstrap.Modal
+                        .getInstance(document.getElementById('productDetailModal'))
+                        ?.hide();
+
+                    showToast(
+                        `${currentQty} item${currentQty > 1 ? 's' : ''} added to bag 🛍️`
+                    );
+
+                    // reset qty
+                    currentQty = 1;
+                    $('#qtyDisplay').text(1);
+                }
+                else {
+                    showToast(res.message || "Failed to add item");
+                }
+            },
+
+            error: function (xhr) {
+
+                console.log("Cart Error:", xhr);
+
+                showToast("Something went wrong");
+            }
+        });
+    }
+
+    function addToCartQuick(name) {
+        cartCount++;
+        updateCartBadge();
+        showToast(`"${name.split(' ').slice(0, 2).join(' ')}" added to bag`);
+    }
+
+    function updateCartBadge() {
+
+        const cartCountEl = document.getElementById('cartCount');
+        const tabBadgeEl = document.getElementById('tabBadge');
+
+        if (cartCountEl) {
+            cartCountEl.textContent = cartCount;
+        }
+
+        if (tabBadgeEl) {
+            tabBadgeEl.textContent = cartCount;
+        }
+    }
+
+    function showToast(msg) {
+
+        const toastEl = document.getElementById('cartToast');
+
+        document.getElementById('toastMsg').textContent = msg;
+
+        const toast = bootstrap.Toast.getOrCreateInstance(toastEl, {
+            delay: 2500
+        });
+
+        toast.show();
+    }
+
+    function getFilteredProducts() {
+        const activeCategory =
+            document.querySelector('.cat-pill.active')?.dataset.cat || "all";
+        let price = Number($('#priceRange').val());
+
+        // If all category + no brand selected → return all products
+        if (activeCategory === "all" && SELECTED_BRAND_LIST.length === 0 && SELECTED_SIZE_LIST.length === 0 && price === 0) {
+            return PRODUCTS;
+        }
+
+        const filteredProducts = PRODUCTS.filter(p =>
+            // Category filter
+            (activeCategory === "all" || p.Category === activeCategory) &&
+
+            // Brand filter
+            (
+                SELECTED_BRAND_LIST.length === 0 ||
+                SELECTED_BRAND_LIST.includes(p.Brand)
+            ) &&
+            (
+                SELECTED_SIZE_LIST.length === 0 ||
+                p.VariantList?.some(v => SELECTED_SIZE_LIST.includes(v.SizeName))
+            )
+            &&
+
+            (
+                price === 0 ||
+                p.VariantList?.some(v => Number(v.Price) <= price)
+
+            )
+        );
+
+        return filteredProducts;
+    }
+
+    function sortProducts(products) {
+
+        const sortValue = $('#sortSelect').val();
+
+        let sortedProducts = [...products];
+
+        switch (sortValue) {
+
+            case 'Price: Low to High':
+
+                sortedProducts.sort((a, b) => {
+
+                    const aPrice = getBestVariant(a.VariantList)
+                        ? calculatePrice(getBestVariant(a.VariantList)).finalPrice
+                        : 0;
+
+                    const bPrice = getBestVariant(b.VariantList)
+                        ? calculatePrice(getBestVariant(b.VariantList)).finalPrice
+                        : 0;
+
+                    return aPrice - bPrice;
+                });
+
+                break;
+
+            case 'Price: High to Low':
+
+                sortedProducts.sort((a, b) => {
+
+                    const aPrice = getBestVariant(a.VariantList)
+                        ? calculatePrice(getBestVariant(a.VariantList)).finalPrice
+                        : 0;
+
+                    const bPrice = getBestVariant(b.VariantList)
+                        ? calculatePrice(getBestVariant(b.VariantList)).finalPrice
+                        : 0;
+
+                    return bPrice - aPrice;
+                });
+
+                break;
+
+            case 'Newest First':
+
+                sortedProducts.sort((a, b) =>
+                    new Date(b.CreatedOn) - new Date(a.CreatedOn)
+                );
+
+                break;
+
+            case 'Most Popular':
+
+                sortedProducts.sort((a, b) =>
+                    (b.Rating || 0) - (a.Rating || 0)
+                );
+
+                break;
+
+            case 'Top Rated':
+
+                sortedProducts.sort((a, b) =>
+                    (b.Rating || 0) - (a.Rating || 0)
+                );
+
+                break;
+        }
+
+        return sortedProducts;
+    }
 
     function renderCategoryPills(categoryList)
     {
@@ -1045,32 +939,9 @@
         renderProducts(PRODUCTS);
     }
 
-    $(window).on('scroll', function () {
-
-        if (IS_LOADING || !HAS_MORE_PRODUCTS)
-            return;
-
-        const scrollTop = $(window).scrollTop();
-        const windowHeight = $(window).height();
-        const documentHeight = $(document).height();
-
-        const threshold = 300; // 300px
-
-        if (
-            scrollTop + windowHeight >=
-            documentHeight - threshold
-        ) {
-            getAllProducts();
-        }
-    });
-
-    $(document).ready(function () {
-
-        // Fetch all categories by CustomerID and render them
-        getAllCategories()
-
+    function init() {
         // Set the active category on click
-        $(document).on('click', '.cat-pill', function () {
+        $('.cat-pill').on('click', function () {
 
             const category = $(this).data('cat');
             const categoryId = $(this).data('id');
@@ -1090,8 +961,87 @@
             clearAllFilters();
         });
 
+        $(document).on('click', '.cat-pill', function () {
+
+            const category = $(this).data('cat');
+            const categoryID = $(this).data('id');
+
+            setActiveCategory(category);
+            let filtered = getFilteredProducts();
+
+            filtered = sortProducts(filtered);
+
+            renderProducts(filtered);
+        })
+
+        document.getElementById('sortSelect').addEventListener('change', () => {
+            let filtered = getFilteredProducts();
+            filtered = sortProducts(filtered);
+
+            renderProducts(filtered);
+        });
+
+        /* ---- View Toggle ---- */
+        document.getElementById('gridViewBtn').addEventListener('click', () => {
+            isGridView = true;
+            document.getElementById('productGrid').classList.remove('d-none');
+            document.getElementById('productList').classList.add('d-none');
+            document.getElementById('gridViewBtn').classList.add('active');
+            document.getElementById('listViewBtn').classList.remove('active');
+        });
+
+        document.getElementById('listViewBtn').addEventListener('click', () => {
+            isGridView = false;
+            document.getElementById('productGrid').classList.add('d-none');
+            document.getElementById('productList').classList.remove('d-none');
+            document.getElementById('listViewBtn').classList.add('active');
+            document.getElementById('gridViewBtn').classList.remove('active');
+        });
+
+        /* ---- Scroll fade-up ---- */
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach((e, i) => {
+                if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 55);
+            });
+        }, { threshold: 0.1 });
+
+        /* ---- Filter sidebar chip clicks ---- */
+        document.querySelectorAll('.size-chip').forEach(c => {
+            c.addEventListener('click', () => {
+                c.classList.toggle('active');
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            //renderProducts(PRODUCTS);
+        });
+
+        $(window).on('scroll', function () {
+
+            if (IS_LOADING || !HAS_MORE_PRODUCTS)
+                return;
+
+            const scrollTop = $(window).scrollTop();
+            const windowHeight = $(window).height();
+            const documentHeight = $(document).height();
+
+            const threshold = 300; // 300px
+
+            if (
+                scrollTop + windowHeight >=
+                documentHeight - threshold
+            ) {
+                getAllProducts();
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        init();
+        // Fetch all categories by CustomerID and render them
+        getAllCategories()
         getAllProducts()
         getSideFilterDetails();
 
-    })
+    });
 </script>
