@@ -122,10 +122,26 @@
         // Global State to store the cart items for changes in UI 
         let CART_ITEMS = [];
 
-        $(document).ready(function () {
+        $(document).ready(async function () {
 
             // Fetch cart details immediately on load
-            const userID = Auth.currentUser().userId;
+            const isValid = await Auth.validate();
+
+            if (!isValid) {
+
+                window.location.href = 'User/Login';
+                return;
+            }
+
+            Auth.ajaxToken();
+
+            const currentUser = Auth.currentUser();
+
+            if (!currentUser) {
+
+                window.location.href = 'User/Login';
+                return;
+            }
             getCartDetailsByUserID(userID);
 
             $('.fade-up').each(function (index, el) {

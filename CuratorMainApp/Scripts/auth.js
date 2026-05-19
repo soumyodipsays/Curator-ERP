@@ -312,13 +312,11 @@
 
         $(async function () {
 
-            var valid = await validate();
+            const isValid = await validate();
 
-            if (!valid) {
+            if (!isValid) {
 
-                await logout(
-                    "Please login to continue"
-                );
+                window.location.href = loginPage;
 
                 return;
             }
