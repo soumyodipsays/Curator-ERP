@@ -696,8 +696,8 @@ function generateAddressCard(addr) {
 
 function deleteAddress(addressId) {
 
-    const userID = Auth.currentUser()?.UserID ||
-                    localStorage.getItem("UserID")
+    const userID = Auth.currentUser()?.userId ||
+        localStorage.getItem("UserID")
 
     if (!confirm("Remove this address?")) {
         return;
@@ -746,7 +746,9 @@ function deleteAddress(addressId) {
             showToast("Address removed");
         },
 
-        error: function () {
+        error: function (response) {
+
+            console.log("E-Response: ", response)
 
             showToast(
                 "Failed to remove address"
