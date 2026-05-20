@@ -150,6 +150,8 @@
     let IS_LOADING = false;
     let HAS_MORE_PRODUCTS = true;
 
+    let IS_CAT_ACTIVE = false;
+
     function calculatePrice(p) {
         const isPercentage = p.IsInrOrPercentage == 'P';
 
@@ -291,18 +293,26 @@
             </div>`;
     }
 
-    function renderProducts(products) {
+    function renderProducts(products, IS_CAT_ACTIVE = false) {
         const grid = document.getElementById('productGrid');
         const list = document.getElementById('productList');
         const none = document.getElementById('noResults');
 
         if (!products.length) {
-            grid.innerHTML = ''; list.innerHTML = '';
+            grid.innerHTML = '';
+            list.innerHTML = '';
             none.classList.remove('d-none');
             document.getElementById('paginationWrap').classList.add('d-none');
             return;
         }
         none.classList.add('d-none');
+
+        // means category is selected -> empty all products and then add
+        if (IS_CAT_ACTIVE) {
+            grid.innerHTML = '';
+            list.innerHTML = '';
+        }
+
         grid.insertAdjacentHTML(
             'beforeend',
             products.map(buildGridCard).join('')
@@ -579,9 +589,26 @@
         toast.show();
     }
 
+    function hasActiveFilters() {
+
+        const activeCategory =
+            $('.cat-pill.active').data('cat') || 'all';
+
+        const price =
+            Number($('#priceRange').val());
+
+        return (
+            activeCategory !== 'all' ||
+            SELECTED_BRAND_LIST.length > 0 ||
+            SELECTED_SIZE_LIST.length > 0 ||
+            price > 0
+        );
+    }
+
     function getFilteredProducts() {
         const activeCategory =
-            document.querySelector('.cat-pill.active')?.dataset.cat || "all";
+            $('.cat-pill.active').data('cat') || 'all';
+        
         let price = Number($('#priceRange').val());
 
         // If all category + no brand selected → return all products
@@ -610,6 +637,8 @@
 
             )
         );
+
+        console.log("Filtered products : ", filteredProducts); // No issue here
 
         return filteredProducts;
     }
@@ -680,6 +709,7 @@
 
                 break;
         }
+        console.log("Sorted products : ", sortedProducts); // No issue here
 
         return sortedProducts;
     }
@@ -745,11 +775,15 @@
                     return;
                 }
 
+                console.log("PRODUCTS from getAllProducts() before empty: ", PRODUCTS);
+                if (IS_CAT_ACTIVE) PRODUCTS.empty();
+
                 // Keep existing functionality
                 PRODUCTS.push(...response);
+                console.log("PRODUCTS from getAllProducts() after empty: ", PRODUCTS);
 
                 // Render only new batch
-                renderProducts(response);
+                renderProducts(PRODUCTS);
 
                 // last page check
                 if (response.length < PAGE_SIZE) {
@@ -940,15 +974,6 @@
     }
 
     function init() {
-        // Set the active category on click
-        $('.cat-pill').on('click', function () {
-
-            const category = $(this).data('cat');
-            const categoryId = $(this).data('id');
-
-            //console.log("Selected:", category, categoryId);
-            setActiveCategory(category)
-        })
 
         $("#btn-apply-filters").on('click', function () {
             let filtered = getFilteredProducts();
@@ -970,8 +995,9 @@
             let filtered = getFilteredProducts();
 
             filtered = sortProducts(filtered);
+            IS_CAT_ACTIVE = true;
 
-            renderProducts(filtered);
+            renderProducts(filtered, IS_CAT_ACTIVE); // true bcoz we dont want to append (empty products and then add)
         })
 
         document.getElementById('sortSelect').addEventListener('change', () => {
