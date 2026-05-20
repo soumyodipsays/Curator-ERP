@@ -302,7 +302,7 @@
             grid.innerHTML = '';
             list.innerHTML = '';
             none.classList.remove('d-none');
-            document.getElementById('paginationWrap').classList.add('d-none');
+            // document.getElementById('paginationWrap').classList.add('d-none');
             return;
         }
         none.classList.add('d-none');
@@ -603,9 +603,9 @@
             SELECTED_SIZE_LIST.length > 0 ||
             price > 0
         );
-    }
+}
 
-    function getFilteredProducts() {
+    function getFilteredProducts(productList) {
         const activeCategory =
             $('.cat-pill.active').data('cat') || 'all';
         
@@ -613,10 +613,10 @@
 
         // If all category + no brand selected → return all products
         if (activeCategory === "all" && SELECTED_BRAND_LIST.length === 0 && SELECTED_SIZE_LIST.length === 0 && price === 0) {
-            return PRODUCTS;
+            return productList;
         }
 
-        const filteredProducts = PRODUCTS.filter(p =>
+        const filteredProducts = productList.filter(p =>
             // Category filter
             (activeCategory === "all" || p.Category === activeCategory) &&
 
@@ -776,14 +776,19 @@
                 }
 
                 console.log("PRODUCTS from getAllProducts() before empty: ", PRODUCTS);
-                if (IS_CAT_ACTIVE) PRODUCTS.empty();
+                // if (IS_CAT_ACTIVE) PRODUCTS.empty();
 
                 // Keep existing functionality
-                PRODUCTS.push(...response);
-                console.log("PRODUCTS from getAllProducts() after empty: ", PRODUCTS);
+                const newProductList = [...response];
 
-                // Render only new batch
-                renderProducts(PRODUCTS);
+                // always keep raw data
+                PRODUCTS.push(...newProductList);
+
+                // apply filters only for UI
+                let newFilteredProducts = getFilteredProducts(newProductList);
+
+                // append filtered batch
+                renderProducts(newFilteredProducts);
 
                 // last page check
                 if (response.length < PAGE_SIZE) {
@@ -976,10 +981,10 @@
     function init() {
 
         $("#btn-apply-filters").on('click', function () {
-            let filtered = getFilteredProducts();
+            let filtered = getFilteredProducts(PRODUCTS);
             filtered = sortProducts(filtered);
 
-            renderProducts(filtered);
+            renderProducts(filtered, true);
         })
 
         $('#btn-clear-filters').on('click', function () {
@@ -992,7 +997,7 @@
             const categoryID = $(this).data('id');
 
             setActiveCategory(category);
-            let filtered = getFilteredProducts();
+            let filtered = getFilteredProducts(PRODUCTS);
 
             filtered = sortProducts(filtered);
             IS_CAT_ACTIVE = true;
@@ -1001,7 +1006,7 @@
         })
 
         document.getElementById('sortSelect').addEventListener('change', () => {
-            let filtered = getFilteredProducts();
+            let filtered = getFilteredProducts(PRODUCTS);
             filtered = sortProducts(filtered);
 
             renderProducts(filtered);
