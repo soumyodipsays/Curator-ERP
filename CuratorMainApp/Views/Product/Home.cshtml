@@ -293,43 +293,41 @@
             </div>`;
     }
 
-    function renderProducts(products, IS_CAT_ACTIVE = false) {
+    function renderProducts(products, clearExisting = false) {
         const grid = document.getElementById('productGrid');
         const list = document.getElementById('productList');
         const none = document.getElementById('noResults');
 
-        if (!products.length) {
+        // Clear the grid if this is a fresh filter/sort action
+        if (clearExisting) {
             grid.innerHTML = '';
             list.innerHTML = '';
-            none.classList.remove('d-none');
-            // document.getElementById('paginationWrap').classList.add('d-none');
+        }
+
+        if (!products || !products.length) {
+            // Only show "No Results" if the grid is entirely empty
+            if (grid.innerHTML.trim() === '') {
+                none.classList.remove('d-none');
+            }
             return;
         }
         none.classList.add('d-none');
 
-        // means category is selected -> empty all products and then add
-        if (IS_CAT_ACTIVE) {
-            grid.innerHTML = '';
-            list.innerHTML = '';
-        }
+        grid.insertAdjacentHTML('beforeend', products.map(buildGridCard).join(''));
+        list.insertAdjacentHTML('beforeend', products.map(buildListCard).join(''));
 
-        grid.insertAdjacentHTML(
-            'beforeend',
-            products.map(buildGridCard).join('')
-        );
+        // Update counts based on visible elements
+        const visibleCount = grid.querySelectorAll('.col-6, .col-md-4').length;
 
-        list.insertAdjacentHTML(
-            'beforeend',
-            products.map(buildListCard).join('')
-        );
+        const resultSummary = document.getElementById('resultSummary');
+        if (resultSummary) resultSummary.textContent = `Showing ${visibleCount} products`;
 
-        // Update counts
-        document.getElementById('resultSummary').textContent = `Showing ${products.length} products`;
-        document.getElementById('gridResultCount').textContent = `${products.length} Products`;
+        const gridResultCount = document.getElementById('gridResultCount');
+        if (gridResultCount) gridResultCount.textContent = `${visibleCount} Products`;
 
-        // Trigger fade animations
+        // Trigger fade animations for new items only
         setTimeout(() => {
-            document.querySelectorAll('.fade-up').forEach((el, i) => {
+            document.querySelectorAll('.fade-up:not(.visible)').forEach((el, i) => {
                 setTimeout(() => el.classList.add('visible'), i * 60);
             });
         }, 50);
@@ -606,39 +604,40 @@
 }
 
     function getFilteredProducts(productList) {
-        const activeCategory =
-            $('.cat-pill.active').data('cat') || 'all';
-        
-        let price = Number($('#priceRange').val());
+        const activeCategory = $('.cat-pill.active').data('cat') || 'all';
+        let price = Number($('#priceRange').val()) || 0;
 
-        // If all category + no brand selected → return all products
+        // Fast return if no filters are active
         if (activeCategory === "all" && SELECTED_BRAND_LIST.length === 0 && SELECTED_SIZE_LIST.length === 0 && price === 0) {
             return productList;
         }
 
-        const filteredProducts = productList.filter(p =>
-            // Category filter
-            (activeCategory === "all" || p.Category === activeCategory) &&
+        // Convert arrays to Strings to prevent Number vs String mismatches
+        const sizeListStr = SELECTED_SIZE_LIST.map(String);
+        const brandListStr = SELECTED_BRAND_LIST.map(String);
 
-            // Brand filter
-            (
-                SELECTED_BRAND_LIST.length === 0 ||
-                SELECTED_BRAND_LIST.includes(p.Brand)
-            ) &&
-            (
-                SELECTED_SIZE_LIST.length === 0 ||
-                p.VariantList?.some(v => SELECTED_SIZE_LIST.includes(v.SizeName))
-            )
-            &&
+        const filteredProducts = productList.filter(p => {
+            // Category
+            const matchCategory = (activeCategory === "all" || p.Category === activeCategory);
 
-            (
-                price === 0 ||
-                p.VariantList?.some(v => Number(v.Price) <= price)
+            // Brand Match
+            const matchBrand = (SELECTED_BRAND_LIST.length === 0 || brandListStr.includes(String(p.Brand)));
 
-            )
-        );
+            // Size Match
+            const matchSize = (SELECTED_SIZE_LIST.length === 0 ||
+                (p.VariantList && p.VariantList.some(v => sizeListStr.includes(String(v.SizeName))))
+            );
 
-        console.log("Filtered products : ", filteredProducts); // No issue here
+            // Price Match (Using discounted final price, not original base price)
+            const matchPrice = (price === 0 ||
+                (p.VariantList && p.VariantList.some(v => {
+                    const { finalPrice } = calculatePrice(v);
+                    return finalPrice <= price;
+                }))
+            );
+
+            return matchCategory && matchBrand && matchSize && matchPrice;
+        });
 
         return filteredProducts;
     }
@@ -952,7 +951,6 @@
     }
 
     function clearAllFilters() {
-
         // Reset JS state
         SELECTED_BRAND_LIST = [];
         SELECTED_SIZE_LIST = [];
@@ -970,12 +968,13 @@
 
         // Reset price range
         $('#priceRange').val(0);
+        if ($('#priceValue').length) {
+            $('#priceValue').text(0);
+        }
 
-        // Optional label update if exists
-        $('#priceValue').text(0);
-
-        // Render original products
-        renderProducts(PRODUCTS);
+        // Sort and render the original unfiltered array, passing `true` to clear the DOM
+        let sorted = sortProducts(PRODUCTS);
+        renderProducts(sorted, true);
     }
 
     function init() {
@@ -983,33 +982,28 @@
         $("#btn-apply-filters").on('click', function () {
             let filtered = getFilteredProducts(PRODUCTS);
             filtered = sortProducts(filtered);
-
-            renderProducts(filtered, true);
-        })
+            renderProducts(filtered, true); // <--- Pass true
+        });
 
         $('#btn-clear-filters').on('click', function () {
             clearAllFilters();
         });
 
         $(document).on('click', '.cat-pill', function () {
-
             const category = $(this).data('cat');
-            const categoryID = $(this).data('id');
-
             setActiveCategory(category);
+
             let filtered = getFilteredProducts(PRODUCTS);
-
             filtered = sortProducts(filtered);
-            IS_CAT_ACTIVE = true;
 
-            renderProducts(filtered, IS_CAT_ACTIVE); // true bcoz we dont want to append (empty products and then add)
-        })
+            // Pass true to replace the grid completely
+            renderProducts(filtered, true);
+        });
 
         document.getElementById('sortSelect').addEventListener('change', () => {
             let filtered = getFilteredProducts(PRODUCTS);
             filtered = sortProducts(filtered);
-
-            renderProducts(filtered);
+            renderProducts(filtered, true); // <--- Fix: Pass true so sorting doesn't duplicate items
         });
 
         /* ---- View Toggle ---- */
